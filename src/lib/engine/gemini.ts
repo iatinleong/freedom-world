@@ -16,7 +16,14 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
         });
 
         if (!response.ok) {
-            throw new Error(`API Error: ${response.statusText}`);
+            let errorMsg = `API Error: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.error) errorMsg += ` - ${errorData.error}`;
+            } catch (e) {
+                // Ignore json parse error
+            }
+            throw new Error(errorMsg);
         }
 
         const data = await response.json();

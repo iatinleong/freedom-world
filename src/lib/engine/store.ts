@@ -442,7 +442,7 @@ export const useGameStore = create<GameStore>()(
             }
         }),
         {
-            name: 'freedom-jianghu-storage-v4',
+            name: 'freedom-jianghu-storage-v5',
             // Deep merge persisted state with initial state to handle missing fields
             merge: (persistedState: any, currentState: GameStore) => {
                 if (!persistedState) return currentState;
@@ -479,6 +479,8 @@ export const useGameStore = create<GameStore>()(
                     ...currentState,
                     ...persistedState,
                     player: mergedPlayer,
+                    isCharacterPanelOpen: false, // Force panel closed on load
+                    isProcessing: false, // Force processing false on load
                 };
             },
         })
