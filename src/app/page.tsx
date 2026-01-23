@@ -8,10 +8,11 @@ import { ActionPanel } from '@/components/ActionPanel';
 import { StatusHUD } from '@/components/StatusHUD';
 import { CostMonitor } from '@/components/CostMonitor';
 import { CharacterPanel } from '@/components/CharacterPanel';
-import { GameMenu } from '@/components/GameMenu';
+import { DeathScreen } from '@/components/DeathScreen';
+import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem';
 
 export default function Home() {
-  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen } = useGameStore();
+  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player } = useGameStore();
   // Hydration fix
   const [mounted, setMounted] = useState(false);
 
@@ -20,6 +21,9 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
+
+  // Check for death
+  const isDead = isGameStarted && player.stats.hp <= 0;
 
   return (
     <main className="flex h-screen flex-col bg-background text-foreground overflow-hidden max-w-4xl mx-auto border-x border-wuxia-gold/20 shadow-2xl shadow-black relative z-10 scroll-border">
@@ -50,25 +54,27 @@ export default function Home() {
         </header>
       )}
 
-      {/* 雲紋分隔 */}
-      <div className="cloud-divider my-0 shrink-0 z-40"></div>
-
-      {!isGameStarted ? (
-        <CharacterCreation />
-      ) : (
-        <>
-          <StatusHUD />
-          <GameTerminal />
-          <ActionPanel />
-          <CharacterPanel
-            isOpen={isCharacterPanelOpen}
-            onClose={() => setCharacterPanelOpen(false)}
-          />
-        </>
-      )}
-
+            {/* 雲紋分隔 */}
+            <div className="cloud-divider my-0 shrink-0 z-40"></div>
+      
+            {isDead ? (
+                <DeathScreen />
+            ) : !isGameStarted ? (
+                <CharacterCreation />
+            ) : (
+                <>
+                  <StatusHUD />
+                  <GameTerminal />
+                  <ActionPanel />
+                  <CharacterPanel 
+                      isOpen={isCharacterPanelOpen} 
+                      onClose={() => setCharacterPanelOpen(false)} 
+                  />
+                </>
+            )}
+      
       <CostMonitor />
-      <GameMenu />
+      <GlobalNotificationSystem />
 
       {/* 底部裝飾線 */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-wuxia-gold/40 to-transparent z-50"></div>

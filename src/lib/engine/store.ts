@@ -23,7 +23,9 @@ interface GameStore extends GameState {
     setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
     setGameStarted: (started: boolean) => void;
     setCharacterPanelOpen: (isOpen: boolean) => void;
+    addNotification: (notification: { type: any, title: string, description: string, icon?: string }) => void;
     isCharacterPanelOpen: boolean;
+    notifications: any[];
 }
 
 const INITIAL_STATE: GameState = {
@@ -130,6 +132,7 @@ const INITIAL_STATE: GameState = {
     isProcessing: false,
     isGameStarted: false,
     isCharacterPanelOpen: false,
+    notifications: [],
     usage: {
         totalCost: 0,
         totalInputTokens: 0,
@@ -361,15 +364,35 @@ export const useGameStore = create<GameStore>()(
 
 
 
-            setCharacterPanelOpen: (isOpen) => set({ isCharacterPanelOpen: isOpen }),
+                setCharacterPanelOpen: (isOpen) => set({ isCharacterPanelOpen: isOpen }),
 
 
 
-            setPlayerProfile: (name, gender, attributes) =>
+            
 
 
 
-                set((state) => {
+                addNotification: (notification) => set((state) => ({
+
+
+
+                    notifications: [...state.notifications, { ...notification, id: Math.random().toString(36).substring(7) }]
+
+
+
+                })),
+
+
+
+            
+
+
+
+                setPlayerProfile: (name, gender, attributes) => 
+
+
+
+                    set((state) => {
 
 
 

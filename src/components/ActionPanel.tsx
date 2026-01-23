@@ -9,7 +9,7 @@ import { generateGameResponse, generateStorySummary } from '@/lib/engine/gemini'
 import { cn } from '@/lib/utils';
 
 export function ActionPanel() {
-    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle } = useGameStore();
+    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
     const [playTime, setPlayTime] = useState(0);
@@ -180,6 +180,12 @@ export function ActionPanel() {
                     response.stateUpdate.newItems.forEach((item: any) => {
                         addItem(item);
                         addLog({ role: 'system', content: `獲得物品：${item.name} x${item.count}` });
+                        addNotification({
+                            type: 'item',
+                            title: item.name,
+                            description: item.description || `獲得 ${item.count} 個 ${item.name}`,
+                            icon: '📦'
+                        });
                     });
                 }
 
@@ -188,6 +194,12 @@ export function ActionPanel() {
                     response.stateUpdate.newSkills.forEach((skill: any) => {
                         learnSkill(skill);
                         addLog({ role: 'system', content: `領悟武學：${skill.name} (${skill.level})` });
+                        addNotification({
+                            type: 'skill',
+                            title: skill.name,
+                            description: `境界提升至：${skill.level}`,
+                            icon: '⚔️'
+                        });
                     });
                 }
 
@@ -196,6 +208,12 @@ export function ActionPanel() {
                     response.stateUpdate.newTitles.forEach((title: string) => {
                         addTitle(title);
                         addLog({ role: 'system', content: `獲得稱號：${title}` });
+                        addNotification({
+                            type: 'title',
+                            title: title,
+                            description: '江湖中開始流傳你的名號...',
+                            icon: '🏆'
+                        });
                     });
                 }
             }
