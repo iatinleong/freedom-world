@@ -24,6 +24,8 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     const system = useGameStore((state) => state.system);
     const narrative = useGameStore((state) => state.narrative);
     const options = useGameStore((state) => state.options);
+    const summary = useGameStore((state) => state.summary);
+    const isGameStarted = useGameStore((state) => state.isGameStarted);
     const loadGameState = useGameStore((state) => state.loadGameState);
 
     // Memoize gameState to prevent re-creation on each render
@@ -33,9 +35,11 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         system,
         narrative,
         options,
+        summary,
+        isGameStarted,
         isProcessing: false,
         usage: { totalCost: 0, totalInputTokens: 0, totalOutputTokens: 0 },
-    }), [player, world, system, narrative, options]);
+    }), [player, world, system, narrative, options, summary, isGameStarted]);
 
     const { saves, saveGame, loadGame, deleteSave } = useSaveGameStore();
 
