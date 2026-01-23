@@ -154,14 +154,33 @@ export const useGameStore = create<GameStore>()(
                     ],
                 })),
 
-            updatePlayerStats: (stats) =>
-                set((state) => ({
-                    player: {
-                        ...state.player,
-                        stats: { ...state.player.stats, ...stats },
-                    },
-                })),
-
+                updatePlayerStats: (statsUpdates) =>
+                    set((state) => {
+                        const newStats = { ...state.player.stats, ...statsUpdates };
+                        
+                        // Deep merge attributes if provided
+                        if (statsUpdates.attributes) {
+                            newStats.attributes = {
+                                ...state.player.stats.attributes,
+                                ...statsUpdates.attributes
+                            };
+                        }
+            
+                        // Deep merge reputation if provided
+                        if (statsUpdates.reputation) {
+                            newStats.reputation = {
+                                ...state.player.stats.reputation,
+                                ...statsUpdates.reputation
+                            };
+                        }
+            
+                        return {
+                            player: {
+                                ...state.player,
+                                stats: newStats,
+                            },
+                        };
+                    }),
             setProcessing: (isProcessing) => set({ isProcessing }),
 
             updateWorld: (world) =>

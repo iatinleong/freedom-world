@@ -80,9 +80,10 @@ export function ActionPanel() {
                     addLog({ role: 'assistant', content: response.narrative });
 
                     if (response.stateUpdate) {
-                        if (response.stateUpdate.attributeChanges) {
-                            updatePlayerStats({ attributes: response.stateUpdate.attributeChanges });
-                        }
+                        // 初始階段不接受屬性變更，以免覆蓋創角數值
+                        // if (response.stateUpdate.attributeChanges) {
+                        //    updatePlayerStats({ attributes: response.stateUpdate.attributeChanges });
+                        // }
                         if (response.stateUpdate.location) {
                             updateWorld({ location: response.stateUpdate.location });
                         }
