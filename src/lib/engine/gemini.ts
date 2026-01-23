@@ -11,7 +11,7 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
             body: JSON.stringify({
                 systemPrompt,
                 userPrompt,
-                modelName: 'gemini-1.5-flash', // You can parameterize this if needed
+                modelName: 'gemini-2.0-flash-lite', // You can parameterize this if needed
             }),
         });
 
@@ -70,7 +70,7 @@ ${newContent}
             body: JSON.stringify({
                 systemPrompt: prompt,
                 // userPrompt is empty for summary task as we combined it
-                modelName: 'gemini-1.5-flash',
+                modelName: 'gemini-2.0-flash-lite',
             }),
         });
 

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { systemPrompt, userPrompt, modelName = 'gemini-1.5-flash' } = body;
+        const { systemPrompt, userPrompt, modelName = 'gemini-2.0-flash-lite' } = body;
 
         if (!systemPrompt) {
             return NextResponse.json({ error: 'Missing prompts' }, { status: 400 });
