@@ -1,26 +1,1300 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  /* Deep Ink */
+  --foreground: #e5e5e5;
+  /* Rice Paper */
+
+  /* 武俠配色系統 */
+  --color-gold: #d4af37;
+  /* 金色 - 主要強調色 */
+  --color-crimson: #991b1b;
+  /* 血紅 - 危險/HP */
+  --color-ink-light: #1a1a1a;
+  /* 淺墨色 */
+
+  /* 擴展武俠色系 */
+  --color-jade: #2d5016;
+  /* 碧玉綠 */
+  --color-vermillion: #c73e1d;
+  /* 朱砂紅 */
+  --color-bronze: #8b6914;
+  /* 古銅色 */
+  --color-bamboo: #4a5f3a;
+  /* 竹青色 */
+  --color-ink-blue: #1e293b;
+  /* 墨藍色 */
+  --color-paper: #f5f0e8;
+  /* 宣紙色 */
+  --color-seal: #d2042d;
+  /* 印泥紅 */
+
+  --font-serif: "Noto Serif TC", serif;
+  --font-mono: "Fira Code", monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-wuxia-gold: var(--color-gold);
+  --color-wuxia-crimson: var(--color-crimson);
+  --color-wuxia-ink: var(--color-ink-light);
+  --color-wuxia-jade: var(--color-jade);
+  --color-wuxia-vermillion: var(--color-vermillion);
+  --color-wuxia-bronze: var(--color-bronze);
+  --color-wuxia-bamboo: var(--color-bamboo);
+  --color-wuxia-ink-blue: var(--color-ink-blue);
+  --color-wuxia-paper: var(--color-paper);
+  --color-wuxia-seal: var(--color-seal);
+
+  --font-wuxia-serif: var(--font-serif);
+  --font-wuxia-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* 紙張紋理背景疊加 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.02) 0%, transparent 50%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.01) 2px,
+      rgba(255, 255, 255, 0.01) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Custom Scrollbar for Terminal Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* Wuxia Animations */
+@keyframes pulse-gold {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(212, 175, 55, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.6);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 墨跡擴散效果 */
+@keyframes ink-spread {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+    filter: blur(4px);
+  }
+
+  50% {
+    opacity: 0.8;
+    filter: blur(2px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 劍光閃爍 */
+@keyframes sword-flash {
+  0%, 100% {
+    opacity: 0.3;
+    box-shadow: 0 0 2px rgba(212, 175, 55, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.8), 0 0 24px rgba(212, 175, 55, 0.4);
+  }
+}
+
+/* 呼吸效果 (適用於狀態條) */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleX(1.02);
+  }
+}
+
+/* 古卷展開 */
+@keyframes scroll-unfurl {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(212, 175, 55, 0.1) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-ink-spread {
+  animation: ink-spread 0.6s ease-out forwards;
+}
+
+.animate-sword-flash {
+  animation: sword-flash 2s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.animate-scroll-unfurl {
+  animation: scroll-unfurl 0.5s ease-out forwards;
+}
+
+/* Option Button Hover Effects */
+.option-button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.option-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 0%, rgba(212, 175, 55, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.option-button:hover::before {
+  opacity: 1;
+}
+
+.option-button:hover {
+  transform: translateX(4px);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+}
+
+/* HP/Qi Bars */
+.stat-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+/* 武俠風格裝飾元素 */
+
+/* 卷軸邊框 */
+.scroll-border {
+  position: relative;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-image: linear-gradient(
+    to bottom,
+    rgba(212, 175, 55, 0.5),
+    rgba(212, 175, 55, 0.2),
+    rgba(212, 175, 55, 0.5)
+  ) 1;
+}
+
+.scroll-border::before,
+.scroll-border::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  left: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(212, 175, 55, 0.5) 50%,
+    transparent
+  );
+}
+
+.scroll-border::before {
+  top: -2px;
+}
+
+.scroll-border::after {
+  bottom: -2px;
+}
+
+/* 印章效果 */
+.seal-stamp {
+  position: relative;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #d2042d 0%, #991b1b 100%);
+  color: #f5f0e8;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 雲紋分隔線 */
+.cloud-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(212, 175, 55, 0.3) 30%,
+    rgba(212, 175, 55, 0.3) 70%,
+    transparent
+  );
+  overflow: visible;
+}
+
+.cloud-divider::before,
+.cloud-divider::after {
+  content: '◆';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(212, 175, 55, 0.4);
+  font-size: 8px;
+}
+
+.cloud-divider::before {
+  left: 10px;
+}
+
+.cloud-divider::after {
+  right: 10px;
+}
+
+/* 竹簡紋理 */
+.bamboo-texture {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(74, 95, 58, 0.05) 0px,
+    rgba(74, 95, 58, 0.05) 1px,
+    transparent 1px,
+    transparent 20px
+  );
+}
+
+/* 墨跡邊緣效果 */
+.ink-edge {
+  position: relative;
+  filter: contrast(1.1);
+}
+
+.ink-edge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 8px rgba(0, 0, 0, 0.3),
+    inset 0 0 2px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* 古籍標題樣式 */
+.ancient-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--color-gold);
+  text-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(212, 175, 55, 0.3);
+  position: relative;
+  padding: 0 1rem;
+}
+
+.ancient-title::before,
+.ancient-title::after {
+  content: '※';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(212, 175, 55, 0.5);
+  animation: pulse-gold 2s infinite;
+}
+
+.ancient-title::before {
+  left: -0.5rem;
+}
+
+.ancient-title::after {
+  right: -0.5rem;
+}
+
+/* 武學選項卡片 */
+.wuxia-card {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.9) 0%,
+    rgba(26, 26, 26, 0.7) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-left: 3px solid rgba(212, 175, 55, 0.5);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.wuxia-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.05) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wuxia-card:hover {
+  border-left-width: 4px;
+  transform: translateX(4px);
+  box-shadow:
+    -4px 0 12px rgba(212, 175, 55, 0.2),
+    inset 0 0 20px rgba(212, 175, 55, 0.05);
+}
+
+.wuxia-card:hover::before {
+  opacity: 1;
+}
+
+/* 關鍵詞高亮 (如參考圖片中的紅色文字) */
+.keyword-highlight {
+  color: var(--color-vermillion);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(199, 62, 29, 0.4);
+  transition: all 0.2s ease;
+}
+
+.keyword-highlight:hover {
+  color: var(--color-seal);
+  text-shadow: 0 0 12px rgba(210, 4, 45, 0.6);
+}
+
+/* 數字標記 (如選項編號) */
+.option-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: linear-gradient(135deg, rgba(139, 105, 20, 0.8), rgba(139, 105, 20, 0.5));
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 2px;
+  color: var(--color-gold);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 狀態值閃光效果 (用於屬性變化) */
+.stat-glow {
+  animation: sword-flash 1.5s ease-in-out;
+}
+
+/* 紙張邊緣效果 */
+.paper-edge {
+  position: relative;
+  background: linear-gradient(
+    to bottom,
+    rgba(245, 240, 232, 0.02) 0%,
+    rgba(245, 240, 232, 0.01) 100%
+  );
+}
+
+.paper-edge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(212, 175, 55, 0.2) 50%,
+    transparent
+  );
+}
+
+/* --- 新增/優化樣式 --- */
+
+/* 墨跡漸乾效果 (文字出現) */
+@keyframes dry-ink {
+  0% {
+    color: rgba(30, 30, 30, 0.6);
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    filter: blur(0.5px);
+  }
+  100% {
+    color: inherit;
+    text-shadow: none;
+    filter: blur(0);
+  }
+}
+
+.animate-dry-ink {
+  animation: dry-ink 1s ease-out forwards;
+}
+
+/* 書法輸入框 */
+.input-ink {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--color-foreground);
+  font-family: var(--font-serif);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.input-ink:focus {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: var(--color-gold);
+  outline: none;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(212, 175, 55, 0.1);
+}
+
+.input-ink::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+  font-style: italic;
+}
+
+/* 竹簡/木牌按鈕 */
+.btn-bamboo {
+  position: relative;
+  background: linear-gradient(
+    to bottom,
+    #4a3c31 0%,
+    #3e3228 100%
+  );
+  border: 1px solid #5d4a3a;
+  box-shadow: 
+    0 2px 0 #2a221b,
+    0 4px 4px rgba(0,0,0,0.3);
+  color: #e0d0b0;
+  transition: all 0.1s ease;
+}
+
+.btn-bamboo:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 
+    0 3px 0 #2a221b,
+    0 6px 8px rgba(0,0,0,0.3);
+}
+
+.btn-bamboo:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #2a221b;
+}
+
+.btn-bamboo::before {
+  /* 木紋質感 */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  pointer-events: none;
+}
+
+/* 八卦旋轉 */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+/* === Steam 专业级样式增强 === */
+
+/* 自定义滚动条 - 更精致的设计 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    rgba(212, 175, 55, 0.3),
+    rgba(212, 175, 55, 0.5),
+    rgba(212, 175, 55, 0.3)
+  );
+  border-radius: 5px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(212, 175, 55, 0.5),
+    rgba(212, 175, 55, 0.7),
+    rgba(212, 175, 55, 0.5)
+  );
+}
+
+/* 淡入动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* 文字发光效果 */
+.text-glow {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+/* 高级边框发光 */
+.border-glow {
+  position: relative;
+}
+
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(212, 175, 55, 0.3),
+    transparent
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: border-rotate 3s linear infinite;
+  z-index: -1;
+}
+
+.border-glow:hover::before {
+  opacity: 1;
+}
+
+@keyframes border-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 玻璃态效果 */
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 选项按钮高级悬停 */
+.option-button-advanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.option-button-advanced::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(212, 175, 55, 0.3) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.option-button-advanced:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* 粒子效果容器 */
+.particle-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 浮动粒子 */
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--color-gold);
+  border-radius: 50%;
+  animation: float-particle linear infinite;
+  box-shadow: 0 0 4px var(--color-gold);
+}
+
+/* 墨滴效果 */
+@keyframes ink-drop {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.ink-drop {
+  animation: ink-drop 1s ease-out forwards;
+}
+
+/* 高级阴影系统 */
+.shadow-elevated {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-elevated-gold {
+  box-shadow:
+    0 2px 4px rgba(212, 175, 55, 0.2),
+    0 4px 8px rgba(212, 175, 55, 0.15),
+    0 8px 16px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(212, 175, 55, 0.1);
+}
+
+/* 文字选择样式 */
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: var(--color-paper);
+}
+
+::-moz-selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: var(--color-paper);
+}
+
+/* 禁用状态 */
+.disabled-overlay {
+  position: relative;
+  pointer-events: none;
+}
+
+.disabled-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: grayscale(100%);
+}
+
+/* 脉冲边框 */
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(212, 175, 55, 0.2);
+  }
+  50% {
+    border-color: rgba(212, 175, 55, 0.6);
+  }
+}
+
+.animate-pulse-border {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* 数值变化动画 */
+@keyframes number-change {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.3);
+    color: var(--color-gold);
+    text-shadow: 0 0 8px var(--color-gold);
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+  }
+}
+
+.stat-change {
+  animation: number-change 0.5s ease-out;
+}
+
+/* 工具提示样式 */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--color-gold);
+  border-radius: 4px;
+  color: var(--color-gold);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+
+.tooltip:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* 键盘快捷键提示 */
+.kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-gold);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* 成就解锁动画 */
+@keyframes achievement-unlock {
+  0% {
+    transform: translateX(400px) scale(0.8);
+    opacity: 0;
+  }
+  10% {
+    transform: translateX(0) scale(1.1);
+    opacity: 1;
+  }
+  90% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(400px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.achievement-notification {
+  animation: achievement-unlock 5s ease-in-out forwards;
+}
+
+/* 高级网格背景 */
+.grid-background {
+  background-image:
+    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Steam 风格按钮 */
+.steam-button {
+  position: relative;
+  background: linear-gradient(to bottom, #4c4c4c 5%, #333333 100%);
+  border: 1px solid #1a1a1a;
+  padding: 8px 16px;
+  border-radius: 2px;
+  color: #e0e0e0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.steam-button:hover {
+  background: linear-gradient(to bottom, #5c5c5c 5%, #434343 100%);
+  border-color: var(--color-gold);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+.steam-button:active {
+  background: linear-gradient(to bottom, #333333 5%, #4c4c4c 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  transform: translateY(1px);
+}
+
+/* 对话框背景模糊 */
+.dialog-backdrop {
+  backdrop-filter: blur(8px) saturate(80%);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+/* 加载骨架屏 */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* 进度条样式 */
+.progress-bar {
+  position: relative;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-gold),
+    var(--color-bronze),
+    var(--color-gold)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  transition: width 0.5s ease;
+}
+
+/* === 专业排版系统 === */
+
+/* 优化的文字渲染 */
+.text-rendering-optimized {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* 段落样式 - 提高可读性 */
+.prose-wuxia {
+  line-height: 2;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+}
+
+.prose-wuxia p {
+  margin-bottom: 1.5em;
+  text-indent: 2em; /* 传统中文段落首行缩进 */
+}
+
+.prose-wuxia p:first-of-type {
+  text-indent: 0;
+}
+
+/* 引用样式 */
+.prose-wuxia blockquote {
+  position: relative;
+  padding-left: 2em;
+  border-left: 3px solid var(--color-gold);
+  margin: 1.5em 0;
+  font-style: italic;
+  color: rgba(229, 229, 229, 0.8);
+}
+
+.prose-wuxia blockquote::before {
+  content: '"';
+  position: absolute;
+  left: 0.5em;
+  top: 0;
+  font-size: 2em;
+  color: var(--color-gold);
+  opacity: 0.3;
+}
+
+/* 标题层级 */
+.heading-primary {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  color: var(--color-gold);
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  margin-bottom: 1rem;
+}
+
+.heading-secondary {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--color-gold);
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.heading-tertiary {
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: rgba(212, 175, 55, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+/* 代码块样式 */
+.code-block {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-left: 3px solid var(--color-gold);
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+/* 列表样式 */
+.list-wuxia {
+  list-style: none;
+  padding-left: 0;
+}
+
+.list-wuxia li {
+  position: relative;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.list-wuxia li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+  font-size: 0.75em;
+}
+
+/* 表格样式 */
+.table-wuxia {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.table-wuxia th {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-gold);
+}
+
+.table-wuxia td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+}
+
+.table-wuxia tr:hover td {
+  background: rgba(212, 175, 55, 0.05);
+}
+
+/* 分隔线样式 */
+.divider-wuxia {
+  position: relative;
+  height: 1px;
+  margin: 2rem 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(212, 175, 55, 0.3) 30%,
+    rgba(212, 175, 55, 0.3) 70%,
+    transparent
+  );
+}
+
+.divider-wuxia::before,
+.divider-wuxia::after {
+  content: '◆';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(212, 175, 55, 0.5);
+  font-size: 0.75rem;
+}
+
+.divider-wuxia::before {
+  left: 15%;
+}
+
+.divider-wuxia::after {
+  right: 15%;
+}
+
+/* 强调文本 */
+.text-emphasis {
+  color: var(--color-vermillion);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(199, 62, 29, 0.3);
+}
+
+/* 注释文本 */
+.text-note {
+  font-size: 0.875em;
+  color: rgba(229, 229, 229, 0.5);
+  font-style: italic;
+}
+
+/* 标记高亮 */
+.mark-wuxia {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 50%,
+    rgba(212, 175, 55, 0.2) 50%,
+    rgba(212, 175, 55, 0.2) 100%
+  );
+  padding: 0 0.25em;
+}
+
+/* 悬停高亮行 */
+.hover-highlight:hover {
+  background: rgba(212, 175, 55, 0.05);
+  transition: background 0.2s ease;
+}
+
+/* 可选文本区域 */
+.selectable-text {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  cursor: text;
+}
+
+/* 不可选文本区域 */
+.unselectable-text {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* 响应式字体大小 */
+@media (max-width: 768px) {
+  .prose-wuxia {
+    font-size: 0.875rem;
+    line-height: 1.8;
+  }
+
+  .heading-primary {
+    font-size: 1.5rem;
+  }
+
+  .heading-secondary {
+    font-size: 1.25rem;
+  }
+
+  .heading-tertiary {
+    font-size: 1rem;
+  }
+}
+
+/* 打字机光标 */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--color-gold);
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
