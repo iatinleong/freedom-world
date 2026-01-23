@@ -239,12 +239,9 @@ export const useGameStore = create<GameStore>()(
                     // Clean up the type string for storage (remove parentheses if AI added them)
                     const cleanType = isInternal ? 'internal' : (newSkill.type.toLowerCase().includes('light') ? 'light' : 'external');
 
-                    // @ts-expect-error - Dynamic key access safe here
                     const existingSkillIndex = state.player.skills[skillType].findIndex(
                         (s: any) => s.name === newSkill.name
                     );
-
-                    // @ts-expect-error - Dynamic key access safe here
 
                     let newSkillsList = [...state.player.skills[skillType]];
 
@@ -438,25 +435,10 @@ export const useGameStore = create<GameStore>()(
 
 
             getGameState: () => {
-
-
-
                 const state = get();
-
-
-
                 // Extract only the GameState properties to save
-
-
-
-                const { player, world, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen } = state;
-
-
-
-                return { player, world, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen };
-
-
-
+                const { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage } = state;
+                return { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage };
             }
         }),
         {

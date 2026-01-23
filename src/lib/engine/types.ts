@@ -128,6 +128,7 @@ export interface GameState {
     summary: string; // Rolling summary of past events
     options: Option[];
     isGameStarted: boolean;
+    isCharacterPanelOpen: boolean;
     isProcessing: boolean;
     usage: {
         totalCost: number;
