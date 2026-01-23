@@ -46,9 +46,10 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
             {/* Drawer */}
             <div 
                 className={cn(
-                    "fixed top-0 right-0 h-full w-[90vw] sm:w-[400px] z-[150] transform transition-transform duration-300 ease-in-out bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 border-l-2 border-wuxia-gold/40 shadow-2xl shadow-black flex flex-col",
-                    isOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+                    "fixed top-0 right-0 h-full w-[90vw] sm:w-[400px] z-[150] transition-transform duration-300 ease-in-out bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 border-l-2 border-wuxia-gold/40 shadow-2xl shadow-black flex flex-col",
+                    !isOpen && "pointer-events-none"
                 )}
+                style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
             >
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-wuxia-gold/20 bg-black/50 flex items-center justify-between shrink-0">
