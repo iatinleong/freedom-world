@@ -15,6 +15,7 @@ export function ActionPanel() {
     const [playTime, setPlayTime] = useState(0);
     const [customAction, setCustomAction] = useState('');
     const hasInitialized = useRef(false); // Ref to track initialization status
+    const [error, setError] = useState<string | null>(null);
 
     // Play time tracker
     useEffect(() => {
@@ -97,8 +98,10 @@ export function ActionPanel() {
                         setOptions(response.options);
                     }
 
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Init failed", error);
+                    setError(error.message || "初始化失敗，請檢查網路或 API Key");
+                    hasInitialized.current = false; // Allow retry
                 } finally {
                     setProcessing(false);
                 }
@@ -310,11 +313,27 @@ export function ActionPanel() {
 
 
 
-            {/* Empty State */}
-            {options.length === 0 && !isProcessing && narrative.length > 1 && (
-                <div className="p-6 text-center space-y-2">
-                    <div className="text-wuxia-gold/20 text-2xl">※</div>
-                    <p className="text-white/30 text-xs font-serif italic tracking-wide">等待命運的指引...</p>
+            {/* Empty State / Error */}
+            {options.length === 0 && !isProcessing && (
+                <div className="p-6 text-center space-y-4">
+                    {error ? (
+                        <div className="text-red-400">
+                            <p className="mb-2">⚠️ {error}</p>
+                            <button 
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 bg-red-900/30 border border-red-500/50 rounded hover:bg-red-900/50 transition-colors text-sm"
+                            >
+                                重新載入
+                            </button>
+                        </div>
+                    ) : (
+                        narrative.length > 1 && (
+                            <>
+                                <div className="text-wuxia-gold/20 text-2xl">※</div>
+                                <p className="text-white/30 text-xs font-serif italic tracking-wide">等待命運的指引...</p>
+                            </>
+                        )
+                    )}
                 </div>
             )}
 

@@ -47,7 +47,7 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
             <div 
                 className={cn(
                     "fixed top-0 right-0 h-full w-full max-w-md z-[120] transform transition-transform duration-300 ease-in-out bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 border-l-2 border-wuxia-gold/40 shadow-2xl shadow-black flex flex-col",
-                    isOpen ? "translate-x-0" : "translate-x-full"
+                    isOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
                 )}
             >
                 {/* Header */}
