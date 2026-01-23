@@ -20,7 +20,7 @@ interface GameStore extends GameState {
     equipTitle: (title: string) => void;
     loadGameState: (state: GameState) => void;
     getGameState: () => GameState;
-    setPlayerProfile: (name: string, attributes: import('./types').PlayerStats['attributes']) => void;
+    setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
     setGameStarted: (started: boolean) => void;
     setCharacterPanelOpen: (isOpen: boolean) => void;
     isCharacterPanelOpen: boolean;
