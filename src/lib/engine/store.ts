@@ -479,8 +479,8 @@ export const useGameStore = create<GameStore>()(
             getGameState: () => {
                 const state = get();
                 // Extract only the GameState properties to save
-                const { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage } = state;
-                return { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage };
+                const { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications } = state;
+                return { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications };
             }
         }),
         {

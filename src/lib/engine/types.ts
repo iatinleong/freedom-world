@@ -129,6 +129,7 @@ export interface GameState {
     options: Option[];
     isGameStarted: boolean;
     isCharacterPanelOpen: boolean;
+    notifications: any[];
     isProcessing: boolean;
     usage: {
         totalCost: number;
