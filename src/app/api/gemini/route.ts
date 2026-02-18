@@ -9,41 +9,28 @@ export async function POST(request: Request) {
             userPrompt,
             modelName = 'gemini-2.5-flash-lite',
             provider = 'gemini',
-            apiKey: clientApiKey,
         } = body;
 
         if (!systemPrompt) {
             return NextResponse.json({ error: 'Missing systemPrompt' }, { status: 400 });
         }
 
-        // Resolve API key: use client-provided key first, then env fallback
-        const resolvedKey = clientApiKey ||
-            process.env.GEMINI_API_KEY ||
-            process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
-
-        if (!resolvedKey && provider === 'gemini') {
-            return NextResponse.json({ error: 'API Key not configured' }, { status: 500 });
-        }
+        const key = process.env.AI_API_KEY || '';
+        if (!key) return NextResponse.json({ error: 'AI_API_KEY not configured' }, { status: 500 });
 
         if (provider === 'gemini') {
-            return await handleGemini(resolvedKey, modelName, systemPrompt, userPrompt);
+            return await handleGemini(key, modelName, systemPrompt, userPrompt);
         }
 
         if (provider === 'grok') {
-            const key = clientApiKey || process.env.GROK_API_KEY || '';
-            if (!key) return NextResponse.json({ error: 'Grok API Key not configured' }, { status: 500 });
             return await handleGrok(key, modelName, systemPrompt, userPrompt);
         }
 
         if (provider === 'claude') {
-            const key = clientApiKey || process.env.CLAUDE_API_KEY || '';
-            if (!key) return NextResponse.json({ error: 'Claude API Key not configured' }, { status: 500 });
             return await handleClaude(key, modelName, systemPrompt, userPrompt);
         }
 
         if (provider === 'deepseek') {
-            const key = clientApiKey || process.env.DEEPSEEK_API_KEY || '';
-            if (!key) return NextResponse.json({ error: 'DeepSeek API Key not configured' }, { status: 500 });
             return await handleDeepSeek(key, modelName, systemPrompt, userPrompt);
         }
 
