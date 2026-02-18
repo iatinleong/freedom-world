@@ -65,46 +65,35 @@ ${recentHistory || '（暫無）'}
 ・連續兩次描寫完全相同的環境氛圍
 ・NPC 永遠不受傷、永遠追不上——他們也是凡人，有破綻
 
-屬性判定參考：
-膂力→外功傷害/破防 | 身法→閃避/逃跑/偷襲 | 根骨→防禦/中毒抵抗
-悟性→識破弱點/學功速度 | 定力→抗威壓/心魔 | 福緣→奇遇/隱藏物品 | 魅力→NPC態度/交易折扣
+屬性判定參考 (重要標竿)：
+・數值標準：輕微傷/消耗(-5~15) | 顯著傷/中招(-20~40) | 重創/大招(-50以上)。
+・因果描述：必須在敘事中體現屬性影響。例如：「因你身法高超，險險避開...」或「儘管你膂力驚人，卻難敵此重兵器...」。
+・功能對應：膂力→傷害/破防 | 身法→閃避/逃跑 | 根骨→防禦/抗性 | 悟性→識破/學功 | 福緣→奇遇 | 魅力→NPC態度。
 
 ━━ 選項設計準則 ━━
-提供 4 個選項，對應四種不同的應對哲學：
-1. 主動強硬型——有明確風險，但可能有高回報
-2. 謹慎觀察型——較安全，資訊導向
-3. 社交斡旋型——利用口才、魅力或道義影響局勢
-4. 奇招創意型——出人意料，利用環境、物品或意外角度
+提供 4 個選項，標籤描述必須是具體動作（如「拔刀橫斬其咽喉」而非「攻擊」）：
+1. 主動強硬型——高難度屬性判定，成功則獲取關鍵物/重創敵手，失敗則代價慘重。
+2. 謹慎穩健型——利用現有武學或環境進行消耗，風險低但回報平平。
+3. 社交智取型——利用口才、魅力或悟性化解衝突，獲取資訊。
+4. 整備奇招型——尋求喘息/療傷機會，或利用高福緣進行出人意料的大膽嘗試。
 
 每個選項都要讓玩家覺得「選哪個都有點可惜」。
-禁止出現：「繼續走」「再觀察一下」「等待」「離開」之類無意義選項。
+禁止出現：「繼續走」「離開」「觀察」等無意義選項。
 label 是玩家看到的按鈕文字，4-12 字，描述具體而非抽象的行動：
-  ✓「趁亂偷襲領頭者」「拔刀橫擋喝問來歷」「掏銀子打點掌柜」「跳崖逃脫」
+  ✓「趁亂偷襲領頭者」「拔刀橫擋喝問來歷」「使出基礎劍法封路」「跳崖逃脫」
   ✗「繼續走」「等待」「觀察」「逃跑」——這些太模糊，不知道具體做什麼
 action 是這個選項的詳細行動描述（30字以上），作為下一回合的 prompt 使用。
 
 ━━ 輸出格式 ━━
 只輸出 JSON，無 Markdown。
 
-stateUpdate 合法欄位清單（只能用這些，不可自行發明欄位名稱）：
-  hpChange        → 氣血變化（整數，負數=受傷，正數=回血）
-  qiChange        → 內力/真氣變化（整數，注意：不是 internalEnergyChange）
-  hungerChange    → 飢餓值（通常 -1 至 -3）
-  expChange       → 經驗值（正整數）
-  attributeChanges → 永久屬性變化（見下方 key 規則）
-  reputationChanges → 聲望變化（見下方 key 規則）
-  newItems        → 獲得物品陣列
-  newSkills       → 學習武功陣列
-  newTitles       → 獲得稱號陣列
-  newTags         → 新增環境標籤陣列
-  removedTags     → 移除環境標籤陣列
+stateUpdate 規則（非常重要）：
+・只填這回合「真正有變化」的欄位
+・值為 0 的欄位【一律不寫】，例如沒受傷就不寫 hpChange，沒消耗內力就不寫 qiChange
 
-・值為 0 的欄位【一律不寫】，例如沒受傷就不寫 hpChange
-・金錢（money）的增減不透過 stateUpdate，不要填
-
-attributeChanges 的 key 只能用以下7個（角色天賦屬性，永久提升才填，一般情況不會變）：
-  ✓ strength / agility / constitution / intelligence / spirit / luck / charm
-  ✗ 禁止：dexterity / power / money / wisdom / fortitude 等
+attributeChanges 的 key 只能用以下7個，其他都是錯的：
+  ✓ strength（膂力）/ agility（身法）/ constitution（根骨）/ intelligence（悟性）/ spirit（定力）/ luck（福緣）/ charm（魅力）
+  ✗ 不可使用：dexterity / fortitude / power / perception / wisdom 等——這些不存在於本系統
 
 reputationChanges 的 key 只能用這4個：chivalry / infamy / fame / seclusion
 
@@ -132,7 +121,8 @@ reputationChanges 的 key 只能用這4個：chivalry / infamy / fame / seclusio
 }
 
 export function buildUserPrompt(action: string): string {
-  return `玩家行動：「${action}」
+  return `玩家行動：『${action}』
 
-根據此行動推進劇情，給出明確結果。narrative 中禁止出現「似乎」「彷彿」「好像」「可能」「隱約」——直接描述發生了什麼。`.trim();
+請根據此行動，結合當前的屬性與環境標籤，給出一個「確定的、物理性的」結果。
+narrative 中禁止出現模糊詞（似乎、可能、彷彿），直接描述發生了什麼。`.trim();
 }

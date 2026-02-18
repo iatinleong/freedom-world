@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { Trophy, Package, Swords, Crown, Sparkles, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +22,7 @@ export const GameNotification = forwardRef<NotificationRef>((props, ref) => {
     const [queue, setQueue] = useState<NotificationData[]>([]);
     const [current, setCurrent] = useState<NotificationData | null>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useImperativeHandle(ref, () => ({
         notify: (data) => {
@@ -30,21 +31,28 @@ export const GameNotification = forwardRef<NotificationRef>((props, ref) => {
         }
     }));
 
+    // Effect 1: Pick next notification from queue (only when idle)
     useEffect(() => {
         if (!current && queue.length > 0) {
             const next = queue[0];
-            setCurrent(next);
             setQueue(prev => prev.slice(1));
+            setCurrent(next);
             setIsVisible(true);
-
-            const timer = setTimeout(() => {
-                setIsVisible(false);
-                setTimeout(() => setCurrent(null), 500); // Wait for fade out
-            }, 4000);
-
-            return () => clearTimeout(timer);
         }
     }, [queue, current]);
+
+    // Effect 2: Start auto-dismiss timer when a notification is shown
+    // Depends only on `current` so setState calls in Effect 1 don't clear this timer
+    useEffect(() => {
+        if (!current) return;
+        dismissTimerRef.current = setTimeout(() => {
+            setIsVisible(false);
+            setTimeout(() => setCurrent(null), 500);
+        }, 4000);
+        return () => {
+            if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        };
+    }, [current]);
 
     if (!current) return null;
 
@@ -100,11 +108,8 @@ export const GameNotification = forwardRef<NotificationRef>((props, ref) => {
                 {/* Closing Timer Bar */}
                 <div className="h-[1px] bg-white/5 overflow-hidden">
                     <div
-                        className="h-full bg-wuxia-gold/40"
-                        style={{ 
-                            width: isVisible ? '0%' : '100%', 
-                            transition: isVisible ? 'width 4s linear' : 'none' 
-                        }}
+                        key={current?.id}
+                        className="h-full bg-wuxia-gold/40 notification-timer-bar"
                     />
                 </div>
             </div>

@@ -42,21 +42,21 @@ export function GameTerminal() {
         <div className="flex-1 overflow-y-auto p-6 space-y-8 font-serif text-lg leading-loose text-foreground/90 paper-edge bg-gradient-to-b from-black/40 to-black/60 bamboo-texture relative scroll-smooth">
 
             {/* Floating Action Buttons */}
-            <div className="fixed top-20 right-8 z-40 flex flex-col gap-3">
+            <div className="fixed top-16 right-4 z-40 flex flex-col gap-2">
                 <button
                     onClick={() => setCharacterPanelOpen(true)}
-                    className="p-2 bg-black/60 border border-wuxia-gold/30 rounded-full hover:bg-wuxia-gold/10 hover:border-wuxia-gold transition-all group shadow-lg backdrop-blur-sm"
+                    className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
                     title="角色面板"
                 >
-                    <User className="w-5 h-5 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
+                    <User className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
                 </button>
 
                 <button
                     onClick={() => setShowSummary(true)}
-                    className="p-2 bg-black/60 border border-wuxia-gold/30 rounded-full hover:bg-wuxia-gold/10 hover:border-wuxia-gold transition-all group shadow-lg backdrop-blur-sm"
+                    className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
                     title="江湖傳聞"
                 >
-                    <BookOpen className="w-5 h-5 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
+                    <BookOpen className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
                 </button>
             </div>
 

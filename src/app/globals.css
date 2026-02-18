@@ -1298,3 +1298,12 @@ body::after {
     opacity: 0;
   }
 }
+
+@keyframes notification-timer {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.notification-timer-bar {
+  animation: notification-timer 4s linear forwards;
+}
