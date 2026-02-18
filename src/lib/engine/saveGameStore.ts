@@ -106,7 +106,7 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
     autoSave: async (gameState, playTime) => {
         const state = get();
         const now = Date.now();
-        if (!state.autoSaveEnabled || now - state.lastAutoSave < 5 * 60 * 1000) return;
+        if (!state.autoSaveEnabled || now - state.lastAutoSave < 60 * 1000) return;
 
         set({ lastAutoSave: now });
 
