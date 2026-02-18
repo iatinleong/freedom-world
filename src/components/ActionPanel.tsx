@@ -39,35 +39,35 @@ export function ActionPanel() {
 
                 try {
                     const systemPrompt = `
-你現在是《自由江湖》的遊戲主持人。遊戲開始。
-玩家設定如下：
-- 姓名：${player.name}
-- 性別：${player.gender === 'male' ? '男' : '女'}
-- 屬性：膂力${player.stats.attributes.strength}, 身法${player.stats.attributes.agility}, 根骨${player.stats.attributes.constitution}, 悟性${player.stats.attributes.intelligence}, 定力${player.stats.attributes.spirit}, 福緣${player.stats.attributes.luck}, 魅力${player.stats.attributes.charm}
+你是《自由江湖》的說書人。現在為以下角色生成一個武俠開場場景。
 
-請生成一個**符合上述設定**的武俠開場場景。
-**生成內容**：
-1. **世界狀態**：隨機地點、隨機天氣、隨機時間。
-2. **開場劇情**：描述玩家（${player.name}）身處的環境，並根據其屬性（例如悟性高則觀察敏銳，根骨好則體格強健）進行簡單描寫。
+角色設定：
+・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
+・膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
 
-請回傳 JSON 格式：
+開場要求：
+1. 隨機選擇地點（城鎮/山野/古道/渡口/客棧/廢墟/山洞……任意）、天氣、時辰
+2. 場景必須立刻有張力——不是「在路上走」，而是：剛目睹一件事、被人攔截、聽到奇怪聲音、發現異常、遭遇突發狀況
+3. 劇情要體現角色屬性（悟性高→觀察敏銳，福緣高→意外發現寶物，魅力高→引人注意……）
+4. 長度 150-200 字，有具體的人物或事件出現
+5. 提供 4 個截然不同的選項（主動應對 / 謹慎觀察 / 社交斡旋 / 奇招創意）
+
+只回傳 JSON，格式如下：
 {
-  "narrative": "開場劇情描述...",
+  "narrative": "開場劇情（150-200字，必有具體事件）",
   "options": [
-    { "label": "選項1描述", "action": "action_1" },
-    { "label": "選項2描述", "action": "action_2" },
-    { "label": "選項3描述", "action": "action_3" },
-    { "label": "選項4描述", "action": "action_4" }
+    { "label": "玩家看到的選項文字", "action": "這個選項的詳細行動描述，作為下一回合的prompt" },
+    { "label": "玩家看到的選項文字", "action": "詳細行動描述" },
+    { "label": "玩家看到的選項文字", "action": "詳細行動描述" },
+    { "label": "玩家看到的選項文字", "action": "詳細行動描述" }
   ],
   "stateUpdate": {
-    "attributeChanges": {}, // 初始屬性已設定，此處留空或僅做微調
-    "newTags": ["天氣標籤", "地點標籤"],
-    "location": "隨機地點",
-    "weather": "隨機天氣"
+    "location": "具體地點名稱",
+    "weather": "天氣描述",
+    "newTags": ["地點特徵標籤", "天氣標籤"]
   }
 }
-**重要規則**：選項文字 (label) 必須是純粹的敘事描述。
-          `.trim();
+                    `.trim();
 
                     const { text: responseJson, usage: usageData } = await generateGameResponse(systemPrompt, "開始遊戲");
 
