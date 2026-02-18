@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
-import { useAIConfigStore } from '@/lib/engine/aiConfigStore';
 import { useAuthStore } from '@/lib/supabase/authStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
-import { AIConfigScreen } from '@/components/AIConfigScreen';
 import { AuthScreen } from '@/components/AuthScreen';
 import { CharacterCreation } from '@/components/CharacterCreation';
 import { GameTerminal } from '@/components/GameTerminal';
@@ -19,7 +17,6 @@ import { GameMenu } from '@/components/GameMenu';
 
 export default function Home() {
   const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player, loadGameState } = useGameStore();
-  const { isConfigured } = useAIConfigStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { restoreLatestAutoSave } = useSaveGameStore();
   const [mounted, setMounted] = useState(false);
@@ -46,11 +43,6 @@ export default function Home() {
   // Auth gate — show login/register screen if not logged in
   if (!user) {
     return <AuthScreen />;
-  }
-
-  // Show AI config screen if not configured
-  if (!isConfigured) {
-    return <AIConfigScreen />;
   }
 
   // Check for death

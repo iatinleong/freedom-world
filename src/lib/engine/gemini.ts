@@ -4,12 +4,12 @@
 import { useAIConfigStore } from './aiConfigStore';
 
 function getConfig() {
-    const { provider, apiKey, modelName } = useAIConfigStore.getState();
-    return { provider, apiKey, modelName };
+    const { provider, modelName } = useAIConfigStore.getState();
+    return { provider, modelName };
 }
 
 export async function generateGameResponse(systemPrompt: string, userPrompt: string) {
-    const { provider, apiKey, modelName } = getConfig();
+    const { provider, modelName } = getConfig();
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -18,7 +18,7 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ systemPrompt, userPrompt, modelName, provider, apiKey }),
+            body: JSON.stringify({ systemPrompt, userPrompt, modelName, provider }),
             signal: controller.signal,
         });
 
@@ -47,7 +47,7 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
 }
 
 export async function generateStorySummary(previousSummary: string, newContent: string) {
-    const { provider, apiKey, modelName } = getConfig();
+    const { provider, modelName } = getConfig();
 
     const prompt = `
 你是一個專業的劇情摘要助手。
@@ -74,7 +74,7 @@ ${newContent}
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ systemPrompt: prompt, modelName, provider, apiKey }),
+            body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
             signal: controller.signal,
         });
 

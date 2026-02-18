@@ -39,79 +39,43 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelOption[]> = {
     ],
 };
 
-export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string; apiKeyUrl: string; freeNote?: string }> = {
-    gemini: {
-        name: 'Google Gemini',
-        label: 'Gemini',
-        apiKeyUrl: 'https://aistudio.google.com/app/apikey',
-        freeNote: '有免費額度',
-    },
-    grok: {
-        name: 'xAI Grok',
-        label: 'Grok',
-        apiKeyUrl: 'https://console.x.ai/',
-        freeNote: '新帳號贈 $25',
-    },
-    claude: {
-        name: 'Anthropic Claude',
-        label: 'Claude',
-        apiKeyUrl: 'https://console.anthropic.com/',
-    },
-    deepseek: {
-        name: 'DeepSeek',
-        label: 'DeepSeek',
-        apiKeyUrl: 'https://platform.deepseek.com/api_keys',
-        freeNote: '極低費用',
-    },
+export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string }> = {
+    gemini:   { name: 'Google Gemini',    label: 'Gemini'   },
+    grok:     { name: 'xAI Grok',         label: 'Grok'     },
+    claude:   { name: 'Anthropic Claude', label: 'Claude'   },
+    deepseek: { name: 'DeepSeek',         label: 'DeepSeek' },
 };
 
-interface AIConfigState {
-    provider: AIProvider;
-    apiKey: string;
-    modelName: string;
-    isConfigured: boolean;
-    setConfig: (provider: AIProvider, apiKey: string, modelName: string) => void;
-    clearConfig: () => void;
-}
-
-// Developer shortcut: set these env vars to skip the AIConfigScreen entirely.
-// API key stays server-side (e.g. DEEPSEEK_API_KEY in route.ts).
+// Configure via environment variables — no UI config screen needed.
 // NEXT_PUBLIC_DEFAULT_PROVIDER=deepseek
 // NEXT_PUBLIC_DEFAULT_MODEL=deepseek-chat
+// DEEPSEEK_API_KEY=sk-xxx  (server-side only, not NEXT_PUBLIC_)
 const ENV_PROVIDER = process.env.NEXT_PUBLIC_DEFAULT_PROVIDER as AIProvider | undefined;
-const ENV_MODEL = process.env.NEXT_PUBLIC_DEFAULT_MODEL || '';
+const ENV_MODEL    = process.env.NEXT_PUBLIC_DEFAULT_MODEL || '';
 
 const FALLBACK_PROVIDER: AIProvider = 'gemini';
 const FALLBACK_MODEL = 'gemini-2.5-flash-lite';
 
+interface AIConfigState {
+    provider: AIProvider;
+    modelName: string;
+}
+
 export const useAIConfigStore = create<AIConfigState>()(
     persist(
-        (set) => ({
+        () => ({
             provider: ENV_PROVIDER ?? FALLBACK_PROVIDER,
-            apiKey: '',
             modelName: ENV_MODEL || FALLBACK_MODEL,
-            isConfigured: !!ENV_PROVIDER,
-            setConfig: (provider, apiKey, modelName) =>
-                set({ provider, apiKey, modelName, isConfigured: true }),
-            clearConfig: () =>
-                set({
-                    provider: ENV_PROVIDER ?? FALLBACK_PROVIDER,
-                    apiKey: '',
-                    modelName: ENV_MODEL || FALLBACK_MODEL,
-                    isConfigured: !!ENV_PROVIDER,
-                }),
         }),
         {
             name: 'jianghu-ai-config',
             merge: (persisted: any, current) => {
-                // Env vars always win over persisted user config
+                // Env vars always take priority over anything persisted
                 if (ENV_PROVIDER) {
                     return {
                         ...current,
-                        ...persisted,
                         provider: ENV_PROVIDER,
                         modelName: ENV_MODEL || persisted?.modelName || current.modelName,
-                        isConfigured: true,
                     };
                 }
                 return { ...current, ...persisted };
