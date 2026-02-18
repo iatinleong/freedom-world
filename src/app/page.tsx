@@ -35,7 +35,7 @@ export default function Home() {
     if (user && !isGameStarted && !restored) {
       setRestored(true);
       restoreLatestAutoSave().then(save => {
-        if (save) loadGameState(save.gameState);
+        if (save) loadGameState(save.gameState, save.sessionId);
       });
     }
     if (!user) setRestored(false);

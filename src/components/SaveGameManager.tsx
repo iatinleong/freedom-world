@@ -30,6 +30,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     const isCharacterPanelOpen = useGameStore((state) => state.isCharacterPanelOpen);
     const notifications = useGameStore((state) => state.notifications);
     const loadGameState = useGameStore((state) => state.loadGameState);
+    const sessionId = useGameStore((state) => state.sessionId);
 
     const gameState = useMemo(() => ({
         player, world, system, narrative, options, summary,
@@ -68,7 +69,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     const handleSave = async () => {
         if (!saveName.trim()) { alert('請輸入存檔名稱'); return; }
         setIsSaving(true);
-        await saveGame(saveName, gameState, playTime);
+        await saveGame(saveName, gameState, playTime, sessionId);
         setSaveName('');
         setIsSaving(false);
         alert('存檔成功！');
@@ -80,7 +81,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         setIsLoadingGame(true);
         const save = await loadGame(selectedSave);
         if (save) {
-            loadGameState(save.gameState);
+            loadGameState(save.gameState, save.sessionId);
             setPlayTime(save.playTime);
             alert('載入成功！');
             onClose();

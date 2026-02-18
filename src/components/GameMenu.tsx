@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { SaveGameManager } from './SaveGameManager';
 import { useAuthStore } from '@/lib/supabase/authStore';
 import { useGameStore } from '@/lib/engine/store';
+import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 
 export function GameMenu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export function GameMenu() {
     const [isSaveManagerOpen, setIsSaveManagerOpen] = useState(false);
     const { signOut } = useAuthStore();
     const { resetGame } = useGameStore();
+    const { clearNarrative } = useSaveGameStore();
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -172,8 +174,10 @@ export function GameMenu() {
                                             </h3>
                                             <div className="space-y-2 pl-4">
                                                 <button
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         if (confirm('確定要重新開始遊戲嗎？所有未保存的進度將會丟失！')) {
+                                                            const oldSessionId = useGameStore.getState().sessionId;
+                                                            await clearNarrative(oldSessionId);
                                                             resetGame();
                                                             setIsMenuOpen(false);
                                                         }

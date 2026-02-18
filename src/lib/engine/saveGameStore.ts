@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState } from './types';
+import { GameState, NarrativeLog } from './types';
 import { supabase } from '@/lib/supabase/client';
 
 export interface SaveSlot {
@@ -7,10 +7,11 @@ export interface SaveSlot {
     name: string;
     gameState: GameState;
     timestamp: number;
-    playTime: number; // in seconds
+    playTime: number;
     location: string;
     level: number;
     isAutoSave?: boolean;
+    sessionId?: string;
 }
 
 interface SaveGameStore {
@@ -20,12 +21,13 @@ interface SaveGameStore {
     lastAutoSave: number;
 
     fetchSaves: () => Promise<void>;
-    saveGame: (name: string, gameState: GameState, playTime: number) => Promise<void>;
+    saveGame: (name: string, gameState: GameState, playTime: number, sessionId: string) => Promise<void>;
     loadGame: (id: string) => Promise<SaveSlot | null>;
     deleteSave: (id: string) => Promise<void>;
     setAutoSaveEnabled: (enabled: boolean) => void;
-    autoSave: (gameState: GameState, playTime: number) => Promise<void>;
+    autoSave: (gameState: GameState, playTime: number, sessionId: string) => Promise<void>;
     restoreLatestAutoSave: () => Promise<SaveSlot | null>;
+    clearNarrative: (sessionId: string) => Promise<void>;
 }
 
 function rowToSaveSlot(row: Record<string, unknown>): SaveSlot {
@@ -38,7 +40,22 @@ function rowToSaveSlot(row: Record<string, unknown>): SaveSlot {
         location: (row.location as string) ?? '',
         level: (row.level as number) ?? 1,
         isAutoSave: (row.is_auto_save as boolean) ?? false,
+        sessionId: (row.session_id as string) ?? undefined,
     };
+}
+
+async function syncNarrativeToSupabase(narrative: NarrativeLog[], userId: string, sessionId: string) {
+    if (narrative.length === 0) return;
+    await supabase.from('narrative_logs').upsert(
+        narrative.map(log => ({
+            user_id: userId,
+            session_id: sessionId,
+            log_id: log.id,
+            role: log.role,
+            content: log.content,
+        })),
+        { onConflict: 'session_id,log_id', ignoreDuplicates: true }
+    );
 }
 
 export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
@@ -59,14 +76,16 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
         set({ isLoading: false });
     },
 
-    saveGame: async (name, gameState, playTime) => {
+    saveGame: async (name, gameState, playTime, sessionId) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // Manual save: store full snapshot (including narrative) for point-in-time restore
         const { data, error } = await supabase
             .from('game_saves')
             .insert({
                 user_id: user.id,
+                session_id: sessionId,
                 save_name: name,
                 game_state: gameState,
                 play_time: playTime,
@@ -78,9 +97,7 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
             .single();
 
         if (!error && data) {
-            set(state => ({
-                saves: [rowToSaveSlot(data), ...state.saves],
-            }));
+            set(state => ({ saves: [rowToSaveSlot(data), ...state.saves] }));
         }
     },
 
@@ -99,66 +116,96 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
         set(state => ({ saves: state.saves.filter(s => s.id !== id) }));
     },
 
-    setAutoSaveEnabled: (enabled) => {
-        set({ autoSaveEnabled: enabled });
-    },
+    setAutoSaveEnabled: (enabled) => set({ autoSaveEnabled: enabled }),
 
-    autoSave: async (gameState, playTime) => {
+    autoSave: async (gameState, playTime, sessionId) => {
         const state = get();
         const now = Date.now();
         if (!state.autoSaveEnabled || now - state.lastAutoSave < 60 * 1000) return;
-
         set({ lastAutoSave: now });
 
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Check for existing auto-save row
+        // Strip narrative from game_state — stored separately in narrative_logs
+        const { narrative, ...gameStateWithoutNarrative } = gameState;
+
+        // Upsert auto-save slot (one per session)
         const { data: existing } = await supabase
             .from('game_saves')
             .select('id')
             .eq('user_id', user.id)
+            .eq('session_id', sessionId)
             .eq('is_auto_save', true)
-            .single();
+            .maybeSingle();
 
         if (existing) {
-            await supabase
-                .from('game_saves')
-                .update({
-                    game_state: gameState,
-                    play_time: playTime,
-                    location: gameState.world.location,
-                    level: gameState.player.stats.level,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('id', existing.id);
+            await supabase.from('game_saves').update({
+                game_state: gameStateWithoutNarrative,
+                play_time: playTime,
+                location: gameState.world.location,
+                level: gameState.player.stats.level,
+                updated_at: new Date().toISOString(),
+            }).eq('id', existing.id);
         } else {
-            await supabase
-                .from('game_saves')
-                .insert({
-                    user_id: user.id,
-                    save_name: '自動存檔',
-                    game_state: gameState,
-                    play_time: playTime,
-                    location: gameState.world.location,
-                    level: gameState.player.stats.level,
-                    is_auto_save: true,
-                });
+            await supabase.from('game_saves').insert({
+                user_id: user.id,
+                session_id: sessionId,
+                save_name: '自動存檔',
+                game_state: gameStateWithoutNarrative,
+                play_time: playTime,
+                location: gameState.world.location,
+                level: gameState.player.stats.level,
+                is_auto_save: true,
+            });
         }
+
+        // Append only new narrative entries (ON CONFLICT DO NOTHING)
+        await syncNarrativeToSupabase(narrative, user.id, sessionId);
     },
 
     restoreLatestAutoSave: async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
 
-        const { data } = await supabase
+        // Find the latest auto-save across all sessions for this user
+        const { data: saveData } = await supabase
             .from('game_saves')
             .select('*')
             .eq('user_id', user.id)
             .eq('is_auto_save', true)
-            .single();
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        if (!data) return null;
-        return rowToSaveSlot(data);
+        if (!saveData) return null;
+
+        // Fetch narrative logs for this session (append-only store)
+        const { data: narrativeLogs } = await supabase
+            .from('narrative_logs')
+            .select('*')
+            .eq('session_id', saveData.session_id)
+            .order('created_at', { ascending: true });
+
+        const narrative: NarrativeLog[] = (narrativeLogs || []).map(row => ({
+            id: row.log_id as string,
+            role: row.role as 'user' | 'assistant' | 'system',
+            content: row.content as string,
+            timestamp: new Date(row.created_at as string).getTime(),
+        }));
+
+        const gameState: GameState = {
+            ...(saveData.game_state as GameState),
+            narrative: narrative.length > 0 ? narrative : (saveData.game_state as GameState).narrative ?? [],
+        };
+
+        return {
+            ...rowToSaveSlot(saveData),
+            gameState,
+        };
+    },
+
+    clearNarrative: async (sessionId: string) => {
+        await supabase.from('narrative_logs').delete().eq('session_id', sessionId);
     },
 }));

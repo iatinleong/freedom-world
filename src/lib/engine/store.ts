@@ -4,6 +4,7 @@ import { GameState, NarrativeLog } from './types';
 import { getMartialArtPower, getMartialArtRankPower } from './constants';
 
 interface GameStore extends GameState {
+    sessionId: string;
     // Actions
     addLog: (log: Omit<NarrativeLog, 'id' | 'timestamp'>) => void;
     updatePlayerStats: (stats: Partial<GameState['player']['stats']>) => void;
@@ -18,7 +19,7 @@ interface GameStore extends GameState {
     learnSkill: (skill: import('./types').MartialArt) => void;
     addTitle: (title: string) => void;
     equipTitle: (title: string) => void;
-    loadGameState: (state: GameState) => void;
+    loadGameState: (state: GameState, sessionId?: string) => void;
     getGameState: () => GameState;
     setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
     setGameStarted: (started: boolean) => void;
@@ -144,6 +145,7 @@ export const useGameStore = create<GameStore>()(
     persist(
         (set, get) => ({
             ...INITIAL_STATE,
+            sessionId: crypto.randomUUID(),
 
             addLog: (log) =>
                 set((state) => ({
@@ -193,7 +195,7 @@ export const useGameStore = create<GameStore>()(
 
             setOptions: (options) => set({ options }),
 
-            resetGame: () => set(INITIAL_STATE),
+            resetGame: () => set({ ...INITIAL_STATE, sessionId: crypto.randomUUID() }),
 
             startGame: async () => {
                 // Placeholder for component-driven init
@@ -353,9 +355,10 @@ export const useGameStore = create<GameStore>()(
                     };
                 }),
 
-            loadGameState: (gameState) => {
+            loadGameState: (gameState, sessionId?) => {
                 set({
                     ...gameState,
+                    sessionId: sessionId ?? crypto.randomUUID(),
                     isProcessing: false,
                 });
             },
