@@ -48,7 +48,7 @@ export function AIConfigScreen() {
                     {/* Provider Tabs */}
                     <div>
                         <p className="text-xs text-wuxia-gold/50 tracking-widest mb-3 uppercase">AI 服務商</p>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                             {(Object.keys(PROVIDER_INFO) as AIProvider[]).map((p) => {
                                 const pi = PROVIDER_INFO[p];
                                 const isActive = provider === p;

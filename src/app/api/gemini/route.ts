@@ -41,6 +41,12 @@ export async function POST(request: Request) {
             return await handleClaude(key, modelName, systemPrompt, userPrompt);
         }
 
+        if (provider === 'deepseek') {
+            const key = clientApiKey || process.env.DEEPSEEK_API_KEY || '';
+            if (!key) return NextResponse.json({ error: 'DeepSeek API Key not configured' }, { status: 500 });
+            return await handleDeepSeek(key, modelName, systemPrompt, userPrompt);
+        }
+
         return NextResponse.json({ error: 'Unknown provider' }, { status: 400 });
 
     } catch (error: any) {
@@ -89,6 +95,37 @@ async function handleGrok(apiKey: string, modelName: string, systemPrompt: strin
     if (!response.ok) {
         const err = await response.text();
         throw new Error(`Grok API error ${response.status}: ${err}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    const usage = {
+        promptTokenCount: data.usage?.prompt_tokens || 0,
+        candidatesTokenCount: data.usage?.completion_tokens || 0,
+    };
+    return NextResponse.json({ text, usage });
+}
+
+async function handleDeepSeek(apiKey: string, modelName: string, systemPrompt: string, userPrompt?: string) {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            model: modelName,
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt || '請繼續' },
+            ],
+            response_format: { type: 'json_object' },
+        }),
+    });
+
+    if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`DeepSeek API error ${response.status}: ${err}`);
     }
 
     const data = await response.json();

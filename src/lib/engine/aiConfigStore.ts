@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type AIProvider = 'gemini' | 'grok' | 'claude';
+export type AIProvider = 'gemini' | 'grok' | 'claude' | 'deepseek';
 
 export interface ModelOption {
     id: string;
@@ -31,6 +31,10 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelOption[]> = {
         { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: '平衡速度與能力', inputPrice: 3.00, outputPrice: 15.00 },
         { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', desc: '頂級能力', inputPrice: 5.00, outputPrice: 25.00 },
     ],
+    deepseek: [
+        { id: 'deepseek-chat', name: 'DeepSeek V3', desc: '快速・極省費用', inputPrice: 0.27, outputPrice: 1.10, badge: '推薦' },
+        { id: 'deepseek-reasoner', name: 'DeepSeek R1', desc: '深度推理・回應較慢', inputPrice: 0.55, outputPrice: 2.19 },
+    ],
 };
 
 export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string; apiKeyUrl: string; freeNote?: string }> = {
@@ -51,6 +55,12 @@ export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string; ap
         label: 'Claude',
         apiKeyUrl: 'https://console.anthropic.com/',
     },
+    deepseek: {
+        name: 'DeepSeek',
+        label: 'DeepSeek',
+        apiKeyUrl: 'https://platform.deepseek.com/api_keys',
+        freeNote: '極低費用',
+    },
 };
 
 interface AIConfigState {
@@ -65,14 +75,14 @@ interface AIConfigState {
 export const useAIConfigStore = create<AIConfigState>()(
     persist(
         (set) => ({
-            provider: 'gemini',
+            provider: 'gemini' as AIProvider,
             apiKey: '',
             modelName: 'gemini-2.5-flash-lite',
             isConfigured: false,
             setConfig: (provider, apiKey, modelName) =>
                 set({ provider, apiKey, modelName, isConfigured: true }),
             clearConfig: () =>
-                set({ provider: 'gemini', apiKey: '', modelName: 'gemini-2.5-flash-lite', isConfigured: false }),
+                set({ provider: 'gemini' as AIProvider, apiKey: '', modelName: 'gemini-2.5-flash-lite', isConfigured: false }),
         }),
         { name: 'jianghu-ai-config' }
     )
