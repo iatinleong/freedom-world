@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { useAIConfigStore } from '@/lib/engine/aiConfigStore';
+import { useAuthStore } from '@/lib/supabase/authStore';
+import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { AIConfigScreen } from '@/components/AIConfigScreen';
+import { AuthScreen } from '@/components/AuthScreen';
 import { CharacterCreation } from '@/components/CharacterCreation';
 import { GameTerminal } from '@/components/GameTerminal';
 import { ActionPanel } from '@/components/ActionPanel';
@@ -15,18 +18,37 @@ import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem'
 import { GameMenu } from '@/components/GameMenu';
 
 export default function Home() {
-  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player } = useGameStore();
+  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player, loadGameState } = useGameStore();
   const { isConfigured } = useAIConfigStore();
-  // Hydration fix
+  const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
+  const { restoreLatestAutoSave } = useSaveGameStore();
   const [mounted, setMounted] = useState(false);
+  const [restored, setRestored] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    initialize();
+  }, [initialize]);
 
-  if (!mounted) return null;
+  // On login, restore latest auto-save if game hasn't started yet
+  useEffect(() => {
+    if (user && !isGameStarted && !restored) {
+      setRestored(true);
+      restoreLatestAutoSave().then(save => {
+        if (save) loadGameState(save.gameState);
+      });
+    }
+    if (!user) setRestored(false);
+  }, [user, isGameStarted, restored, restoreLatestAutoSave, loadGameState]);
 
-  // Show AI config screen first if not configured
+  if (!mounted || isAuthLoading) return null;
+
+  // Auth gate — show login/register screen if not logged in
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  // Show AI config screen if not configured
   if (!isConfigured) {
     return <AIConfigScreen />;
   }

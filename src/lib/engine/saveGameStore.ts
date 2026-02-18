@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { GameState } from './types';
+import { supabase } from '@/lib/supabase/client';
 
 export interface SaveSlot {
     id: string;
@@ -10,117 +10,155 @@ export interface SaveSlot {
     playTime: number; // in seconds
     location: string;
     level: number;
-    screenshotData?: string; // base64 image data
+    isAutoSave?: boolean;
 }
 
 interface SaveGameStore {
     saves: SaveSlot[];
+    isLoading: boolean;
     autoSaveEnabled: boolean;
     lastAutoSave: number;
 
-    // Actions
-    saveGame: (name: string, gameState: GameState, playTime: number) => string;
-    loadGame: (id: string) => SaveSlot | null;
-    deleteSave: (id: string) => void;
-    getSaves: () => SaveSlot[];
+    fetchSaves: () => Promise<void>;
+    saveGame: (name: string, gameState: GameState, playTime: number) => Promise<void>;
+    loadGame: (id: string) => Promise<SaveSlot | null>;
+    deleteSave: (id: string) => Promise<void>;
     setAutoSaveEnabled: (enabled: boolean) => void;
-    autoSave: (gameState: GameState, playTime: number) => void;
+    autoSave: (gameState: GameState, playTime: number) => Promise<void>;
+    restoreLatestAutoSave: () => Promise<SaveSlot | null>;
 }
 
-export const useSaveGameStore = create<SaveGameStore>()(
-    persist(
-        (set, get) => ({
-            saves: [],
-            autoSaveEnabled: true,
-            lastAutoSave: 0,
+function rowToSaveSlot(row: Record<string, unknown>): SaveSlot {
+    return {
+        id: row.id as string,
+        name: row.save_name as string,
+        gameState: row.game_state as GameState,
+        timestamp: new Date(row.updated_at as string).getTime(),
+        playTime: (row.play_time as number) ?? 0,
+        location: (row.location as string) ?? '',
+        level: (row.level as number) ?? 1,
+        isAutoSave: (row.is_auto_save as boolean) ?? false,
+    };
+}
 
-            saveGame: (name, gameState, playTime) => {
-                const id = crypto.randomUUID();
-                const saveSlot: SaveSlot = {
-                    id,
-                    name,
-                    gameState,
-                    timestamp: Date.now(),
-                    playTime,
+export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
+    saves: [],
+    isLoading: false,
+    autoSaveEnabled: true,
+    lastAutoSave: 0,
+
+    fetchSaves: async () => {
+        set({ isLoading: true });
+        const { data, error } = await supabase
+            .from('game_saves')
+            .select('*')
+            .order('updated_at', { ascending: false });
+        if (!error && data) {
+            set({ saves: data.map(rowToSaveSlot) });
+        }
+        set({ isLoading: false });
+    },
+
+    saveGame: async (name, gameState, playTime) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('game_saves')
+            .insert({
+                user_id: user.id,
+                save_name: name,
+                game_state: gameState,
+                play_time: playTime,
+                location: gameState.world.location,
+                level: gameState.player.stats.level,
+                is_auto_save: false,
+            })
+            .select()
+            .single();
+
+        if (!error && data) {
+            set(state => ({
+                saves: [rowToSaveSlot(data), ...state.saves],
+            }));
+        }
+    },
+
+    loadGame: async (id) => {
+        const { data, error } = await supabase
+            .from('game_saves')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error || !data) return null;
+        return rowToSaveSlot(data);
+    },
+
+    deleteSave: async (id) => {
+        await supabase.from('game_saves').delete().eq('id', id);
+        set(state => ({ saves: state.saves.filter(s => s.id !== id) }));
+    },
+
+    setAutoSaveEnabled: (enabled) => {
+        set({ autoSaveEnabled: enabled });
+    },
+
+    autoSave: async (gameState, playTime) => {
+        const state = get();
+        const now = Date.now();
+        if (!state.autoSaveEnabled || now - state.lastAutoSave < 5 * 60 * 1000) return;
+
+        set({ lastAutoSave: now });
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Check for existing auto-save row
+        const { data: existing } = await supabase
+            .from('game_saves')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_auto_save', true)
+            .single();
+
+        if (existing) {
+            await supabase
+                .from('game_saves')
+                .update({
+                    game_state: gameState,
+                    play_time: playTime,
                     location: gameState.world.location,
                     level: gameState.player.stats.level,
-                };
-
-                set((state) => ({
-                    saves: [...state.saves, saveSlot].sort((a, b) => b.timestamp - a.timestamp),
-                }));
-
-                return id;
-            },
-
-            loadGame: (id) => {
-                const save = get().saves.find((s) => s.id === id);
-                return save || null;
-            },
-
-            deleteSave: (id) => {
-                set((state) => ({
-                    saves: state.saves.filter((s) => s.id !== id),
-                }));
-            },
-
-            getSaves: () => {
-                return get().saves;
-            },
-
-            setAutoSaveEnabled: (enabled) => {
-                set({ autoSaveEnabled: enabled });
-            },
-
-            autoSave: (gameState, playTime) => {
-                const state = get();
-                const now = Date.now();
-
-                // Auto-save every 5 minutes
-                if (state.autoSaveEnabled && now - state.lastAutoSave > 5 * 60 * 1000) {
-                    // Check if there's already an auto-save
-                    const existingAutoSave = state.saves.find((s) => s.name === '自動存檔');
-
-                    if (existingAutoSave) {
-                        // Update existing auto-save
-                        set((state) => ({
-                            saves: state.saves.map((s) =>
-                                s.name === '自動存檔'
-                                    ? {
-                                          ...s,
-                                          gameState,
-                                          timestamp: now,
-                                          playTime,
-                                          location: gameState.world.location,
-                                          level: gameState.player.stats.level,
-                                      }
-                                    : s
-                            ),
-                            lastAutoSave: now,
-                        }));
-                    } else {
-                        // Create new auto-save
-                        const id = crypto.randomUUID();
-                        const saveSlot: SaveSlot = {
-                            id,
-                            name: '自動存檔',
-                            gameState,
-                            timestamp: now,
-                            playTime,
-                            location: gameState.world.location,
-                            level: gameState.player.stats.level,
-                        };
-
-                        set((state) => ({
-                            saves: [...state.saves, saveSlot].sort((a, b) => b.timestamp - a.timestamp),
-                            lastAutoSave: now,
-                        }));
-                    }
-                }
-            },
-        }),
-        {
-            name: 'jianghu-saves',
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', existing.id);
+        } else {
+            await supabase
+                .from('game_saves')
+                .insert({
+                    user_id: user.id,
+                    save_name: '自動存檔',
+                    game_state: gameState,
+                    play_time: playTime,
+                    location: gameState.world.location,
+                    level: gameState.player.stats.level,
+                    is_auto_save: true,
+                });
         }
-    )
-);
+    },
+
+    restoreLatestAutoSave: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data } = await supabase
+            .from('game_saves')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('is_auto_save', true)
+            .single();
+
+        if (!data) return null;
+        return rowToSaveSlot(data);
+    },
+}));

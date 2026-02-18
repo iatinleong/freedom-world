@@ -257,9 +257,9 @@ narrative 禁止出現「似乎」「彷彿」「好像」「可能」「隱約�
         } finally {
             setProcessing(false);
 
-            // Trigger auto-save after each action
+            // Trigger auto-save after each action (fire-and-forget)
             const currentState = useGameStore.getState().getGameState();
-            autoSave(currentState, playTime);
+            void autoSave(currentState, playTime);
         }
     };
 

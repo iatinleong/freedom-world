@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, HelpCircle, X, Volume2, VolumeX, Maximize2, Minimize2, Save, RotateCcw } from 'lucide-react';
+import { Settings, HelpCircle, X, Volume2, VolumeX, Maximize2, Minimize2, Save, RotateCcw, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SaveGameManager } from './SaveGameManager';
+import { useAuthStore } from '@/lib/supabase/authStore';
+import { useGameStore } from '@/lib/engine/store';
 
 export function GameMenu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +13,8 @@ export function GameMenu() {
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isSaveManagerOpen, setIsSaveManagerOpen] = useState(false);
+    const { signOut } = useAuthStore();
+    const { resetGame } = useGameStore();
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -160,7 +164,7 @@ export function GameMenu() {
                                             </div>
                                         </div>
 
-                                        {/* Restart Game */}
+                                        {/* Game Controls */}
                                         <div className="space-y-3">
                                             <h3 className="text-sm font-serif text-wuxia-gold/80 tracking-wide flex items-center gap-2">
                                                 <span className="w-1 h-4 bg-wuxia-crimson/60 rounded-sm"></span>
@@ -170,17 +174,27 @@ export function GameMenu() {
                                                 <button
                                                     onClick={() => {
                                                         if (confirm('確定要重新開始遊戲嗎？所有未保存的進度將會丟失！')) {
-                                                            // Clear all game-related localStorage
-                                                            localStorage.removeItem('freedom-jianghu-storage-v4');
-                                                            localStorage.removeItem('jianghu-saves');
-                                                            // Reload the page
-                                                            window.location.reload();
+                                                            resetGame();
+                                                            setIsMenuOpen(false);
                                                         }
                                                     }}
                                                     className="w-full flex items-center justify-between p-3 rounded-sm bg-wuxia-crimson/10 border border-wuxia-crimson/30 hover:border-wuxia-crimson/60 hover:bg-wuxia-crimson/20 transition-all group"
                                                 >
                                                     <span className="text-sm text-wuxia-crimson/80 group-hover:text-wuxia-crimson">重新開始遊戲</span>
                                                     <RotateCcw className="w-4 h-4 text-wuxia-crimson/70 group-hover:text-wuxia-crimson group-hover:rotate-180 transition-all duration-500" />
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm('確定要登出嗎？')) {
+                                                            setIsMenuOpen(false);
+                                                            resetGame();
+                                                            await signOut();
+                                                        }
+                                                    }}
+                                                    className="w-full flex items-center justify-between p-3 rounded-sm bg-white/5 border border-white/10 hover:border-wuxia-gold/30 hover:bg-wuxia-gold/5 transition-all group"
+                                                >
+                                                    <span className="text-sm text-white/70 group-hover:text-white/90">登出帳號</span>
+                                                    <LogOut className="w-4 h-4 text-white/40 group-hover:text-wuxia-gold" />
                                                 </button>
                                             </div>
                                         </div>
