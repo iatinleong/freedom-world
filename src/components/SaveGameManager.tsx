@@ -30,6 +30,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     const isCharacterPanelOpen = useGameStore((state) => state.isCharacterPanelOpen);
     const notifications = useGameStore((state) => state.notifications);
     const loadGameState = useGameStore((state) => state.loadGameState);
+    const addNotification = useGameStore((state) => state.addNotification);
     const sessionId = useGameStore((state) => state.sessionId);
 
     const gameState = useMemo(() => ({
@@ -72,7 +73,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         await saveGame(saveName, gameState, playTime, sessionId);
         setSaveName('');
         setIsSaving(false);
-        alert('存檔成功！');
+        addNotification({ type: 'achievement', title: '存檔成功', description: `「${saveName}」已儲存至雲端` });
         setActiveTab('load');
     };
 
@@ -80,13 +81,15 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         if (!selectedSave) { alert('請選擇要載入的存檔'); return; }
         setIsLoadingGame(true);
         const save = await loadGame(selectedSave);
-        if (save) {
-            loadGameState(save.gameState, save.sessionId);
-            setPlayTime(save.playTime);
-            alert('載入成功！');
-            onClose();
-        }
         setIsLoadingGame(false);
+        if (!save) {
+            addNotification({ type: 'warning', title: '載入失敗', description: '無法讀取存檔，請稍後再試' });
+            return;
+        }
+        loadGameState(save.gameState, save.sessionId);
+        setPlayTime(save.playTime);
+        onClose();
+        addNotification({ type: 'achievement', title: '載入成功', description: `已恢復至「${save.name}」` });
     };
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {

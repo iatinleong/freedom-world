@@ -112,7 +112,31 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
             .eq('id', id)
             .single();
         if (error || !data) return null;
-        return rowToSaveSlot(data);
+
+        const slot = rowToSaveSlot(data);
+
+        // Auto-saves strip narrative to save bandwidth; restore it from narrative_logs
+        if (slot.isAutoSave && slot.sessionId) {
+            const { data: logs } = await supabase
+                .from('narrative_logs')
+                .select('*')
+                .eq('session_id', slot.sessionId)
+                .order('created_at', { ascending: true });
+
+            if (logs && logs.length > 0) {
+                slot.gameState = {
+                    ...slot.gameState,
+                    narrative: logs.map(row => ({
+                        id: row.log_id as string,
+                        role: row.role as 'user' | 'assistant' | 'system',
+                        content: row.content as string,
+                        timestamp: new Date(row.created_at as string).getTime(),
+                    })),
+                };
+            }
+        }
+
+        return slot;
     },
 
     deleteSave: async (id) => {

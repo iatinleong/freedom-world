@@ -377,6 +377,8 @@ export const useGameStore = create<GameStore>()(
             loadGameState: (gameState, sessionId?) => {
                 set({
                     ...gameState,
+                    // narrative may be missing from auto-saves (stored separately in narrative_logs)
+                    narrative: gameState.narrative ?? INITIAL_STATE.narrative,
                     sessionId: sessionId ?? crypto.randomUUID(),
                     isProcessing: false,
                     isCharacterPanelOpen: false,
