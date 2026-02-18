@@ -22,6 +22,8 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelOption[]> = {
     ],
     grok: [
         { id: 'grok-4-fast-non-reasoning', name: 'Grok 4 Fast', desc: '最省費用', inputPrice: 0.20, outputPrice: 0.50, badge: '推薦' },
+        { id: 'grok-4-1-fast-non-reasoning', name: 'Grok 4.1 Fast', desc: '最新快速版', inputPrice: 0.20, outputPrice: 0.50 },
+        { id: 'grok-4-1-fast-reasoning', name: 'Grok 4.1 Fast Reasoning', desc: '最新推理版', inputPrice: 0.20, outputPrice: 0.50 },
         { id: 'grok-3-mini', name: 'Grok 3 Mini', desc: '輕量・省費用', inputPrice: 0.30, outputPrice: 0.50 },
         { id: 'grok-3', name: 'Grok 3', desc: '標準旗艦', inputPrice: 3.00, outputPrice: 15.00 },
         { id: 'grok-4-0709', name: 'Grok 4', desc: '最強能力', inputPrice: 3.00, outputPrice: 15.00 },
