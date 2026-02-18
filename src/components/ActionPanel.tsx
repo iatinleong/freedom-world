@@ -115,11 +115,12 @@ export function ActionPanel() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Run once on mount
 
-    const handleAction = async (actionText: string) => {
+    // actionText: 詳細描述（傳給AI），displayText: 短標籤（顯示在劇情中）
+    const handleAction = async (actionText: string, displayText?: string) => {
         if (!actionText.trim() || isProcessing) return;
 
         setProcessing(true);
-        addLog({ role: 'user', content: actionText });
+        addLog({ role: 'user', content: displayText || actionText });
         setOptions([]); // Clear options while processing
 
         try {
@@ -306,7 +307,7 @@ export function ActionPanel() {
                     {options.slice(0, 4).map((option, idx) => (
                         <button
                             key={option.id || idx}
-                            onClick={() => handleAction(option.label)}
+                            onClick={() => handleAction(option.action || option.label, option.label)}
                             disabled={isProcessing}
                             className={cn(
                                 "wuxia-card relative group overflow-hidden p-3 text-left min-h-[4rem]",

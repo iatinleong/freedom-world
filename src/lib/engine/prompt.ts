@@ -1,8 +1,8 @@
 import { GameState } from './types';
 import { MARTIAL_ART_LEVELS, MARTIAL_ART_RANKS } from './constants';
 
-// 短期記憶保留回合數（4條 = 約2輪對話）
-const MAX_HISTORY_TURNS = 4;
+// 短期記憶保留回合數（8條 = 約4輪對話，戰鬥需要更多上下文）
+const MAX_HISTORY_TURNS = 8;
 
 export function buildSystemPrompt(state: GameState): string {
   const { player, world, narrative, summary } = state;
@@ -121,8 +121,15 @@ reputationChanges 的 key 只能用這4個：chivalry / infamy / fame / seclusio
 }
 
 export function buildUserPrompt(action: string): string {
+  const combatKeywords = ['攻', '斬', '打', '殺', '刀', '劍', '拳', '踢', '躲', '擋', '逃', '衝', '刺', '砍', '格', '推', '摔', '踹'];
+  const isCombat = combatKeywords.some(k => action.includes(k));
+
+  const combatHint = isCombat
+    ? `\n\n【戰鬥指引】這是戰鬥行動，必須給出明確的物理結果：誰受傷了多少、對方位置如何改變、戰況是否結束。不得停留在「交手」狀態，必須推進。`
+    : '';
+
   return `玩家行動：『${action}』
 
 請根據此行動，結合當前的屬性與環境標籤，給出一個「確定的、物理性的」結果。
-narrative 中禁止出現模糊詞（似乎、可能、彷彿），直接描述發生了什麼。`.trim();
+narrative 中禁止出現模糊詞（似乎、可能、彷彿），直接描述發生了什麼。${combatHint}`.trim();
 }
