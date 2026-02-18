@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
+export const maxDuration = 60; // seconds (Vercel Hobby max)
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
