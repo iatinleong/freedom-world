@@ -112,9 +112,9 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     if (!isOpen) return null;
 
     return (
-        <>
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] animate-fade-in" onClick={onClose} />
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl z-[120] animate-slide-up">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+            <div className="relative w-full max-w-3xl animate-slide-up">
                 <div className="bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 backdrop-blur-xl border-2 border-wuxia-gold/40 rounded-lg shadow-2xl shadow-wuxia-gold/20 overflow-hidden max-h-[80vh] flex flex-col">
                     {/* Header */}
                     <div className="px-6 py-4 border-b border-wuxia-gold/20 bg-black/50 flex items-center justify-between shrink-0">
@@ -226,6 +226,6 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
