@@ -12,6 +12,7 @@ import { CostMonitor } from '@/components/CostMonitor';
 import { CharacterPanel } from '@/components/CharacterPanel';
 import { DeathScreen } from '@/components/DeathScreen';
 import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem';
+import { GameMenu } from '@/components/GameMenu';
 
 export default function Home() {
   const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player } = useGameStore();
@@ -83,6 +84,7 @@ export default function Home() {
 
       <CostMonitor />
       <GlobalNotificationSystem />
+      <GameMenu />
 
       {/* 底部裝飾線 */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-wuxia-gold/40 to-transparent z-50"></div>
