@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
+import { useAIConfigStore } from '@/lib/engine/aiConfigStore';
+import { AIConfigScreen } from '@/components/AIConfigScreen';
 import { CharacterCreation } from '@/components/CharacterCreation';
 import { GameTerminal } from '@/components/GameTerminal';
 import { ActionPanel } from '@/components/ActionPanel';
@@ -13,6 +15,7 @@ import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem'
 
 export default function Home() {
   const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player } = useGameStore();
+  const { isConfigured } = useAIConfigStore();
   // Hydration fix
   const [mounted, setMounted] = useState(false);
 
@@ -21,6 +24,11 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
+
+  // Show AI config screen first if not configured
+  if (!isConfigured) {
+    return <AIConfigScreen />;
+  }
 
   // Check for death
   const isDead = isGameStarted && player.stats.hp <= 0;
@@ -56,7 +64,7 @@ export default function Home() {
 
             {/* 雲紋分隔 */}
             <div className="cloud-divider my-0 shrink-0 z-40"></div>
-      
+
             {isDead ? (
                 <DeathScreen />
             ) : !isGameStarted ? (
@@ -66,13 +74,13 @@ export default function Home() {
                   <StatusHUD />
                   <GameTerminal />
                   <ActionPanel />
-                  <CharacterPanel 
-                      isOpen={isCharacterPanelOpen} 
-                      onClose={() => setCharacterPanelOpen(false)} 
+                  <CharacterPanel
+                      isOpen={isCharacterPanelOpen}
+                      onClose={() => setCharacterPanelOpen(false)}
                   />
                 </>
             )}
-      
+
       <CostMonitor />
       <GlobalNotificationSystem />
 

@@ -1,18 +1,21 @@
-// Client-side Gemini Helper
-// Now delegates to Next.js API Route for security
+// Client-side AI Helper
+// Delegates to Next.js API Route, supports Gemini / Grok / Claude
+
+import { useAIConfigStore } from './aiConfigStore';
+
+function getConfig() {
+    const { provider, apiKey, modelName } = useAIConfigStore.getState();
+    return { provider, apiKey, modelName };
+}
 
 export async function generateGameResponse(systemPrompt: string, userPrompt: string) {
+    const { provider, apiKey, modelName } = getConfig();
+
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                systemPrompt,
-                userPrompt,
-                modelName: 'gemini-2.0-flash-lite', // You can parameterize this if needed
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ systemPrompt, userPrompt, modelName, provider, apiKey }),
         });
 
         if (!response.ok) {
@@ -20,29 +23,23 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
             try {
                 const errorData = await response.json();
                 if (errorData.error) errorMsg += ` - ${errorData.error}`;
-            } catch (e) {
-                // Ignore json parse error
-            }
+            } catch (_) { /* ignore */ }
             throw new Error(errorMsg);
         }
 
         const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
 
-        return {
-            text: data.text,
-            usage: data.usage
-        };
+        return { text: data.text, usage: data.usage };
     } catch (error) {
-        console.error("Gemini Client Error:", error);
+        console.error('AI Client Error:', error);
         throw error;
     }
 }
 
 export async function generateStorySummary(previousSummary: string, newContent: string) {
+    const { provider, apiKey, modelName } = getConfig();
+
     const prompt = `
 你是一個專業的劇情摘要助手。
 請將以下「舊的劇情摘要」與「新增的劇情對話」合併，重新撰寫成一段約 200 字的流暢劇情摘要。
@@ -64,28 +61,19 @@ ${newContent}
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                systemPrompt: prompt,
-                // userPrompt is empty for summary task as we combined it
-                modelName: 'gemini-2.0-flash-lite',
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ systemPrompt: prompt, modelName, provider, apiKey }),
         });
 
         if (!response.ok) {
-            console.error("Summary API Error:", response.statusText);
+            console.error('Summary API Error:', response.statusText);
             return null;
         }
 
         const data = await response.json();
-        return {
-            text: data.text,
-            usage: data.usage
-        };
+        return { text: data.text, usage: data.usage };
     } catch (error) {
-        console.error("Summary Generation Error:", error);
+        console.error('Summary Generation Error:', error);
         return null;
     }
 }

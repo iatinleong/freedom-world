@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useAIConfigStore, PROVIDER_MODELS } from './aiConfigStore';
 
 interface UsageState {
     totalCost: number;
@@ -30,11 +31,15 @@ export const useUsageStore = create<UsageStore>()(
 
             addUsage: (inputTokens, outputTokens) =>
                 set((state) => {
-                    // Pricing for Gemini 1.5 Flash (approximate)
-                    // Input: $0.075 / 1M tokens
-                    // Output: $0.30 / 1M tokens
-                    const inputCost = (inputTokens / 1000000) * 0.075;
-                    const outputCost = (outputTokens / 1000000) * 0.30;
+                    // Dynamically look up pricing from the selected model
+                    const { provider, modelName } = useAIConfigStore.getState();
+                    const models = PROVIDER_MODELS[provider] ?? [];
+                    const currentModel = models.find((m) => m.id === modelName);
+                    const inputPricePerM = currentModel?.inputPrice ?? 0.10;
+                    const outputPricePerM = currentModel?.outputPrice ?? 0.40;
+
+                    const inputCost = (inputTokens / 1_000_000) * inputPricePerM;
+                    const outputCost = (outputTokens / 1_000_000) * outputPricePerM;
 
                     return {
                         totalCost: state.totalCost + inputCost + outputCost,
@@ -49,7 +54,7 @@ export const useUsageStore = create<UsageStore>()(
                 set((state) => ({ sessionCount: state.sessionCount + 1 })),
         }),
         {
-            name: 'freedom-jianghu-usage', // localStorage key
+            name: 'freedom-jianghu-usage',
         }
     )
 );
