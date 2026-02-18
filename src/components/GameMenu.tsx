@@ -7,6 +7,7 @@ import { SaveGameManager } from './SaveGameManager';
 import { useAuthStore } from '@/lib/supabase/authStore';
 import { useGameStore } from '@/lib/engine/store';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
+import { useAIConfigStore, PROVIDER_INFO, PROVIDER_MODELS } from '@/lib/engine/aiConfigStore';
 
 export function GameMenu() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,8 +16,11 @@ export function GameMenu() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isSaveManagerOpen, setIsSaveManagerOpen] = useState(false);
     const { signOut } = useAuthStore();
-    const { resetGame } = useGameStore();
+    const { resetGame, isCharacterPanelOpen } = useGameStore();
     const { clearNarrative } = useSaveGameStore();
+    const { provider, modelName } = useAIConfigStore();
+    const providerLabel = PROVIDER_INFO[provider]?.name ?? provider;
+    const modelLabel = PROVIDER_MODELS[provider]?.find(m => m.id === modelName)?.name ?? modelName;
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -30,25 +34,27 @@ export function GameMenu() {
 
     return (
         <>
-            {/* Menu Buttons */}
-            <div className="fixed top-4 right-4 z-[100] flex gap-2">
-                <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="w-10 h-10 rounded-sm bg-black/80 border border-wuxia-gold/30 backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
-                    title="設置"
-                >
-                    <Settings className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold group-hover:rotate-90 transition-all duration-300" />
-                </button>
-            </div>
+            {/* Menu Buttons - Moved slightly left to avoid character panel overlap */}
+            {!isCharacterPanelOpen && (
+                <div className="fixed top-4 right-16 z-[100] flex gap-2 animate-fade-in">
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="w-10 h-10 rounded-sm bg-black/80 border border-wuxia-gold/30 backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
+                        title="設置"
+                    >
+                        <Settings className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold group-hover:rotate-90 transition-all duration-300" />
+                    </button>
+                </div>
+            )}
 
             {/* Menu Overlay */}
             {isMenuOpen && (
-                <>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] animate-fade-in"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in"
                         onClick={() => setIsMenuOpen(false)}
                     />
-                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl z-[120] animate-slide-up">
+                    <div className="relative w-full max-w-2xl animate-slide-up">
                         <div className="bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 backdrop-blur-xl border-2 border-wuxia-gold/40 rounded-lg shadow-2xl shadow-wuxia-gold/20 overflow-hidden">
                             {/* Header */}
                             <div className="relative px-6 py-4 border-b border-wuxia-gold/20 bg-black/50">
@@ -216,7 +222,7 @@ export function GameMenu() {
                                                 </div>
                                                 <div className="flex justify-between p-2 bg-white/5 rounded-sm">
                                                     <span>引擎</span>
-                                                    <span className="text-wuxia-gold">Gemini 2.0 Flash Lite</span>
+                                                    <span className="text-wuxia-gold">{modelLabel}</span>
                                                 </div>
                                                 <div className="flex justify-between p-2 bg-white/5 rounded-sm">
                                                     <span>框架</span>
@@ -302,12 +308,12 @@ export function GameMenu() {
                             <div className="px-6 py-4 border-t border-wuxia-gold/20 bg-black/50">
                                 <div className="flex items-center justify-between text-xs text-white/40">
                                     <span className="font-serif">自由江湖 Freedom Jianghu</span>
-                                    <span className="font-mono">Powered by Gemini AI</span>
+                                    <span className="font-mono">Powered by {providerLabel}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </>
+                </div>
             )}
             <SaveGameManager
                 isOpen={isSaveManagerOpen}

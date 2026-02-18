@@ -11,11 +11,15 @@ function getConfig() {
 export async function generateGameResponse(systemPrompt: string, userPrompt: string) {
     const { provider, apiKey, modelName } = getConfig();
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ systemPrompt, userPrompt, modelName, provider, apiKey }),
+            signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -32,8 +36,13 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
 
         return { text: data.text, usage: data.usage };
     } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error('AI 請求逾時（30秒），請稍後再試');
+        }
         console.error('AI Client Error:', error);
         throw error;
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
@@ -58,11 +67,15 @@ ${newContent}
 }
     `.trim();
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ systemPrompt: prompt, modelName, provider, apiKey }),
+            signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -75,5 +88,7 @@ ${newContent}
     } catch (error) {
         console.error('Summary Generation Error:', error);
         return null;
+    } finally {
+        clearTimeout(timeoutId);
     }
 }

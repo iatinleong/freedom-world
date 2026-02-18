@@ -46,16 +46,20 @@ function rowToSaveSlot(row: Record<string, unknown>): SaveSlot {
 
 async function syncNarrativeToSupabase(narrative: NarrativeLog[], userId: string, sessionId: string) {
     if (narrative.length === 0) return;
-    await supabase.from('narrative_logs').upsert(
-        narrative.map(log => ({
-            user_id: userId,
-            session_id: sessionId,
-            log_id: log.id,
-            role: log.role,
-            content: log.content,
-        })),
-        { onConflict: 'session_id,log_id', ignoreDuplicates: true }
-    );
+    try {
+        await supabase.from('narrative_logs').upsert(
+            narrative.map(log => ({
+                user_id: userId,
+                session_id: sessionId,
+                log_id: log.id,
+                role: log.role,
+                content: log.content,
+            })),
+            { onConflict: 'session_id,log_id', ignoreDuplicates: true }
+        );
+    } catch (error) {
+        console.error('Failed to sync narrative logs:', error);
+    }
 }
 
 export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
@@ -130,34 +134,38 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
         // Strip narrative from game_state — stored separately in narrative_logs
         const { narrative, ...gameStateWithoutNarrative } = gameState;
 
-        // Upsert auto-save slot (one per session)
-        const { data: existing } = await supabase
-            .from('game_saves')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('session_id', sessionId)
-            .eq('is_auto_save', true)
-            .maybeSingle();
+        try {
+            // Upsert auto-save slot (one per session)
+            const { data: existing } = await supabase
+                .from('game_saves')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('session_id', sessionId)
+                .eq('is_auto_save', true)
+                .maybeSingle();
 
-        if (existing) {
-            await supabase.from('game_saves').update({
-                game_state: gameStateWithoutNarrative,
-                play_time: playTime,
-                location: gameState.world.location,
-                level: gameState.player.stats.level,
-                updated_at: new Date().toISOString(),
-            }).eq('id', existing.id);
-        } else {
-            await supabase.from('game_saves').insert({
-                user_id: user.id,
-                session_id: sessionId,
-                save_name: '自動存檔',
-                game_state: gameStateWithoutNarrative,
-                play_time: playTime,
-                location: gameState.world.location,
-                level: gameState.player.stats.level,
-                is_auto_save: true,
-            });
+            if (existing) {
+                await supabase.from('game_saves').update({
+                    game_state: gameStateWithoutNarrative,
+                    play_time: playTime,
+                    location: gameState.world.location,
+                    level: gameState.player.stats.level,
+                    updated_at: new Date().toISOString(),
+                }).eq('id', existing.id);
+            } else {
+                await supabase.from('game_saves').insert({
+                    user_id: user.id,
+                    session_id: sessionId,
+                    save_name: '自動存檔',
+                    game_state: gameStateWithoutNarrative,
+                    play_time: playTime,
+                    location: gameState.world.location,
+                    level: gameState.player.stats.level,
+                    is_auto_save: true,
+                });
+            }
+        } catch (error) {
+            console.error('Auto-save failed:', error);
         }
 
         // Append only new narrative entries (ON CONFLICT DO NOTHING)

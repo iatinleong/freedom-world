@@ -37,10 +37,13 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
             {/* Backdrop */}
             <div
                 className={cn(
-                    "fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] transition-opacity duration-300",
+                    "fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] transition-opacity duration-300",
                     isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
-                onClick={onClose}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                }}
             />
             
             {/* Drawer */}
@@ -50,6 +53,7 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                     !isOpen && "pointer-events-none"
                 )}
                 style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-wuxia-gold/20 bg-black/50 flex items-center justify-between shrink-0">

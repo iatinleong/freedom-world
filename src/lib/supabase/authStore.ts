@@ -21,18 +21,27 @@ function formatError(message: string): string {
     return message;
 }
 
+// Module-level ref to prevent duplicate auth listeners
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 export const useAuthStore = create<AuthStore>((set) => ({
     user: null,
     isLoading: true,
 
     initialize: async () => {
+        // Unsubscribe existing listener before re-registering
+        if (authSubscription) {
+            authSubscription.unsubscribe();
+            authSubscription = null;
+        }
         set({ isLoading: true });
         const { data: { user } } = await supabase.auth.getUser();
         set({ user, isLoading: false });
 
-        supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             set({ user: session?.user ?? null });
         });
+        authSubscription = subscription;
     },
 
     signIn: async (email, password) => {

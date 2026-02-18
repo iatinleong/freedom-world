@@ -161,20 +161,39 @@ export const useGameStore = create<GameStore>()(
 
                 updatePlayerStats: (statsUpdates) =>
                     set((state) => {
-                        const newStats = { ...state.player.stats, ...statsUpdates };
+                        const currentStats = state.player.stats;
+                        const newStats = { ...currentStats, ...statsUpdates };
                         
                         // Deep merge attributes if provided
                         if (statsUpdates.attributes) {
                             newStats.attributes = {
-                                ...state.player.stats.attributes,
+                                ...currentStats.attributes,
                                 ...statsUpdates.attributes
                             };
+
+                            // --- LOGIC REINFORCEMENT: Derived Stats ---
+                            // If constitution (根骨) changes, update maxHp (根骨 x 20)
+                            if (statsUpdates.attributes.constitution !== undefined) {
+                                newStats.maxHp = newStats.attributes.constitution * 20;
+                                // Automatically heal if maxHp increased
+                                if (newStats.maxHp > currentStats.maxHp) {
+                                    newStats.hp += (newStats.maxHp - currentStats.maxHp);
+                                }
+                            }
+                            
+                            // If spirit (定力) changes, update maxQi (定力 x 10)
+                            if (statsUpdates.attributes.spirit !== undefined) {
+                                newStats.maxQi = newStats.attributes.spirit * 10;
+                                if (newStats.maxQi > currentStats.maxQi) {
+                                    newStats.qi += (newStats.maxQi - currentStats.maxQi);
+                                }
+                            }
                         }
             
                         // Deep merge reputation if provided
                         if (statsUpdates.reputation) {
                             newStats.reputation = {
-                                ...state.player.stats.reputation,
+                                ...currentStats.reputation,
                                 ...statsUpdates.reputation
                             };
                         }
@@ -360,6 +379,8 @@ export const useGameStore = create<GameStore>()(
                     ...gameState,
                     sessionId: sessionId ?? crypto.randomUUID(),
                     isProcessing: false,
+                    isCharacterPanelOpen: false,
+                    notifications: [],
                 });
             },
 

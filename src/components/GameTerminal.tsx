@@ -12,6 +12,7 @@ export function GameTerminal() {
     const narrative = useGameStore((state) => state.narrative);
     const summary = useGameStore((state) => state.summary);
     const setCharacterPanelOpen = useGameStore((state) => state.setCharacterPanelOpen);
+    const isCharacterPanelOpen = useGameStore((state) => state.isCharacterPanelOpen);
     const bottomRef = useRef<HTMLDivElement>(null);
     const [showSummary, setShowSummary] = useState(false);
 
@@ -41,8 +42,8 @@ export function GameTerminal() {
     return (
         <div className="flex-1 overflow-y-auto p-6 space-y-8 font-serif text-lg leading-loose text-foreground/90 paper-edge bg-gradient-to-b from-black/40 to-black/60 bamboo-texture relative scroll-smooth">
 
-            {/* Floating Action Buttons */}
-            <div className="fixed top-16 right-4 z-40 flex flex-col gap-2">
+            {/* Floating Action Buttons — hidden when character panel is open */}
+            {!isCharacterPanelOpen && <div className="fixed top-16 right-4 z-40 flex flex-col gap-2">
                 <button
                     onClick={() => setCharacterPanelOpen(true)}
                     className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
@@ -58,7 +59,7 @@ export function GameTerminal() {
                 >
                     <BookOpen className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
                 </button>
-            </div>
+            </div>}
 
             {/* Summary Modal */}            {showSummary && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowSummary(false)}>
