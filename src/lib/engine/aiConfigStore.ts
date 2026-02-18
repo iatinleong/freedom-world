@@ -74,18 +74,48 @@ interface AIConfigState {
     clearConfig: () => void;
 }
 
+// Developer shortcut: set these env vars to skip the AIConfigScreen entirely.
+// API key stays server-side (e.g. DEEPSEEK_API_KEY in route.ts).
+// NEXT_PUBLIC_DEFAULT_PROVIDER=deepseek
+// NEXT_PUBLIC_DEFAULT_MODEL=deepseek-chat
+const ENV_PROVIDER = process.env.NEXT_PUBLIC_DEFAULT_PROVIDER as AIProvider | undefined;
+const ENV_MODEL = process.env.NEXT_PUBLIC_DEFAULT_MODEL || '';
+
+const FALLBACK_PROVIDER: AIProvider = 'gemini';
+const FALLBACK_MODEL = 'gemini-2.5-flash-lite';
+
 export const useAIConfigStore = create<AIConfigState>()(
     persist(
         (set) => ({
-            provider: 'gemini' as AIProvider,
+            provider: ENV_PROVIDER ?? FALLBACK_PROVIDER,
             apiKey: '',
-            modelName: 'gemini-2.5-flash-lite',
-            isConfigured: false,
+            modelName: ENV_MODEL || FALLBACK_MODEL,
+            isConfigured: !!ENV_PROVIDER,
             setConfig: (provider, apiKey, modelName) =>
                 set({ provider, apiKey, modelName, isConfigured: true }),
             clearConfig: () =>
-                set({ provider: 'gemini' as AIProvider, apiKey: '', modelName: 'gemini-2.5-flash-lite', isConfigured: false }),
+                set({
+                    provider: ENV_PROVIDER ?? FALLBACK_PROVIDER,
+                    apiKey: '',
+                    modelName: ENV_MODEL || FALLBACK_MODEL,
+                    isConfigured: !!ENV_PROVIDER,
+                }),
         }),
-        { name: 'jianghu-ai-config' }
+        {
+            name: 'jianghu-ai-config',
+            merge: (persisted: any, current) => {
+                // Env vars always win over persisted user config
+                if (ENV_PROVIDER) {
+                    return {
+                        ...current,
+                        ...persisted,
+                        provider: ENV_PROVIDER,
+                        modelName: ENV_MODEL || persisted?.modelName || current.modelName,
+                        isConfigured: true,
+                    };
+                }
+                return { ...current, ...persisted };
+            },
+        }
     )
 );
