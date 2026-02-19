@@ -2,6 +2,7 @@
 // Delegates to Next.js API Route, supports Gemini / Grok / Claude
 
 import { useAIConfigStore } from './aiConfigStore';
+import type { GameState } from './types';
 
 function getConfig() {
     const { provider, modelName } = useAIConfigStore.getState();
@@ -43,6 +44,44 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
         throw error;
     } finally {
         clearTimeout(timeoutId);
+    }
+}
+
+export async function generateNextQuest(state: GameState): Promise<string | null> {
+    const { provider, modelName } = getConfig();
+    const { player, world, summary, worldState } = state;
+
+    const skillStr = [...player.skills.basics, ...player.skills.internal]
+        .map(s => s.name).join('、') || '無';
+
+    const prompt = `你是武俠遊戲《自由江湖》的敘事導演。根據當前局勢，為玩家生成下一個主線目標。
+
+當前狀態：
+地點：${world.location}
+前情摘要：${summary || '（遊戲剛開始）'}
+玩家技能：${skillStr}
+上一個主線目標：${worldState?.mainQuest || '無'}
+
+要求：
+・目標必須與當前地點和狀態自然銜接
+・一句話，20字以內，具體可執行（如「前往武當山尋找失蹤的師兄」）
+・不能與上一個目標重複，要有明顯的劇情推進感
+・帶有懸念，讓玩家知道接下來要做什麼
+
+只回傳 JSON：{"mainQuest": "新的主線目標"}`.trim();
+
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const json = JSON.parse(data.text);
+        return json.mainQuest || null;
+    } catch {
+        return null;
     }
 }
 

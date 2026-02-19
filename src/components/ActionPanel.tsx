@@ -5,7 +5,7 @@ import { useGameStore } from '@/lib/engine/store';
 import { useUsageStore } from '@/lib/engine/usageStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/engine/prompt';
-import { generateGameResponse, generateStorySummary } from '@/lib/engine/gemini';
+import { generateGameResponse, generateStorySummary, generateNextQuest } from '@/lib/engine/gemini';
 import { cn } from '@/lib/utils';
 
 export function ActionPanel() {
@@ -65,6 +65,7 @@ export function ActionPanel() {
     "location": "具體地點名稱",
     "weather": "天氣描述",
     "newTags": ["地點特徵標籤", "天氣標籤"],
+    "mainQuest": "根據開場情境，為玩家設定第一個主線目標（20字以內，具體可執行）",
     "hpChange": 0,
     "qiChange": 0
   }
@@ -83,9 +84,6 @@ export function ActionPanel() {
 
                     if (response.stateUpdate) {
                         // 初始階段不接受屬性變更，以免覆蓋創角數值
-                        // if (response.stateUpdate.attributeChanges) {
-                        //    updatePlayerStats({ attributes: response.stateUpdate.attributeChanges });
-                        // }
                         if (response.stateUpdate.location) {
                             updateWorld({ location: response.stateUpdate.location });
                         }
@@ -94,6 +92,9 @@ export function ActionPanel() {
                         }
                         if (response.stateUpdate.newTags) {
                             updateWorld({ tags: response.stateUpdate.newTags });
+                        }
+                        if (response.stateUpdate.mainQuest) {
+                            updateWorldState({ mainQuest: response.stateUpdate.mainQuest });
                         }
                     }
 
@@ -251,6 +252,18 @@ export function ActionPanel() {
 
             if (response.options) {
                 setOptions(response.options);
+            }
+
+            // --- Quest Generation Logic ---
+            // Every 15 assistant turns, generate next main quest in background
+            const assistantCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
+            if (assistantCount > 0 && assistantCount % 15 === 0) {
+                generateNextQuest(useGameStore.getState()).then(quest => {
+                    if (quest) {
+                        updateWorldState({ mainQuest: quest });
+                        addNotification({ type: 'achievement', title: '主線更新', description: quest, icon: '📜' });
+                    }
+                });
             }
 
             // --- Rolling Summary Logic ---
