@@ -32,7 +32,7 @@ function normalizeOptions(raw: any[]): import('../lib/engine/types').Option[] {
 }
 
 export function ActionPanel() {
-    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, updateRelations, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, removeItem, learnSkill, addTitle, addNotification } = useGameStore();
+    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, updateRelations, updateEquipment, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, removeItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
     const [playTime, setPlayTime] = useState(0);
@@ -75,22 +75,24 @@ export function ActionPanel() {
 ・第三人稱旁白，金庸武俠白話文筆法，一氣呵成
 ・涵蓋：出身家世、師承門派、重要過去事件（失去什麼/得到什麼）、核心執念、與當前江湖時局的關聯
 ・根骨高→體魄天賦異稟；悟性高→資質驚人；福緣高→奇遇不斷；魅力高→人緣極廣
-・門派必須從金庸正典中選：武當、少林、丐幫、峨嵋、華山、崆峒、明教、桃花島、靈鷲宮、大理段氏、姑蘇慕容氏、神龍教、雪山派（或「江湖散人」）
+・門派必須從以下清單中選（或選「江湖散人」）：
+  武當、少林、丐幫、峨嵋、華山、崆峒、朝廷、天機閣、碧血盟、烈火教、玄冰宗、青鋒劍宗、滄瀾幫、夜鴉堂
 ・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
 
 只回傳 JSON：
 {
   "backstory": "200-300字背景故事",
   "relations": {
-    "sect": "門派（金庸正典或江湖散人）",
+    "sect": "門派名（必須從上方清單選或填江湖散人）",
     "master": "師父名（無則填「無」）"
   },
   "stateUpdate": {
     "newItems": [{ "id": "唯一id", "name": "物品名", "description": "描述", "type": "weapon|armor|consumable|material|book", "count": 1 }],
-    "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }]
+    "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }],
+    "initialEquipment": { "weapon": "武器名（無則不填）", "armor": "護甲名（無則不填）" }
   }
 }
-注意：newItems/newSkills 僅限背景故事中明確擁有的起始物品與武功，若無則回傳空陣列 []。
+注意：newItems/newSkills/initialEquipment 僅限背景故事中明確擁有的起始物品、武功與裝備，若無則省略該欄位。
                     `.trim();
 
                     const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成背景故事");
@@ -120,6 +122,14 @@ export function ActionPanel() {
                     // 處理初始武功
                     if (backstoryResponse.stateUpdate?.newSkills) {
                         backstoryResponse.stateUpdate.newSkills.forEach((skill: any) => learnSkill(skill));
+                    }
+                    // 處理初始裝備
+                    if (backstoryResponse.stateUpdate?.initialEquipment) {
+                        const eq = backstoryResponse.stateUpdate.initialEquipment;
+                        const equipUpdate: { weapon?: string; armor?: string } = {};
+                        if (eq.weapon) equipUpdate.weapon = eq.weapon;
+                        if (eq.armor) equipUpdate.armor = eq.armor;
+                        if (Object.keys(equipUpdate).length > 0) updateEquipment(equipUpdate);
                     }
 
                     // ═══════════════════════════════════════════

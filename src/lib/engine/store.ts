@@ -22,6 +22,7 @@ interface GameStore extends GameState {
     equipTitle: (title: string) => void;
     updateWorldState: (worldState: Partial<GameState['worldState']>) => void;
     updateRelations: (relations: Partial<GameState['player']['relations']>) => void;
+    updateEquipment: (equipment: Partial<GameState['player']['equipment']>) => void;
     loadGameState: (state: GameState, sessionId?: string) => void;
     getGameState: () => GameState;
     setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
@@ -89,10 +90,18 @@ const INITIAL_STATE: GameState = {
             master: '無',
             sect: '無',
             sectAffinity: {
-                '武當': 50, '少林': 50, '丐幫': 50, '峨嵋': 50, '華山': 50,
-                '星宿': 50, '五毒': 50, '白駝': 50, '明教': 50, '金蛇遺脈': 50,
-                '朝廷': 50, '姑蘇慕容氏': 50, '大理段氏': 50, '雪山派': 50,
-                '神龍教': 50, '鐵劍門': 50, '靈鷲宮': 50, '桃花島': 50, '崆峒': 50,
+                // 真實歷史門派（無版權疑慮）
+                '武當': 50, '少林': 50, '丐幫': 50, '峨嵋': 50, '華山': 50, '崆峒': 50,
+                // 通用勢力
+                '朝廷': 50,
+                // 原創勢力（本作獨有）
+                '天機閣': 50,   // 以謀略情報著稱的神秘組織
+                '碧血盟': 50,   // 遊走江湖的義士結盟
+                '烈火教': 50,   // 崇尚烈焰、行事激烈的邪道勢力
+                '玄冰宗': 50,   // 發源北疆、以冰系內功見長的宗門
+                '青鋒劍宗': 50, // 以劍道為核心的正道大派
+                '滄瀾幫': 50,   // 控制江河水路、勢力龐大的幫派
+                '夜鴉堂': 50,   // 行事隱秘的刺客與暗探聚集地
             },
         },
         inventory: [
@@ -239,6 +248,14 @@ export const useGameStore = create<GameStore>()(
                     player: {
                         ...state.player,
                         relations: { ...state.player.relations, ...relations },
+                    },
+                })),
+
+            updateEquipment: (equipment) =>
+                set((state) => ({
+                    player: {
+                        ...state.player,
+                        equipment: { ...state.player.equipment, ...equipment },
                     },
                 })),
 
