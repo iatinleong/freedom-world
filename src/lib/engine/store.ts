@@ -123,14 +123,7 @@ const INITIAL_STATE: GameState = {
         difficulty: '動態難度',
         deathPenalty: true,
     },
-    narrative: [
-        {
-            id: 'init',
-            role: 'system',
-            content: '夜色昏沉，篝火劈啪作響...',
-            timestamp: Date.now(),
-        },
-    ],
+    narrative: [],
     summary: '',
     worldState: {
         mainQuest: '初入江湖，尋找自己的身世線索',
