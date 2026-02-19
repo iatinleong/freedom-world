@@ -45,7 +45,7 @@ export function ActionPanel() {
 
                 try {
                     const systemPrompt = `
-你是《自由江湖》的頂級遊戲主持人(GM)與說書人。現在為以下角色生成一個武俠開場場景。
+你是《自由江湖》的頂級遊戲主持人(GM)與說書人。掌管這個金庸武俠世界，劇情要像金庸小說般精彩，現在為以下角色生成一個武俠開場場景。
 
 角色設定：
 ・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
@@ -226,18 +226,20 @@ export function ActionPanel() {
                     updateWorld({ weather: response.stateUpdate.weatherChange });
                 }
 
-                // Handle Items
+                // Handle Items (only positive counts — negative counts are a bug from AI)
                 if (response.stateUpdate.newItems) {
-                    response.stateUpdate.newItems.forEach((item: any) => {
-                        addItem(item);
-                        addLog({ role: 'system', content: `獲得物品：${item.name} x${item.count}` });
-                        addNotification({
-                            type: 'item',
-                            title: item.name,
-                            description: item.description || `獲得 ${item.count} 個 ${item.name}`,
-                            icon: '📦'
+                    response.stateUpdate.newItems
+                        .filter((item: any) => item.count > 0)
+                        .forEach((item: any) => {
+                            addItem(item);
+                            addLog({ role: 'system', content: `獲得物品：${item.name} x${item.count}` });
+                            addNotification({
+                                type: 'item',
+                                title: item.name,
+                                description: item.description || `獲得 ${item.count} 個 ${item.name}`,
+                                icon: '📦'
+                            });
                         });
-                    });
                 }
 
                 // Handle Skills
