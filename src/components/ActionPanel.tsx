@@ -141,8 +141,7 @@ export function ActionPanel() {
 
             if (response.stateUpdate) {
                 // --- SMART GM: PLOT & COMBAT PACING (client-side detection) ---
-                const currentState = useGameStore.getState();
-                const ws = currentState.worldState;
+                const ws = getGameState().worldState;
 
                 const combatKeywords = ['攻','斬','打','殺','刀','劍','拳','踢','躲','擋','逃','衝','刺','砍','格','推','摔','踹'];
                 const isCombatAction = combatKeywords.some(k => actionText.includes(k));
