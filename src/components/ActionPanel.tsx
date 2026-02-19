@@ -80,11 +80,18 @@ export function ActionPanel() {
 {
   "worldNarrative": "200-300字江湖背景（給玩家看的敘述）",
   "factions": [
-    { "name": "勢力名稱", "alignment": "正道|邪道|中立", "martialStyle": "功法特色一句話", "status": "當前處境" },
-    "...共6-8個勢力"
+    {
+      "name": "勢力名稱",
+      "alignment": "正道|邪道|中立",
+      "philosophy": "門派理念（如：以武入道、順天應命、利益至上）",
+      "martialStyle": "功法特色（如：剛猛外功為主、以柔克剛的內力、飄逸輕功身法）",
+      "personality": "待人處事風格（如：重義輕財、行事冷酷、廣結善緣）",
+      "status": "當前處境（強盛/式微/擴張中/內亂/蟄伏）"
+    }
   ],
   "centralConflict": "核心矛盾一句話"
 }
+共6-8個勢力，每個勢力的 philosophy/martialStyle/personality 必須各有特色，不得雷同。
                     `.trim();
 
                     const { text: worldJson, usage: worldUsage } = await generateGameResponse(worldPrompt, "生成江湖世界");
