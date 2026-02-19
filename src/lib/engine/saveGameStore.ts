@@ -84,6 +84,18 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // Enforce manual save limit of 5 — delete oldest if over limit
+        const { data: existingManual } = await supabase
+            .from('game_saves')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('is_auto_save', false)
+            .order('updated_at', { ascending: true }); // oldest first
+
+        if (existingManual && existingManual.length >= 5) {
+            await supabase.from('game_saves').delete().eq('id', existingManual[0].id);
+        }
+
         // Manual save: store full snapshot (including narrative) for point-in-time restore
         const { data, error } = await supabase
             .from('game_saves')
@@ -182,6 +194,22 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
                     updated_at: new Date().toISOString(),
                 }).eq('id', existing.id);
             } else {
+                // Enforce auto-save limit of 5 sessions — delete oldest if over limit
+                const { data: existingAutos } = await supabase
+                    .from('game_saves')
+                    .select('id, session_id')
+                    .eq('user_id', user.id)
+                    .eq('is_auto_save', true)
+                    .order('updated_at', { ascending: true }); // oldest first
+
+                if (existingAutos && existingAutos.length >= 5) {
+                    const oldest = existingAutos[0];
+                    if (oldest.session_id) {
+                        await supabase.from('narrative_logs').delete().eq('session_id', oldest.session_id);
+                    }
+                    await supabase.from('game_saves').delete().eq('id', oldest.id);
+                }
+
                 await supabase.from('game_saves').insert({
                     user_id: user.id,
                     session_id: sessionId,

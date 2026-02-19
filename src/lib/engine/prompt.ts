@@ -5,7 +5,7 @@ import { MARTIAL_ART_LEVELS, MARTIAL_ART_RANKS } from './constants';
 const MAX_HISTORY_TURNS = 8;
 
 function getDirectorDirectives(state: GameState): string {
-  const { worldState } = state;
+  const { worldState, player } = state;
   if (!worldState) return '';
   const directives: string[] = [];
 
@@ -21,6 +21,11 @@ function getDirectorDirectives(state: GameState): string {
 
   if (worldState.currentCombatTurns === 0 && worldState.pacingCounter >= 5) {
     directives.push(`【節奏警示】劇情已平靜 ${worldState.pacingCounter} 回合，請立即引入突發事件（NPC主動搭話 / 發現異常線索 / 突發危機）打破僵局。`);
+  }
+
+  const hpRatio = player.stats.hp / player.stats.maxHp;
+  if (hpRatio <= 0.3 && hpRatio > 0) {
+    directives.push(`【主角瀕危警報 — 最高優先】玩家氣血僅剩 ${player.stats.hp}/${player.stats.maxHp}（${Math.round(hpRatio * 100)}%），生死一線！本回合必須出現救場轉機（援兵/敵人犯錯/地形/奇遇），hpChange 不得為負值。`);
   }
 
   return directives.join('\n');
@@ -44,7 +49,7 @@ export function buildSystemPrompt(state: GameState): string {
   const skillStr = [...player.skills.basics, ...player.skills.internal]
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
-  return `你是《自由江湖》的說書人兼遊戲主持人，掌管這個殘酷而真實的武俠世界。
+  return `你是《自由江湖》的說書人兼遊戲主持人，掌管這個金庸武俠世界，劇情可以像金庸小說般精彩，但不要抄襲。
 ${directorDirectives ? `\n━━ 導演指令（最高優先，必須遵守）━━\n${directorDirectives}\n` : ''}
 ━━ 前情提要 ━━
 ${summary || '（遊戲剛開始）'}
@@ -69,11 +74,19 @@ ${recentHistory || '（暫無）'}
 境界（低→高）：${levelsStr}
 
 ━━ 主角光環法則（最高優先，不可違反）━━
-玩家是這個故事的主角，天生擁有「主角命格」：
+玩家是這個故事的主角，天生擁有「主角命格」。以下規則絕對不能打破：
+
+【硬性數值規則】
+・hpChange 的負值絕對不可讓玩家當前 HP 歸零或低於 1
+  → 當前 HP：${player.stats.hp}，本回合 hpChange 上限（負值）：${-(player.stats.hp - 1)}
+  → 若玩家本該承受致命傷，敘事上描述「千鈞一髮、瀕死逃過」，但數值只扣到剩 1
+・若玩家 HP 已低於最大值 30%（當前 ${player.stats.hp}，低血線 ${Math.ceil(player.stats.maxHp * 0.3)}），本回合 hpChange 不得為負
+
+【敘事規則】
 ・除非玩家明確選擇赴死，任何致命危機都必須留有生路——敵人關鍵失手、意外救兵、地形逃脫、奇遇化解，擇一呈現
 ・福緣低不代表諸事不順，而是「因禍得福」的路徑更曲折戲劇
-・瀕死時必定出現轉機，轉機可以是：緊要關頭的天降異人、敵人內訌、突破桎梏領悟武功、路人搭救
-・敵人可以佔上風，但最終不能在非玩家主動求死的情況下殺死主角
+・瀕死時必定出現轉機：天降異人、敵人內訌、突破桎梏領悟武功、路人搭救
+・敵人可以佔上風，但最終不能殺死主角
 
 ━━ 敘事準則 ━━
 每次回應必須：
@@ -96,7 +109,6 @@ ${recentHistory || '（暫無）'}
 ・NPC 永遠不受傷、永遠追不上——他們也是凡人，有破綻
 
 屬性判定參考 (重要標竿)：
-・數值標準：輕微傷/消耗(-5~15) | 顯著傷/中招(-20~40) | 重創/大招(-50以上)。
 ・因果描述：必須在敘事中體現屬性影響。例如：「因你身法高超，險險避開...」或「儘管你膂力驚人，卻難敵此重兵器...」。
 ・功能對應：膂力→傷害/破防 | 身法→閃避/逃跑 | 根骨→防禦/抗性 | 悟性→識破/學功 | 福緣→奇遇 | 魅力→NPC態度。
 

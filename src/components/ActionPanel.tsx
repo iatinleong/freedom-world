@@ -170,7 +170,9 @@ export function ActionPanel() {
 
                 // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
-                    updatePlayerStats({ hp: Math.max(0, state.player.stats.hp + response.stateUpdate.hpChange) });
+                    const rawHp = state.player.stats.hp + response.stateUpdate.hpChange;
+                    // 主角光環：HP 不得歸零（除非玩家主動求死）
+                    updatePlayerStats({ hp: Math.max(1, rawHp) });
                 }
                 if (response.stateUpdate.qiChange) {
                     updatePlayerStats({ qi: Math.max(0, state.player.stats.qi + response.stateUpdate.qiChange) });
