@@ -64,7 +64,7 @@ export function buildSystemPrompt(state: GameState): string {
       : `【敘事】${log.content.substring(0, 150)}`)
     .join('\n');
 
-  const skillStr = [...player.skills.basics, ...player.skills.internal]
+  const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
   return `你是《自由江湖》的說書人兼GM，劇情要有金庸武俠的精彩與節奏。
@@ -92,15 +92,14 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 ・任何致命危機必有生路；敵人不能殺死主角
 
 ━━ 敘事法則 ━━
-・每回合一件具體事發生，120-200字，包含感官細節
+・每回合一件具體事發生，120-150字，包含感官細節
 ・行動三合一：執行過程 → 立即結果 → 不可逆局面改變
 ・禁詞：似乎/好像/彷彿/可能/隱約/也許——直接描述發生了什麼
 ・場景自洽：已離場者不再互動；物理常識成立（斷臂不持劍）
-・禁用版權武俠作品的人名/地名/門派/武功名，一律原創
 ・屬性影響：膂力→攻防 | 身法→閃避逃跑 | 根骨→防禦抗傷 | 悟性→識破學功 | 福緣→奇遇 | 魅力→NPC態度
 
 ━━ 選項法則 ━━
-・4個選項覆蓋4個策略維度（戰/智/交/走），每種最多一個
+・4個選項覆蓋4個截然不同，讓玩家覺得選了哪個都可惜。
 ・每選項 action 欄位 10-20字，說清楚做什麼/對誰/目的
 
 ━━ 輸出規則 ━━
@@ -124,7 +123,7 @@ reputationChanges key（僅此4個）：chivalry/infamy/fame/seclusion
     "expChange": 10,
     "newItems": [{ "name": "物品名", "count": 1, "type": "consumable", "description": "簡短描述" }],
     "removedItems": [{ "name": "金創藥", "count": 1 }],
-    "newSkills": [{ "name": "武功名", "type": "internal", "rank": "基礎", "level": "初窺門徑" }],
+    "newSkills": [{ "name": "武功名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }],
     "newTitles": ["江湖稱號"],
     "newTags": ["新增環境標籤"],
     "removedTags": ["移除環境標籤"],

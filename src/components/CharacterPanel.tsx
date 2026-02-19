@@ -374,6 +374,31 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* 輕功身法 */}
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-serif text-emerald-400 tracking-wide flex items-center gap-2">
+                                        <span className="w-1 h-4 bg-emerald-400/60 rounded-sm"></span>
+                                        輕功身法
+                                    </h3>
+                                    {(player.skills.light ?? []).length === 0 ? (
+                                        <p className="text-center py-8 text-white/40 text-sm">尚未習得任何輕功身法</p>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {(player.skills.light ?? []).map((skill, idx) => (
+                                                <div key={idx} className="p-4 bg-emerald-900/10 border border-emerald-600/30 rounded-lg">
+                                                    <div className="flex items-start justify-between mb-2">
+                                                        <h4 className="font-serif text-emerald-400 font-bold">{skill.name}</h4>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-xs text-white/60">
+                                                        <span>境界: <span className="text-emerald-400">{skill.level}</span></span>
+                                                        <span>威力: <span className="text-emerald-400">{(skill.power * 100).toFixed(0)}%</span></span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 

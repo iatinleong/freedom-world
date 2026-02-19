@@ -51,7 +51,7 @@ export async function generateNextQuest(state: GameState): Promise<string | null
     const { provider, modelName } = getConfig();
     const { player, world, summary, worldState } = state;
 
-    const skillStr = [...player.skills.basics, ...player.skills.internal]
+    const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
         .map(s => s.name).join('、') || '無';
 
     const prompt = `你是武俠遊戲《自由江湖》的敘事導演。掌管這個金庸武俠世界，採用金庸般的劇情風格，根據當前局勢，為玩家生成下一個主線目標。
@@ -92,7 +92,7 @@ export async function generateQuestArc(
     const { provider, modelName } = getConfig();
     const { player, world, summary, worldState } = state;
 
-    const skillStr = [...player.skills.basics, ...player.skills.internal]
+    const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
         .map(s => s.name).join('、') || '無';
 
     const existingArc = worldState?.questArc ?? [];
@@ -120,13 +120,21 @@ ${usedStr ? `・以下目標已出現，嚴禁重複或相似：【${usedStr}】
 【核心規則】每個章節是「玩家需要完成的任務目標」，不是「必定發生的事件描述」。
 目標告訴玩家「要去哪、做什麼、找誰」，至於過程中遇到什麼由敘事AI自由發揮。
 
+【武俠世界多元面向——10章中各類型至少出現一次】
+・江湖情義：結義、報恩、化解仇怨、義氣相助
+・秘聞探查：打探情報、追查真相、揭露陰謀、尋訪知情人
+・修煉成長：尋找秘笈、拜師學藝、突破瓶頸、打通經脈
+・人際周旋：與門派周旋、結交豪傑、獲取信任、化敵為友
+・生死危機：逃脫追殺、絕地求生、捨身護人（戰鬥是手段，不是目標本身）
+・江湖遊歷：名勝尋訪、奇遇探索、參加武林大會、路見不平
+
 格式要求：
 ・每章15-20字，格式：「去哪裡 / 對誰 + 做什麼目的」
-・✓ 正確：「前往黑風寨打探斷劍下落」「尋找神秘老者問明身世線索」「突破黑衣人重重追殺逃出官道」
-・✗ 錯誤：「在官道邂逅老者並學得追蹤術」（這是事件描述，不是目標）
+・✓ 正確：「潛入藏書閣查閱失蹤師兄的線索」「說服幫主相信官府栽贓之事」「於山洞閉關突破輕功瓶頸」
+・✗ 錯誤：「與黑衣人大戰三百回合」（動作不是目標）
 ・✗ 錯誤：「繼續探索」「前往某地」（太模糊）
-・章節間有邏輯因果：前章的結果導致後章的任務（如「發現賊窩」→「潛入賊窩取物」→「被擒生死一線」）
-・節奏起伏：探索→危機→逃脫→反擊→終結
+・10章節奏：2情義/探查 → 1修煉 → 2人際/遊歷 → 2危機 → 1修煉 → 2情義/終結（可彈性調整）
+・章節間有邏輯因果，前章結果導致後章任務
 ・禁止重複上面列出的已用目標
 
 只回傳 JSON：{"arc": ["目標1", "目標2", "目標3", "目標4", "目標5", "目標6", "目標7", "目標8", "目標9", "目標10"]}`.trim();

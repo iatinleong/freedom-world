@@ -21,6 +21,7 @@ interface GameStore extends GameState {
     addTitle: (title: string) => void;
     equipTitle: (title: string) => void;
     updateWorldState: (worldState: Partial<GameState['worldState']>) => void;
+    updateRelations: (relations: Partial<GameState['player']['relations']>) => void;
     loadGameState: (state: GameState, sessionId?: string) => void;
     getGameState: () => GameState;
     setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
@@ -74,6 +75,7 @@ const INITIAL_STATE: GameState = {
                 { name: '基礎劍法', level: '初窺門徑', power: 1.0, type: 'external', rank: '基礎' },
             ],
             internal: [],
+            light: [],
         },
         meridians: {
             ren: false, du: false, chong: false, dai: false,
@@ -232,6 +234,14 @@ export const useGameStore = create<GameStore>()(
                     worldState: { ...state.worldState, ...worldState },
                 })),
 
+            updateRelations: (relations) =>
+                set((state) => ({
+                    player: {
+                        ...state.player,
+                        relations: { ...state.player.relations, ...relations },
+                    },
+                })),
+
             setOptions: (options) => set({ options }),
 
             resetGame: () => set({ ...INITIAL_STATE, sessionId: crypto.randomUUID() }),
@@ -294,13 +304,14 @@ export const useGameStore = create<GameStore>()(
 
             learnSkill: (newSkill) =>
                 set((state) => {
-                    // Normalize type: check if it contains 'internal' (case-insensitive) to categorize as internal
-                    // otherwise default to 'basics' (which covers external and light)
-                    const isInternal = newSkill.type.toLowerCase().includes('internal');
-                    const skillType = isInternal ? 'internal' : 'basics';
-
-                    // Clean up the type string for storage (remove parentheses if AI added them)
-                    const cleanType = isInternal ? 'internal' : (newSkill.type.toLowerCase().includes('light') ? 'light' : 'external');
+                    // Normalize type and route to the correct array
+                    const rawType = newSkill.type.toLowerCase();
+                    const cleanType = rawType.includes('internal') ? 'internal'
+                        : rawType.includes('light') ? 'light'
+                        : 'external';
+                    const skillType = cleanType === 'internal' ? 'internal'
+                        : cleanType === 'light' ? 'light'
+                        : 'basics';
 
                     const existingSkillIndex = state.player.skills[skillType].findIndex(
                         (s: any) => s.name === newSkill.name

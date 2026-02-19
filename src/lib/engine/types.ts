@@ -87,8 +87,9 @@ export interface GameState {
         gender: 'male' | 'female';
         stats: PlayerStats;
         skills: {
-            basics: MartialArt[];
-            internal: MartialArt[];
+            basics: MartialArt[];   // 外功
+            internal: MartialArt[]; // 內功
+            light: MartialArt[];    // 輕功
         };
         meridians: Meridians;
         injuries: string[]; // 傷勢狀態
