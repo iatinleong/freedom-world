@@ -38,6 +38,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         player, world, worldState, system, narrative, options, summary,
         isGameStarted, isCharacterPanelOpen, notifications,
         isProcessing: false,
+        isGameMenuOpen: false,
         usage: { totalCost: 0, totalInputTokens: 0, totalOutputTokens: 0 },
     }), [player, world, worldState, system, narrative, options, summary, isGameStarted, isCharacterPanelOpen, notifications]);
 

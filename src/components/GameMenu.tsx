@@ -10,13 +10,12 @@ import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { useAIConfigStore, PROVIDER_INFO, PROVIDER_MODELS } from '@/lib/engine/aiConfigStore';
 
 export function GameMenu() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'settings' | 'help' | 'saves'>('settings');
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isSaveManagerOpen, setIsSaveManagerOpen] = useState(false);
     const { signOut } = useAuthStore();
-    const { resetGame, isCharacterPanelOpen } = useGameStore();
+    const { resetGame, isCharacterPanelOpen, isGameMenuOpen, setGameMenuOpen } = useGameStore();
     const { clearNarrative } = useSaveGameStore();
     const { provider, modelName } = useAIConfigStore();
     const providerLabel = PROVIDER_INFO[provider]?.name ?? provider;
@@ -34,25 +33,12 @@ export function GameMenu() {
 
     return (
         <>
-            {/* Menu Buttons - Moved slightly left to avoid character panel overlap */}
-            {!isCharacterPanelOpen && (
-                <div className="fixed top-4 right-16 z-[100] flex gap-2 animate-fade-in">
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="w-10 h-10 rounded-sm bg-black/80 border border-wuxia-gold/30 backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
-                        title="設置"
-                    >
-                        <Settings className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold group-hover:rotate-90 transition-all duration-300" />
-                    </button>
-                </div>
-            )}
-
             {/* Menu Overlay */}
-            {isMenuOpen && (
+            {isGameMenuOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={() => setGameMenuOpen(false)}
                     />
                     <div className="relative w-full max-w-2xl animate-slide-up">
                         <div className="bg-gradient-to-b from-wuxia-ink-blue/95 to-black/95 backdrop-blur-xl border-2 border-wuxia-gold/40 rounded-lg shadow-2xl shadow-wuxia-gold/20 overflow-hidden">
@@ -64,7 +50,7 @@ export function GameMenu() {
                                         <span>遊戲設置</span>
                                     </h2>
                                     <button
-                                        onClick={() => setIsMenuOpen(false)}
+                                        onClick={() => setGameMenuOpen(false)}
                                         className="w-8 h-8 rounded-sm border border-wuxia-gold/30 flex items-center justify-center hover:bg-wuxia-crimson/20 hover:border-wuxia-crimson transition-all group"
                                     >
                                         <X className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-crimson" />
@@ -87,7 +73,7 @@ export function GameMenu() {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            setIsMenuOpen(false);
+                                            setGameMenuOpen(false);
                                             setIsSaveManagerOpen(true);
                                         }}
                                         className="px-4 py-2 rounded-sm font-serif text-sm transition-all border bg-white/5 border-white/10 text-white/50 hover:border-wuxia-gold/30 hover:text-white/70"
@@ -185,7 +171,7 @@ export function GameMenu() {
                                                             const oldSessionId = useGameStore.getState().sessionId;
                                                             await clearNarrative(oldSessionId);
                                                             resetGame();
-                                                            setIsMenuOpen(false);
+                                                            setGameMenuOpen(false);
                                                         }
                                                     }}
                                                     className="w-full flex items-center justify-between p-3 rounded-sm bg-wuxia-crimson/10 border border-wuxia-crimson/30 hover:border-wuxia-crimson/60 hover:bg-wuxia-crimson/20 transition-all group"
@@ -196,7 +182,7 @@ export function GameMenu() {
                                                 <button
                                                     onClick={async () => {
                                                         if (confirm('確定要登出嗎？')) {
-                                                            setIsMenuOpen(false);
+                                                            setGameMenuOpen(false);
                                                             resetGame();
                                                             await signOut();
                                                         }

@@ -27,6 +27,8 @@ interface GameStore extends GameState {
     setCharacterPanelOpen: (isOpen: boolean) => void;
     addNotification: (notification: { type: any, title: string, description: string, icon?: string }) => void;
     isCharacterPanelOpen: boolean;
+    isGameMenuOpen: boolean;
+    setGameMenuOpen: (isOpen: boolean) => void;
     notifications: any[];
 }
 
@@ -140,6 +142,7 @@ const INITIAL_STATE: GameState = {
     isProcessing: false,
     isGameStarted: false,
     isCharacterPanelOpen: false,
+    isGameMenuOpen: false,
     notifications: [],
     usage: {
         totalCost: 0,
@@ -153,6 +156,12 @@ export const useGameStore = create<GameStore>()(
         (set, get) => ({
             ...INITIAL_STATE,
             sessionId: crypto.randomUUID(),
+
+            isGameStarted: false,
+            isCharacterPanelOpen: false,
+            isGameMenuOpen: false,
+
+            setGameMenuOpen: (isOpen) => set({ isGameMenuOpen: isOpen }),
 
             addLog: (log) =>
                 set((state) => ({
@@ -516,8 +525,8 @@ export const useGameStore = create<GameStore>()(
 
             getGameState: () => {
                 const state = get();
-                const { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications } = state;
-                return { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications };
+                const { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, usage, notifications } = state;
+                return { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, usage, notifications };
             }
         }),
         {

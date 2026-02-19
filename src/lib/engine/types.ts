@@ -81,11 +81,12 @@ export interface Option {
 
 export interface GameState {
     player: {
-                name: string;
-                title: string;
-                unlockedTitles: string[];
-                gender: 'male' | 'female';
-                stats: PlayerStats;        skills: {
+        name: string;
+        title: string;
+        unlockedTitles: string[];
+        gender: 'male' | 'female';
+        stats: PlayerStats;
+        skills: {
             basics: MartialArt[];
             internal: MartialArt[];
         };
@@ -126,9 +127,16 @@ export interface GameState {
     };
     narrative: NarrativeLog[];
     summary: string; // Rolling summary of past events
+    worldState: {
+        mainQuest: string;    // 當前主線目標
+        plotProgress: number; // 劇情進度 (0-100)
+        pacingCounter: number; // 節奏計數：正數代表和平，負數代表剛打完仗需修整
+        currentCombatTurns: number; // 當前戰鬥已持續回合
+    };
     options: Option[];
     isGameStarted: boolean;
     isCharacterPanelOpen: boolean;
+    isGameMenuOpen: boolean;
     notifications: any[];
     isProcessing: boolean;
     usage: {

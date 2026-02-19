@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Heart, Sparkles, Apple, Coins, Crown, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Heart, Sparkles, Apple, Coins, Crown, X, Scroll, Settings } from 'lucide-react';
 
 export function StatusHUD() {
-    const { player, world, equipTitle } = useGameStore();
+    const { player, world, worldState, equipTitle, setGameMenuOpen } = useGameStore();
     const { stats, name, title, unlockedTitles } = player;
     const [isExpanded, setIsExpanded] = useState(false);
     const [showTitleSelector, setShowTitleSelector] = useState(false);
@@ -129,17 +129,52 @@ export function StatusHUD() {
                 <div className="flex-1"></div>
 
                 {/* Location & Time */}
-                <div className="flex items-center gap-2 text-xs text-wuxia-gold/60 font-serif">
+                <div className="flex items-center gap-2 text-xs text-wuxia-gold/60 font-serif mr-2">
                      <span className="text-wuxia-gold/30">◆</span>
                     <span>{world.location}</span>
                     <span className="text-wuxia-gold/30">|</span>
                     <span className="italic">{world.time.period}</span>
                 </div>
 
+                {/* Settings Button */}
+                <button 
+                    onClick={(e) => { e.stopPropagation(); setGameMenuOpen(true); }}
+                    className="p-1.5 rounded-sm hover:bg-white/10 text-white/40 hover:text-wuxia-gold transition-colors mr-1"
+                    title="遊戲設置"
+                >
+                    <Settings size={14} />
+                </button>
+
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-wuxia-gold/5 border border-wuxia-gold/10 text-wuxia-gold/40 group-hover:text-wuxia-gold/70 group-hover:border-wuxia-gold/30 transition-all">
                     {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 </span>
             </div>
+
+            {/* Main Quest Bar (Always Visible if active) */}
+            {worldState.mainQuest && (
+                <div className="px-4 pb-3 flex items-center gap-3 text-xs border-t border-wuxia-gold/5 pt-2 mx-1 animate-fade-in">
+                    <div className="flex items-center gap-1.5 shrink-0 text-wuxia-gold">
+                        <Scroll size={14} />
+                        <span className="font-serif tracking-wide font-bold">當前主線</span>
+                    </div>
+                    
+                    <span className="text-white/80 font-serif flex-1 truncate border-l border-white/10 pl-3">
+                        {worldState.mainQuest}
+                    </span>
+                    
+                    <div className="flex items-center gap-2 shrink-0" title={`劇情進度: ${Math.round(worldState.plotProgress)}%`}>
+                        <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-gradient-to-r from-wuxia-gold/40 to-wuxia-gold transition-all duration-1000 ease-out"
+                                style={{ width: `${Math.min(100, Math.max(0, worldState.plotProgress))}%` }}
+                            />
+                        </div>
+                        <span className="text-[10px] text-wuxia-gold/50 font-mono tabular-nums">
+                            {Math.round(worldState.plotProgress)}%
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {/* Expanded Details */}
             {isExpanded && (
