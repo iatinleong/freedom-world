@@ -61,138 +61,129 @@ export function ActionPanel() {
                 const { player } = currentState;
 
                 try {
-                    const systemPrompt = `
-你是《自由江湖》的頂級說書人，現在要為玩家生成角色背景故事，以及金庸武俠小說風格的「第一章開篇場景」。
-兩者必須分開：背景故事是角色的前史摘要（供主線劇情規劃使用），開篇場景是玩家實際讀到的第一幕。
+                    // ═══════════════════════════════════════════
+                    // STEP 1：生成背景故事
+                    // ═══════════════════════════════════════════
+                    const backstoryPrompt = `
+你是《自由江湖》的說書人，為玩家生成金庸武俠風格的角色背景故事。
 
 角色資料：
 ・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
 ・膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
 
-━━━━━━━━━━━━━━━━━━━━━━
-【一、背景故事 backstory（80-120字）】
-・第三人稱，純文字摘要，不分段
-・包含：出身門派/家世、重要過去事件、核心執念、與當前江湖時局的關聯
-・根骨高→體魄天生異稟但身世坎坷；悟性高→資質驚人卻懷才不遇；福緣高→奇遇不斷卻禍福難料
-・這段文字會持續作為主線規劃的依據，必須凝練準確
-・門派必須從以下金庸武俠正典中選擇（或選「江湖散人」）：
-  武當、少林、丐幫、峨嵋、華山、崆峒、明教、桃花島、靈鷲宮、大理段氏、姑蘇慕容氏、神龍教、雪山派
-
-━━━━━━━━━━━━━━━━━━━━━━
-【二、第一章開篇場景 narrative（280-350字）】
-以下三段必須連貫成一氣，不加標題、不分段：
-
-① 引入危機（120-150字）
-   ・在這一刻，一件具體的事把角色捲進了故事的漩渦
-   ・要有緊張感：時間緊迫、有人追殺、發現秘密、目睹暗殺、意外捲入恩怨
-   ・必須明確：誰、在哪、做了什麼——禁止模糊詞（似乎/彷彿/好像），直接描述
-
-② 當下處境（80-100字）
-   ・主角現在的位置、時辰、天氣、身邊有什麼人或威脅
-   ・感官細節：聲音、氣味、光線
-
-③ 懸念收尾（60-80字）
-   ・以一個玩家必須立刻做決定的時刻作結，第二人稱「你」
-
-【敘事規則】
-・第三人稱旁白用於開場敘述，遇到主角視角切換為第二人稱「你」
-・語感：金庸武俠的白話文筆法，乾淨俐落，無廢字
+【背景故事要求（200-300字）】
+・第三人稱旁白，金庸武俠白話文筆法，一氣呵成
+・涵蓋：出身家世、師承門派、重要過去事件（失去什麼/得到什麼）、核心執念、與當前江湖時局的關聯
+・根骨高→體魄天賦異稟；悟性高→資質驚人；福緣高→奇遇不斷；魅力高→人緣極廣
+・門派必須從金庸正典中選：武當、少林、丐幫、峨嵋、華山、崆峒、明教、桃花島、靈鷲宮、大理段氏、姑蘇慕容氏、神龍教、雪山派（或「江湖散人」）
 ・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
 
-只回傳 JSON，格式如下：
+只回傳 JSON：
 {
-  "backstory": "角色背景摘要（80-120字，第三人稱，凝練）",
-  "narrative": "第一章開篇場景（280-350字，含危機/處境/懸念）",
-  "options": [
-    { "action": "具體行動描述（10-25字，同時作為按鈕文字）" },
-    { "action": "具體行動描述" },
-    { "action": "具體行動描述" },
-    { "action": "具體行動描述" }
-  ],
+  "backstory": "200-300字背景故事",
   "relations": {
-    "sect": "門派名稱（必須是金庸正典門派或江湖散人）",
-    "master": "師父名稱（若無師承填「無」）"
+    "sect": "門派（金庸正典或江湖散人）",
+    "master": "師父名（無則填「無」）"
   },
   "stateUpdate": {
-    "location": "具體地點名稱",
-    "weather": "天氣描述",
-    "newTags": ["地點特徵標籤", "天氣標籤"],
-    "mainQuest": "根據開場危機，為玩家設定第一個主線目標（20字以內，具體可執行）",
-    "hpChange": 0,
-    "qiChange": 0,
-    "newItems": [
-      { "id": "唯一id", "name": "物品名稱", "description": "物品描述", "type": "weapon|armor|consumable|material|book", "count": 1 }
-    ],
-    "newSkills": [
-      { "name": "功法名稱", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }
-    ]
+    "newItems": [{ "id": "唯一id", "name": "物品名", "description": "描述", "type": "weapon|armor|consumable|material|book", "count": 1 }],
+    "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }]
   }
 }
 注意：newItems/newSkills 僅限背景故事中明確擁有的起始物品與武功，若無則回傳空陣列 []。
                     `.trim();
 
-                    const { text: responseJson, usage: usageData } = await generateGameResponse(systemPrompt, "開始遊戲");
+                    const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成背景故事");
+                    if (backstoryUsage) addUsage(backstoryUsage.promptTokenCount || 0, backstoryUsage.candidatesTokenCount || 0);
 
-                    if (usageData) {
-                        addUsage(usageData.promptTokenCount || 0, usageData.candidatesTokenCount || 0);
-                    }
+                    const backstoryResponse = parseJSON(backstoryJson);
+                    const backstory: string = backstoryResponse.backstory || '';
 
-                    const response = parseJSON(responseJson);
-
-                    addLog({ role: 'assistant', content: response.narrative });
-
-                    // backstory（角色前史摘要）存入 summary，作為整場遊戲的背景基底
-                    // narrative（開篇場景）只給玩家看，不進 summary，避免污染主線規劃的背景資訊
-                    const backstory = response.backstory || response.narrative;
+                    // 顯示背景故事給玩家
+                    addLog({ role: 'assistant', content: backstory });
+                    // 存入 summary 作為整場遊戲的背景基底
                     updateSummary(backstory);
 
-                    if (response.stateUpdate) {
-                        // 初始階段不接受屬性變更，以免覆蓋創角數值
-                        if (response.stateUpdate.location) {
-                            updateWorld({ location: response.stateUpdate.location });
-                        }
-                        if (response.stateUpdate.weather) {
-                            updateWorld({ weather: response.stateUpdate.weather });
-                        }
-                        if (response.stateUpdate.newTags) {
-                            updateWorld({ tags: response.stateUpdate.newTags });
-                        }
-                        if (response.stateUpdate.mainQuest) {
-                            updateWorldState({ mainQuest: response.stateUpdate.mainQuest });
-                        }
-                        if (response.stateUpdate.newItems) {
-                            response.stateUpdate.newItems
-                                .filter((item: any) => item.count > 0)
-                                .forEach((item: any) => {
-                                    addItem(item);
-                                });
-                        }
-                        if (response.stateUpdate.newSkills) {
-                            response.stateUpdate.newSkills.forEach((skill: any) => {
-                                learnSkill(skill);
-                            });
-                        }
-                    }
-
-                    // Update relations (sect/master) from backstory, using Jin Yong sects
-                    if (response.relations) {
+                    // 處理門派/師承
+                    if (backstoryResponse.relations) {
                         updateRelations({
-                            sect: response.relations.sect || '江湖散人',
-                            master: response.relations.master || '無',
+                            sect: backstoryResponse.relations.sect || '江湖散人',
+                            master: backstoryResponse.relations.master || '無',
                         });
                     }
-
-                    if (response.options) {
-                        setOptions(normalizeOptions(response.options));
+                    // 處理初始物品
+                    if (backstoryResponse.stateUpdate?.newItems) {
+                        backstoryResponse.stateUpdate.newItems
+                            .filter((item: any) => item.count > 0)
+                            .forEach((item: any) => addItem(item));
+                    }
+                    // 處理初始武功
+                    if (backstoryResponse.stateUpdate?.newSkills) {
+                        backstoryResponse.stateUpdate.newSkills.forEach((skill: any) => learnSkill(skill));
                     }
 
-                    // Generate quest arc in background (fire-and-forget)
-                    // 傳入 backstory 作為 previousSummary，讓主線弧線基於角色前史規劃，而非場景描述
-                    generateQuestArc(useGameStore.getState(), backstory).then(arc => {
-                        if (arc && arc.length > 0) {
-                            updateWorldState({ questArc: arc, questArcIndex: 0, mainQuest: arc[0] });
-                        }
-                    });
+                    // ═══════════════════════════════════════════
+                    // STEP 2：生成主線劇情弧（await，讓開篇能參考第一章目標）
+                    // ═══════════════════════════════════════════
+                    const arc = await generateQuestArc(useGameStore.getState(), backstory);
+                    const firstQuest = arc?.[0] || '';
+                    if (arc && arc.length > 0) {
+                        updateWorldState({ questArc: arc, questArcIndex: 0, mainQuest: arc[0] });
+                    }
+
+                    // ═══════════════════════════════════════════
+                    // STEP 3：生成開篇場景（參考背景故事 + 第一章目標）
+                    // ═══════════════════════════════════════════
+                    const openingPrompt = `
+你是《自由江湖》的說書人，根據角色背景與第一章目標，生成玩家進入遊戲的第一幕場景。
+
+角色背景：
+${backstory}
+
+第一章目標：${firstQuest || '開始江湖之旅'}
+
+【開篇場景要求（80-150字）】
+・第二人稱「你」，帶入感強
+・呈現角色當下所在的具體場景：地點、時辰、天氣、感官細節（聲音/氣味/光線）
+・開篇氛圍多元，不必然是緊張打鬥——可以是清晨趕路、市集偶遇、寺廟靜修、客棧等待，自然引出第一章目標
+・結尾給玩家留下一個明確的行動起點，引出選項
+・語感：金庸武俠白話文，乾淨俐落，無廢字
+・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
+
+只回傳 JSON：
+{
+  "narrative": "80-150字開篇場景",
+  "options": [
+    { "action": "具體行動（10-20字）" },
+    { "action": "具體行動" },
+    { "action": "具體行動" },
+    { "action": "具體行動" }
+  ],
+  "stateUpdate": {
+    "location": "具體地點名稱",
+    "weather": "天氣",
+    "newTags": ["地點標籤", "天氣標籤"]
+  }
+}
+                    `.trim();
+
+                    const { text: openingJson, usage: openingUsage } = await generateGameResponse(openingPrompt, "生成開篇場景");
+                    if (openingUsage) addUsage(openingUsage.promptTokenCount || 0, openingUsage.candidatesTokenCount || 0);
+
+                    const openingResponse = parseJSON(openingJson);
+
+                    // 顯示開篇場景
+                    addLog({ role: 'assistant', content: openingResponse.narrative });
+
+                    if (openingResponse.stateUpdate) {
+                        if (openingResponse.stateUpdate.location) updateWorld({ location: openingResponse.stateUpdate.location });
+                        if (openingResponse.stateUpdate.weather) updateWorld({ weather: openingResponse.stateUpdate.weather });
+                        if (openingResponse.stateUpdate.newTags) updateWorld({ tags: openingResponse.stateUpdate.newTags });
+                    }
+
+                    if (openingResponse.options) {
+                        setOptions(normalizeOptions(openingResponse.options));
+                    }
 
                 } catch (error: any) {
                     console.error("Init failed", error);
