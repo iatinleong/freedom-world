@@ -14,19 +14,19 @@ function parseJSON(text: string) {
     return JSON.parse(cleaned);
 }
 
-// Normalize options to ensure each item has an `action` string field
+// Normalize options to ensure each item conforms to the Option interface
 // Handles: [{action:"..."}, {label:"..."}, {text:"..."}, "...", null]
-function normalizeOptions(raw: any[]): Array<{ action: string }> {
+function normalizeOptions(raw: any[]): import('./lib/engine/types').Option[] {
     if (!Array.isArray(raw)) return [];
     return raw
         .filter(opt => opt != null)
-        .map(opt => {
-            if (typeof opt === 'string') return { action: opt };
+        .map((opt, idx) => {
+            if (typeof opt === 'string') return { id: String(idx), label: opt, action: opt };
             if (typeof opt === 'object') {
                 const action = opt.action || opt.label || opt.text || '';
-                return { ...opt, action };
+                return { id: opt.id || String(idx), label: opt.label || action, action };
             }
-            return { action: String(opt) };
+            return { id: String(idx), label: String(opt), action: String(opt) };
         })
         .filter(opt => opt.action.trim());
 }
