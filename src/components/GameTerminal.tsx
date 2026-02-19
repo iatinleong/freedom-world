@@ -25,7 +25,7 @@ export function GameTerminal() {
     // Calculate quest progress based on assistant turn count
     const assistantCount = narrative.filter(l => l.role === 'assistant').length;
     const questStartTurn = worldState?.questStartTurn ?? 0;
-    const QUEST_TURNS = 15;
+    const QUEST_TURNS = 6;
     const turnsIntoQuest = Math.max(0, assistantCount - questStartTurn);
     const questProgress = Math.min(100, Math.round((turnsIntoQuest / QUEST_TURNS) * 100));
 

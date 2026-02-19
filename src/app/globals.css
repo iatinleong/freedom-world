@@ -423,23 +423,6 @@ body::after {
   padding: 0 1rem;
 }
 
-.ancient-title::before,
-.ancient-title::after {
-  content: '※';
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(212, 175, 55, 0.5);
-  animation: pulse-gold 2s infinite;
-}
-
-.ancient-title::before {
-  left: -0.5rem;
-}
-
-.ancient-title::after {
-  right: -0.5rem;
-}
 
 /* 武學選項卡片 */
 .wuxia-card {

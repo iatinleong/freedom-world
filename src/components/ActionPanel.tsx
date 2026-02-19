@@ -254,9 +254,9 @@ export function ActionPanel() {
             }
 
             // --- Quest Generation Logic ---
-            // Every 15 assistant turns, generate next main quest in background
+            // Every 6 assistant turns, generate next main quest in background
             const assistantCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
-            if (assistantCount > 0 && assistantCount % 15 === 0) {
+            if (assistantCount > 0 && assistantCount % 6 === 0) {
                 generateNextQuest(useGameStore.getState()).then(quest => {
                     if (quest) {
                         const ws = getGameState().worldState;
