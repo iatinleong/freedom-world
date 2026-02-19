@@ -9,7 +9,7 @@ import { generateGameResponse, generateStorySummary } from '@/lib/engine/gemini'
 import { cn } from '@/lib/utils';
 
 export function ActionPanel() {
-    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle, addNotification } = useGameStore();
+    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
     const [playTime, setPlayTime] = useState(0);
@@ -139,6 +139,31 @@ export function ActionPanel() {
             addLog({ role: 'assistant', content: response.narrative });
 
             if (response.stateUpdate) {
+                // --- SMART GM: PLOT & COMBAT PACING (client-side detection) ---
+                const currentState = useGameStore.getState();
+                const ws = currentState.worldState;
+
+                const combatKeywords = ['攻','斬','打','殺','刀','劍','拳','踢','躲','擋','逃','衝','刺','砍','格','推','摔','踹'];
+                const isCombatAction = combatKeywords.some(k => actionText.includes(k));
+                const hadHpChange = !!(response.stateUpdate.hpChange);
+                // A turn counts as combat if player used combat keywords, or was already in combat and took damage
+                const isCombatTurn = isCombatAction || (ws.currentCombatTurns > 0 && hadHpChange);
+
+                const wsUpdate: Partial<typeof ws> = {};
+                if (isCombatTurn) {
+                    wsUpdate.currentCombatTurns = ws.currentCombatTurns + 1;
+                    wsUpdate.pacingCounter = 0; // reset pacing during combat
+                } else {
+                    wsUpdate.currentCombatTurns = 0; // combat ended or never started
+                    wsUpdate.pacingCounter = Math.min(ws.pacingCounter + 1, 10);
+                }
+                if (response.stateUpdate.mainQuest) wsUpdate.mainQuest = response.stateUpdate.mainQuest;
+                if (response.stateUpdate.plotProgress) {
+                    wsUpdate.plotProgress = Math.min(100, ws.plotProgress + response.stateUpdate.plotProgress);
+                }
+                updateWorldState(wsUpdate);
+
+                // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
                     updatePlayerStats({ hp: Math.max(0, state.player.stats.hp + response.stateUpdate.hpChange) });
                 }

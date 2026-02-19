@@ -22,6 +22,7 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
 
     const player = useGameStore((state) => state.player);
     const world = useGameStore((state) => state.world);
+    const worldState = useGameStore((state) => state.worldState);
     const system = useGameStore((state) => state.system);
     const narrative = useGameStore((state) => state.narrative);
     const options = useGameStore((state) => state.options);
@@ -34,11 +35,11 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
     const sessionId = useGameStore((state) => state.sessionId);
 
     const gameState = useMemo(() => ({
-        player, world, system, narrative, options, summary,
+        player, world, worldState, system, narrative, options, summary,
         isGameStarted, isCharacterPanelOpen, notifications,
         isProcessing: false,
         usage: { totalCost: 0, totalInputTokens: 0, totalOutputTokens: 0 },
-    }), [player, world, system, narrative, options, summary, isGameStarted, isCharacterPanelOpen, notifications]);
+    }), [player, world, worldState, system, narrative, options, summary, isGameStarted, isCharacterPanelOpen, notifications]);
 
     const { saves, isLoading, fetchSaves, saveGame, loadGame, deleteSave } = useSaveGameStore();
 

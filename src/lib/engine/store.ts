@@ -19,6 +19,7 @@ interface GameStore extends GameState {
     learnSkill: (skill: import('./types').MartialArt) => void;
     addTitle: (title: string) => void;
     equipTitle: (title: string) => void;
+    updateWorldState: (worldState: Partial<GameState['worldState']>) => void;
     loadGameState: (state: GameState, sessionId?: string) => void;
     getGameState: () => GameState;
     setPlayerProfile: (name: string, gender: 'male' | 'female', attributes: import('./types').PlayerStats['attributes']) => void;
@@ -129,6 +130,12 @@ const INITIAL_STATE: GameState = {
         },
     ],
     summary: '',
+    worldState: {
+        mainQuest: '初入江湖，尋找自己的身世線索',
+        plotProgress: 0,
+        pacingCounter: 0,
+        currentCombatTurns: 0,
+    },
     options: [],
     isProcessing: false,
     isGameStarted: false,
@@ -210,6 +217,11 @@ export const useGameStore = create<GameStore>()(
             updateWorld: (world) =>
                 set((state) => ({
                     world: { ...state.world, ...world },
+                })),
+
+            updateWorldState: (worldState) =>
+                set((state) => ({
+                    worldState: { ...state.worldState, ...worldState },
                 })),
 
             setOptions: (options) => set({ options }),
@@ -504,9 +516,8 @@ export const useGameStore = create<GameStore>()(
 
             getGameState: () => {
                 const state = get();
-                // Extract only the GameState properties to save
-                const { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications } = state;
-                return { player, world, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications };
+                const { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications } = state;
+                return { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, usage, notifications };
             }
         }),
         {

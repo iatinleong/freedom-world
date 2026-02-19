@@ -4,8 +4,31 @@ import { MARTIAL_ART_LEVELS, MARTIAL_ART_RANKS } from './constants';
 // 短期記憶保留回合數（8條 = 約4輪對話，戰鬥需要更多上下文）
 const MAX_HISTORY_TURNS = 8;
 
+function getDirectorDirectives(state: GameState): string {
+  const { worldState } = state;
+  if (!worldState) return '';
+  const directives: string[] = [];
+
+  if (worldState.mainQuest) {
+    directives.push(`【主線目標】${worldState.mainQuest}——請讓敘事隱約或直接地朝此目標推進。`);
+  }
+
+  if (worldState.currentCombatTurns >= 4) {
+    directives.push(`【最高優先令】戰鬥已持續 ${worldState.currentCombatTurns} 回合，嚴重拖沓。本回合必須強制結算：敵人逃跑 / 暴斃 / 第三方介入 / 雙方力竭休戰，擇一執行。禁止繼續普通攻防。`);
+  } else if (worldState.currentCombatTurns >= 2) {
+    directives.push(`【戰鬥進行中】第 ${worldState.currentCombatTurns} 回合，戰局應出現明顯轉折或傷亡，為結束做鋪墊。`);
+  }
+
+  if (worldState.currentCombatTurns === 0 && worldState.pacingCounter >= 5) {
+    directives.push(`【節奏警示】劇情已平靜 ${worldState.pacingCounter} 回合，請立即引入突發事件（NPC主動搭話 / 發現異常線索 / 突發危機）打破僵局。`);
+  }
+
+  return directives.join('\n');
+}
+
 export function buildSystemPrompt(state: GameState): string {
   const { player, world, narrative, summary } = state;
+  const directorDirectives = getDirectorDirectives(state);
 
   const levelsStr = MARTIAL_ART_LEVELS.map(l => `${l.name}(x${l.power})`).join('・');
   const ranksStr = MARTIAL_ART_RANKS.map(r => `${r.name}(x${r.power})`).join('・');
@@ -22,7 +45,7 @@ export function buildSystemPrompt(state: GameState): string {
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
   return `你是《自由江湖》的說書人兼遊戲主持人，掌管這個殘酷而真實的武俠世界。
-
+${directorDirectives ? `\n━━ 導演指令（最高優先，必須遵守）━━\n${directorDirectives}\n` : ''}
 ━━ 前情提要 ━━
 ${summary || '（遊戲剛開始）'}
 
