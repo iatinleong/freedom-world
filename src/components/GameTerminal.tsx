@@ -101,17 +101,55 @@ export function GameTerminal() {
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
+                            {/* Progress Bar — always on top */}
+                            <div className="space-y-1.5">
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className="text-white/40 font-mono">階段進度</span>
+                                    <span className="text-wuxia-gold/60 font-mono tabular-nums">
+                                        {turnsIntoQuest} / {QUEST_TURNS} 回合（{questProgress}%）
+                                    </span>
+                                </div>
+                                <div className="h-2 bg-black/60 rounded-full overflow-hidden border border-wuxia-gold/10">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-wuxia-gold/40 via-wuxia-gold to-amber-300 transition-all duration-700 ease-out shadow-[0_0_8px_rgba(212,175,55,0.4)]"
+                                        style={{ width: `${questProgress}%` }}
+                                    />
+                                </div>
+                                <div className="flex justify-between text-[10px] text-white/20 font-mono">
+                                    <span>開始</span>
+                                    <span>下一階段</span>
+                                </div>
+                            </div>
+
+                            {/* Current Stage */}
+                            {worldState?.mainQuest ? (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
+                                        <span className="text-xs text-wuxia-gold/80 font-serif tracking-widest">當前目標</span>
+                                        <div className="h-px flex-1 bg-gradient-to-r from-wuxia-gold/20 to-transparent"></div>
+                                    </div>
+                                    <div className="px-4 py-3 rounded-sm bg-wuxia-gold/5 border border-wuxia-gold/20">
+                                        <p className="text-base font-serif text-wuxia-gold leading-relaxed">{worldState.mainQuest}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center text-white/30 italic py-4">
+                                    <div className="text-3xl mb-2 opacity-20">📜</div>
+                                    尚未確立主線目標...
+                                </div>
+                            )}
+
                             {/* Completed Stages */}
                             {questHistory.length > 0 && (
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex items-center gap-2 mb-1">
                                         <span className="w-1 h-3 bg-white/20 rounded-sm"></span>
                                         <span className="text-xs text-white/40 font-serif tracking-widest">往事記錄</span>
                                         <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
                                     </div>
                                     {questHistory.map((q, i) => (
                                         <div key={i} className="rounded-sm border border-white/5 overflow-hidden">
-                                            {/* Stage header — clickable to expand summary */}
                                             <button
                                                 className="w-full flex items-start gap-3 px-3 py-2.5 bg-white/5 hover:bg-white/8 transition-colors text-left"
                                                 onClick={() => setExpandedStage(expandedStage === i ? null : i)}
@@ -124,7 +162,6 @@ export function GameTerminal() {
                                                         : <ChevronDown className="w-3.5 h-3.5 text-white/20 shrink-0 mt-0.5" />
                                                 )}
                                             </button>
-                                            {/* Stage summary — collapsible */}
                                             {expandedStage === i && questStageSummaries[i] && (
                                                 <div className="px-4 pb-3 pt-2 bg-black/30 border-t border-white/5">
                                                     <p className="text-xs text-white/50 font-serif leading-relaxed italic">
@@ -134,46 +171,6 @@ export function GameTerminal() {
                                             )}
                                         </div>
                                     ))}
-                                </div>
-                            )}
-
-                            {/* Current Stage */}
-                            {worldState?.mainQuest ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                        <span className="text-xs text-wuxia-gold/80 font-serif tracking-widest">當前目標</span>
-                                        <div className="h-px flex-1 bg-gradient-to-r from-wuxia-gold/20 to-transparent"></div>
-                                    </div>
-
-                                    <div className="px-4 py-3 rounded-sm bg-wuxia-gold/5 border border-wuxia-gold/20">
-                                        <p className="text-base font-serif text-wuxia-gold leading-relaxed">{worldState.mainQuest}</p>
-                                    </div>
-
-                                    {/* Progress */}
-                                    <div className="space-y-1.5">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="text-white/40 font-mono">階段進度</span>
-                                            <span className="text-wuxia-gold/60 font-mono tabular-nums">
-                                                {turnsIntoQuest} / {QUEST_TURNS} 回合（{questProgress}%）
-                                            </span>
-                                        </div>
-                                        <div className="h-2 bg-black/60 rounded-full overflow-hidden border border-wuxia-gold/10">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-wuxia-gold/40 via-wuxia-gold to-amber-300 transition-all duration-700 ease-out shadow-[0_0_8px_rgba(212,175,55,0.4)]"
-                                                style={{ width: `${questProgress}%` }}
-                                            />
-                                        </div>
-                                        <div className="flex justify-between text-[10px] text-white/20 font-mono">
-                                            <span>開始</span>
-                                            <span>下一階段</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center text-white/30 italic py-8">
-                                    <div className="text-3xl mb-3 opacity-20">📜</div>
-                                    尚未確立主線目標...
                                 </div>
                             )}
                         </div>
