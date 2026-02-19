@@ -85,6 +85,47 @@ export async function generateNextQuest(state: GameState): Promise<string | null
     }
 }
 
+export async function generateStageSummary(state: GameState): Promise<string | null> {
+    const { provider, modelName } = getConfig();
+    const { player, narrative, worldState } = state;
+
+    // Build ordered list of assistant turns with their index
+    const assistantLogs = narrative.filter(l => l.role === 'assistant');
+    const questStartTurn = worldState?.questStartTurn ?? 0;
+
+    // Take only the turns that belong to the current stage (from questStartTurn onward)
+    const stageLogs = assistantLogs
+        .slice(questStartTurn)  // questStartTurn is the assistant-count index where this stage began
+        .map(l => l.content)
+        .join('\n\n');
+
+    const prompt = `你是武俠史書的筆錄者。請將以下「${player.name}」的冒險記錄，濃縮成2-3句話的階段摘要。
+
+主線目標：${worldState?.mainQuest || '未知'}
+近期事件：
+${stageLogs || '（暫無記錄）'}
+
+要求：
+・第三人稱，武俠筆法
+・保留關鍵人物、地點、重要轉折
+・50字以內，言簡意賅
+
+只回傳純文字，不要JSON。`.trim();
+
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.text?.trim() || null;
+    } catch {
+        return null;
+    }
+}
+
 export async function generateStorySummary(previousSummary: string, newContent: string) {
     const { provider, modelName } = getConfig();
 

@@ -5,7 +5,7 @@ import { useGameStore } from '@/lib/engine/store';
 import { useUsageStore } from '@/lib/engine/usageStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/engine/prompt';
-import { generateGameResponse, generateStorySummary, generateNextQuest } from '@/lib/engine/gemini';
+import { generateGameResponse, generateNextQuest, generateStageSummary } from '@/lib/engine/gemini';
 import { cn } from '@/lib/utils';
 
 export function ActionPanel() {
@@ -253,46 +253,34 @@ export function ActionPanel() {
                 setOptions(response.options);
             }
 
-            // --- Quest Generation Logic ---
-            // Every 6 assistant turns, generate next main quest in background
+            // --- Unified Quest + Stage Summary Logic ---
+            // Every 6 assistant turns: generate next quest stage AND a summary of the current stage
             const assistantCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
             if (assistantCount > 0 && assistantCount % 6 === 0) {
-                generateNextQuest(useGameStore.getState()).then(quest => {
-                    if (quest) {
-                        const ws = getGameState().worldState;
-                        updateWorldState({
-                            mainQuest: quest,
-                            questHistory: ws.mainQuest ? [...(ws.questHistory ?? []), ws.mainQuest] : (ws.questHistory ?? []),
-                            questStartTurn: assistantCount,
-                        });
-                        addNotification({ type: 'achievement', title: '主線更新', description: quest, icon: '📜' });
+                const currentState = useGameStore.getState();
+                Promise.all([
+                    generateNextQuest(currentState),
+                    generateStageSummary(currentState),
+                ]).then(([quest, stageSummary]) => {
+                    const ws = getGameState().worldState;
+                    const hasCurrentQuest = !!ws.mainQuest;
+                    updateWorldState({
+                        mainQuest: quest ?? ws.mainQuest,
+                        questHistory: hasCurrentQuest
+                            ? [...(ws.questHistory ?? []), ws.mainQuest]
+                            : (ws.questHistory ?? []),
+                        questStageSummaries: hasCurrentQuest
+                            ? [...(ws.questStageSummaries ?? []), stageSummary ?? '']
+                            : (ws.questStageSummaries ?? []),
+                        questStartTurn: assistantCount,
+                    });
+                    // Also update rolling summary for AI context
+                    if (stageSummary) {
+                        const prevSummary = useGameStore.getState().summary;
+                        updateSummary(prevSummary ? `${prevSummary}\n\n${stageSummary}` : stageSummary);
                     }
-                });
-            }
-
-            // --- Rolling Summary Logic ---
-            // Check if narrative length is a multiple of 20 and > 0
-            if (narrative.length > 0 && narrative.length % 20 === 0) {
-                // Get the last 20 logs
-                const recentLogs = narrative.slice(-20).map(log =>
-                    `${log.role === 'user' ? '玩家' : 'AI'}: ${log.content}`
-                ).join('\n');
-
-                // Trigger summary generation in background (fire and forget)
-                generateStorySummary(summary, recentLogs).then(result => {
-                    if (result && result.text) {
-                        try {
-                            const json = JSON.parse(result.text);
-                            if (json.summary) {
-                                updateSummary(json.summary);
-                                console.log("Story summary updated:", json.summary);
-                                if (result.usage) {
-                                    addUsage(result.usage.promptTokenCount || 0, result.usage.candidatesTokenCount || 0);
-                                }
-                            }
-                        } catch (e) {
-                            console.error("Failed to parse summary JSON", e);
-                        }
+                    if (quest) {
+                        addNotification({ type: 'achievement', title: '主線推進', description: quest, icon: '📜' });
                     }
                 });
             }

@@ -135,6 +135,7 @@ const INITIAL_STATE: GameState = {
     worldState: {
         mainQuest: '初入江湖，尋找自己的身世線索',
         questHistory: [],
+        questStageSummaries: [],
         questStartTurn: 0,
         plotProgress: 0,
         pacingCounter: 0,
@@ -565,10 +566,17 @@ export const useGameStore = create<GameStore>()(
                     unlockedTitles: persistedState?.player?.unlockedTitles || INITIAL_STATE.player.unlockedTitles,
                 };
 
+                // Deep merge worldState to ensure new fields exist
+                const mergedWorldState = {
+                    ...INITIAL_STATE.worldState,
+                    ...(persistedState?.worldState || {}),
+                };
+
                 return {
                     ...currentState,
                     ...persistedState,
                     player: mergedPlayer,
+                    worldState: mergedWorldState,
                     isCharacterPanelOpen: false, // Force panel closed on load
                     isProcessing: false, // Force processing false on load
                 };
