@@ -140,6 +140,11 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
     },
 
     deleteSave: async (id) => {
+        const slot = get().saves.find(s => s.id === id);
+        // Auto-saves store narrative separately in narrative_logs — clean up too
+        if (slot?.isAutoSave && slot.sessionId) {
+            await supabase.from('narrative_logs').delete().eq('session_id', slot.sessionId);
+        }
         await supabase.from('game_saves').delete().eq('id', id);
         set(state => ({ saves: state.saves.filter(s => s.id !== id) }));
     },
