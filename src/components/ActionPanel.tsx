@@ -281,7 +281,13 @@ export function ActionPanel() {
                     const ws = getGameState().worldState;
                     const arc = ws.questArc ?? [];
                     const currentIndex = ws.questArcIndex ?? 0;
-                    const nextIndex = currentIndex + 1;
+                    const usedQuests = new Set([...(ws.questHistory ?? []), ws.mainQuest ?? ''].filter(Boolean));
+
+                    // Skip any arc entries already used (dedup protection)
+                    let nextIndex = currentIndex + 1;
+                    while (nextIndex < arc.length && usedQuests.has(arc[nextIndex])) {
+                        nextIndex++;
+                    }
                     const nextQuest = arc[nextIndex] ?? null;
 
                     updateWorldState({

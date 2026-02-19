@@ -99,6 +99,14 @@ export async function generateQuestArc(
     const lastStages = existingArc.slice(-3).join(' → ');
     const context = previousSummary || summary || '（遊戲剛開始）';
 
+    // Build a deduplicated list of ALL quests that must not be repeated
+    const usedQuests = [
+        ...(worldState?.questHistory ?? []),
+        ...(worldState?.mainQuest ? [worldState.mainQuest] : []),
+        ...existingArc,
+    ].filter(Boolean);
+    const usedStr = usedQuests.length > 0 ? usedQuests.join('、') : null;
+
     const prompt = `你是武俠小說的主編，正在為《自由江湖》設計一段完整的冒險弧線（10個章節）。
 
 玩家資訊：
@@ -106,15 +114,15 @@ export async function generateQuestArc(
 ・地點：${world.location}
 ・武學：${skillStr}
 ・當前摘要：${context}
-${lastStages ? `・前幾章走向：${lastStages}（請接續，不要重複）` : ''}
+${lastStages ? `・前幾章走向：${lastStages}（請接續推進）` : ''}
+${usedStr ? `・以下目標已出現，嚴禁重複或相似：【${usedStr}】` : ''}
 
 要求：
 ・生成10個連續的主線目標，如武俠小說的10個章節任務
-・每個目標20字以內，具體可執行
-・章節間有邏輯推進：開端→發展→危機→轉折→結局
+・每個目標20字以內，具體可執行，必須與上面禁止清單明顯不同
+・章節間有邏輯推進：發展→危機→轉折→成長→新威脅
 ・有起伏：平靜→威脅→化解→新危機→成長
 ・與玩家的地點、武學、背景自然銜接
-・禁止重複之前已出現的目標
 
 只回傳 JSON：{"arc": ["目標1", "目標2", "目標3", "目標4", "目標5", "目標6", "目標7", "目標8", "目標9", "目標10"]}`.trim();
 
