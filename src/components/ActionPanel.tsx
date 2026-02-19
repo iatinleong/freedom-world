@@ -8,6 +8,12 @@ import { buildSystemPrompt, buildUserPrompt } from '@/lib/engine/prompt';
 import { generateGameResponse, generateNextQuest, generateStageSummary } from '@/lib/engine/gemini';
 import { cn } from '@/lib/utils';
 
+// Strip markdown code fences that some models wrap around JSON
+function parseJSON(text: string) {
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(cleaned);
+}
+
 export function ActionPanel() {
     const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
@@ -47,10 +53,8 @@ export function ActionPanel() {
 
 開場要求：
 1. 隨機選擇地點、天氣、時辰。
-2. 場景必須立刻有強烈的衝突或張力。
-3. 劇情要高度體現角色屬性（悟性高→觀察敏銳，魅力高→被搭訕，福緣高→撿到遺落之物）。
-4. 敘事準則：禁止模糊詞（似乎、可能、彷彿），直接描述發生了什麼。
-5. 數值標竿：輕微傷害(-5~15)、顯著傷害(-20~40)、重創(-50以上)。
+2. 劇情要像金庸武俠小說的開頭，但不能抄襲版權作品。
+3. 敘事準則：禁止模糊詞（似乎、可能、彷彿），直接描述發生了什麼。
 
 只回傳 JSON，格式如下：
 {
@@ -78,7 +82,7 @@ export function ActionPanel() {
                         addUsage(usageData.promptTokenCount || 0, usageData.candidatesTokenCount || 0);
                     }
 
-                    const response = JSON.parse(responseJson);
+                    const response = parseJSON(responseJson);
 
                     addLog({ role: 'assistant', content: response.narrative });
 
@@ -120,6 +124,7 @@ export function ActionPanel() {
     const handleAction = async (actionText: string, displayText?: string) => {
         if (!actionText.trim() || isProcessing) return;
 
+        const prevOptions = useGameStore.getState().options; // Save for error recovery
         setProcessing(true);
         addLog({ role: 'user', content: displayText || actionText });
         setOptions([]); // Clear options while processing
@@ -135,7 +140,7 @@ export function ActionPanel() {
                 addUsage(usageData.promptTokenCount || 0, usageData.candidatesTokenCount || 0);
             }
 
-            const response = JSON.parse(responseJson);
+            const response = parseJSON(responseJson);
 
             addLog({ role: 'assistant', content: response.narrative });
 
@@ -285,9 +290,11 @@ export function ActionPanel() {
                 });
             }
 
-        } catch (error) {
-            console.error(error);
-            addLog({ role: 'system', content: "The spirits are silent... (API Error)" });
+        } catch (error: any) {
+            console.error('handleAction error:', error);
+            const msg = error.message || 'AI 請求失敗，請稍後再試';
+            addNotification({ type: 'system', title: '請求失敗', description: msg, icon: '⚠️' });
+            setOptions(prevOptions); // Restore options so player can retry
         } finally {
             setProcessing(false);
 

@@ -110,7 +110,7 @@ ${stageLogs || '（暫無記錄）'}
 ・保留關鍵人物、地點、重要轉折
 ・50字以內，言簡意賅
 
-只回傳純文字，不要JSON。`.trim();
+只回傳 JSON：{"summary": "摘要內容"}`.trim();
 
     try {
         const response = await fetch('/api/gemini', {
@@ -120,7 +120,8 @@ ${stageLogs || '（暫無記錄）'}
         });
         if (!response.ok) return null;
         const data = await response.json();
-        return data.text?.trim() || null;
+        const json = JSON.parse(data.text);
+        return json.summary || null;
     } catch {
         return null;
     }
