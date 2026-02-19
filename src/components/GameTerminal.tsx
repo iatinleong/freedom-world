@@ -29,6 +29,10 @@ export function GameTerminal() {
 
     const questHistory = worldState?.questHistory ?? [];
     const questStageSummaries = worldState?.questStageSummaries ?? [];
+    const questArc = worldState?.questArc ?? [];
+    const questArcIndex = worldState?.questArcIndex ?? 0;
+    // Chapters yet to be reached (after current index)
+    const upcomingChapters = questArc.slice(questArcIndex + 1);
 
     const highlightKeywords = (text: string) => {
         const keywordPatterns = [
@@ -137,6 +141,40 @@ export function GameTerminal() {
                                 <div className="text-center text-white/30 italic py-4">
                                     <div className="text-3xl mb-2 opacity-20">📜</div>
                                     尚未確立主線目標...
+                                </div>
+                            )}
+
+                            {/* Upcoming Chapters */}
+                            {upcomingChapters.length > 0 && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="w-1 h-3 bg-wuxia-gold/20 rounded-sm"></span>
+                                        <span className="text-xs text-white/30 font-serif tracking-widest">後續章節</span>
+                                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                                        <span className="text-[10px] text-white/20 font-mono">{upcomingChapters.length} 章</span>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        {upcomingChapters.map((chapter, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex items-center gap-3 px-3 py-2 rounded-sm border border-white/5 bg-white/[0.02]"
+                                                style={{ opacity: Math.max(0.2, 0.7 - i * 0.12) }}
+                                            >
+                                                <span className="text-[10px] text-white/20 font-mono tabular-nums shrink-0">
+                                                    第{questArcIndex + i + 2}章
+                                                </span>
+                                                <span className="text-sm text-white/30 font-serif leading-relaxed flex-1">
+                                                    {chapter}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {questArc.length === 0 && (
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm border border-white/5 bg-white/[0.02]">
+                                    <span className="text-white/20 text-sm animate-pulse">…</span>
+                                    <span className="text-xs text-white/20 font-serif italic">命運的章節正在編織中</span>
                                 </div>
                             )}
 
