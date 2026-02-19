@@ -16,7 +16,7 @@ function parseJSON(text: string) {
 
 // Normalize options to ensure each item conforms to the Option interface
 // Handles: [{action:"..."}, {label:"..."}, {text:"..."}, "...", null]
-function normalizeOptions(raw: any[]): import('./lib/engine/types').Option[] {
+function normalizeOptions(raw: any[]): import('../lib/engine/types').Option[] {
     if (!Array.isArray(raw)) return [];
     return raw
         .filter(opt => opt != null)
