@@ -60,10 +60,10 @@ export function ActionPanel() {
 {
   "narrative": "開場劇情（150-200字，必有具體事件，體現屬性影響）",
   "options": [
-    { "label": "選項文字(4-12字)", "action": "詳細行動描述(30字以上)" },
-    { "label": "選項文字", "action": "詳細行動描述" },
-    { "label": "選項文字", "action": "詳細行動描述" },
-    { "label": "選項文字", "action": "詳細行動描述" }
+    { "action": "具體行動描述（10-25字，同時作為按鈕文字）" },
+    { "action": "具體行動描述" },
+    { "action": "具體行動描述" },
+    { "action": "具體行動描述" }
   ],
   "stateUpdate": {
     "location": "具體地點名稱",
@@ -378,7 +378,7 @@ export function ActionPanel() {
                     {options.slice(0, 4).map((option, idx) => (
                         <button
                             key={option.id || idx}
-                            onClick={() => handleAction(option.action || option.label, option.label)}
+                            onClick={() => handleAction(option.action)}
                             disabled={isProcessing}
                             className={cn(
                                 "wuxia-card relative group overflow-hidden p-3 text-left min-h-[4rem]",
@@ -396,7 +396,7 @@ export function ActionPanel() {
                             {/* 選項內容 */}
                             <div className="flex flex-col gap-0.5 flex-1">
                                 <span className="text-sm font-serif text-foreground/90 group-hover:text-wuxia-gold transition-colors line-clamp-2">
-                                    {option.label}
+                                    {option.action}
                                 </span>
                             </div>
 

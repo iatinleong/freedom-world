@@ -9,8 +9,23 @@ function getDirectorDirectives(state: GameState): string {
   if (!worldState) return '';
   const directives: string[] = [];
 
+  // ── 主線任務（永遠第一條，強制執行）──
   if (worldState.mainQuest) {
-    directives.push(`【主線目標】${worldState.mainQuest}——請讓敘事隱約或直接地朝此目標推進。`);
+    const arc = worldState.questArc ?? [];
+    const arcIndex = worldState.questArcIndex ?? 0;
+    const nextChapter = arc[arcIndex + 1] ?? null;
+
+    const questLines = [
+      `【主線任務 — 本回合敘事必須圍繞此目標】`,
+      `當前目標：「${worldState.mainQuest}」`,
+      `・本回合必須發生一件推進、阻礙或揭示此目標進展的具體事件`,
+      `・4個選項中，至少2個必須是直接推進此目標的行動（前往目標地、尋找關鍵NPC、完成任務步驟）`,
+      `・禁止生成與此目標完全無關的選項（「去別處閒逛」「無視這件事」等偏離主線的選項均不可出現）`,
+    ];
+    if (nextChapter) {
+      questLines.push(`・下一章節預告：「${nextChapter}」——本回合可埋下通往下一階段的伏筆`);
+    }
+    directives.push(questLines.join('\n'));
   }
 
   if (worldState.currentCombatTurns >= 4) {
@@ -35,7 +50,7 @@ function getDirectorDirectives(state: GameState): string {
     directives.push(`【章節衝刺令 — 最高優先】當前章節「${worldState.mainQuest}」已進行 ${turnsIntoQuest}/${QUEST_TURNS} 回合，即將結算。本回合敘事必須在此目標上出現關鍵突破或明確結果，不得繼續鋪陳或拖延。`);
   }
 
-  return directives.join('\n');
+  return directives.join('\n\n');
 }
 
 export function buildSystemPrompt(state: GameState): string {
@@ -122,12 +137,16 @@ ${recentHistory || '（暫無）'}
 ━━ 選項設計準則 ━━
 提供 4 個截然不同的選項，標籤描述必須是具體行動。
 
+【主線優先規則】
+・有主線目標時，至少2個選項必須直接推進當前主線（前往目標地點、尋找關鍵NPC、完成任務的具體步驟）
+・其餘1-2個選項可以是側線（探索奇遇、強化自身、處理支線），但不能完全無視主線目標的存在
+・不可出現「去別處」「先不管這件事」等讓玩家偏離主線的選項
+
 每個選項都要讓玩家覺得「選哪個都有點可惜」。
 禁止出現：「繼續走」「離開」「觀察」等無意義選項。
-label 是玩家看到的按鈕文字，4-12 字，描述具體而非抽象的行動：
-  ✓「趁亂偷襲領頭者」「拔刀橫擋喝問來歷」「使出基礎劍法封路」「跳崖逃脫」
-  ✗「繼續走」「等待」「觀察」「逃跑」——這些太模糊，不知道具體做什麼
-action 是這個選項的詳細行動描述（30字以上），作為下一回合的 prompt 使用。
+每個選項只需一個 action 欄位，10-25 字，同時作為按鈕文字和下一回合的行動描述：
+  ✓「趁亂偷襲領頭者，奪取腰間令牌」「拔刀橫擋喝問他的身分來歷」「壓低身形悄悄跟蹤至目的地」
+  ✗「繼續走」「等待」「觀察」——太模糊，必須說清楚做什麼、對誰、目的是什麼
 
 ━━ 輸出格式 ━━
 只輸出 JSON，無 Markdown。
@@ -147,10 +166,10 @@ reputationChanges 的 key 只能用這4個：chivalry / infamy / fame / seclusio
 {
   "narrative": "（120-200字，必有具體事件發生）",
   "options": [
-    { "label": "拔刀攔住去路喝問來歷", "action": "霍然起身，右手按住刀柄，擋在那蒙面人必經之路上，沉聲喝問他的身分來歷，眼神牢牢鎖住對方的手" },
-    { "label": "壓低身形悄悄跟蹤在後", "action": "壓低身形，踩著軟底靴，保持三丈距離悄悄跟蹤那蒙面人，觀察他究竟去往何處、與何人接頭" },
-    { "label": "走近掌柜低聲打聽消息", "action": "走到掌柜身旁，壓低聲音假裝點茶，趁機打聽那蒙面人的來歷、最近有何異動" },
-    { "label": "倒地裝醉等他走近再動", "action": "趁人不注意倒在必經之路裝作酒醉，等蒙面人走近時，突然抓住他的腳踝將他絆倒，藉機奪取他懷中的物品" }
+    { "action": "拔刀橫擋喝問蒙面人的身分來歷" },
+    { "action": "壓低身形跟蹤蒙面人至接頭地點" },
+    { "action": "走近掌柜低聲打聽此人來歷底細" },
+    { "action": "倒地裝醉待其走近突然絆倒奪物" }
   ],
   "stateUpdate": {
     "hungerChange": -1,
