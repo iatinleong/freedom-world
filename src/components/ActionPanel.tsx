@@ -45,7 +45,7 @@ export function ActionPanel() {
 
                 try {
                     const systemPrompt = `
-你是《自由江湖》的頂級說書人，現在要為玩家撰寫武俠小說的「第一章開篇」。
+你是《自由江湖》的頂級說書人，現在要為玩家撰寫金庸武俠小說的「第一章開篇」。
 這不是普通的遊戲開場——這是讓玩家立刻沉浸、想繼續讀下去的小說章首。
 
 角色資料：
@@ -60,7 +60,6 @@ export function ActionPanel() {
 
 ② 江湖背景（40-60字）
    ・簡述當前時局：哪個勢力崛起、哪宗懸案未解、武林最近發生了什麼大事
-   ・必須是原創設定，不得抄襲金庸版權人物/門派
    ・要與角色的身世有關聯——不是世界背景的堆砌，是「為什麼這件事跟主角有關」
 
 ③ 引入危機（80-100字）
@@ -528,14 +527,6 @@ export function ActionPanel() {
                 </div>
             )}
 
-            {/* 底部裝飾 */}
-            {options.length > 0 && (
-                <div className="flex items-center justify-center gap-2 pb-3 pt-1 opacity-30">
-                    <div className="text-[8px] text-wuxia-gold">◆</div>
-                    <div className="text-[8px] text-wuxia-gold">◆</div>
-                    <div className="text-[8px] text-wuxia-gold">◆</div>
-                </div>
-            )}
         </div>
     );
 }

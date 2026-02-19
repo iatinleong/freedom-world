@@ -34,21 +34,6 @@ export function GameTerminal() {
     // Chapters yet to be reached (after current index)
     const upcomingChapters = questArc.slice(questArcIndex + 1);
 
-    const highlightKeywords = (text: string) => {
-        const keywordPatterns = [
-            /([一-龥]{2,4})(劍|刀|拳|掌|功|法|訣)/g,
-            /([一-龥]{1,3})(草|藥|丹|膏|散)/g,
-            /([一-龥]{2,4})(派|幫|門|宗)/g,
-            /(內力|真氣|血量|飢餓)/g,
-            /([一-龥]{2,4})(劍|刀|槍|棍|鞭)/g,
-        ];
-        let result = text;
-        keywordPatterns.forEach(pattern => {
-            result = result.replace(pattern, '<span class="keyword-highlight">$&</span>');
-        });
-        return result;
-    };
-
     return (
         <div className="flex-1 overflow-y-auto p-6 space-y-8 font-serif text-lg leading-loose text-foreground/90 paper-edge bg-gradient-to-b from-black/40 to-black/60 bamboo-texture relative scroll-smooth">
 
@@ -258,7 +243,7 @@ export function GameTerminal() {
                                     {index === narrative.length - 1 && log.role === 'assistant' ? (
                                         <Typewriter text={log.content} speed={25} />
                                     ) : (
-                                        <div dangerouslySetInnerHTML={{ __html: highlightKeywords(log.content) }} />
+                                        <div>{log.content}</div>
                                     )}
                                 </div>
                                 <div className="absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full bg-black border border-wuxia-gold/40"></div>
