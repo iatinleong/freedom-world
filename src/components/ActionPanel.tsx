@@ -108,6 +108,10 @@ export function ActionPanel() {
 
                     addLog({ role: 'assistant', content: response.narrative });
 
+                    // 將開場敘事（含身世/背景/危機）存入 summary，作為整場遊戲的基底前情
+                    // 讓 buildSystemPrompt 和 generateQuestArc 都能看到完整的故事起點
+                    updateSummary(response.narrative);
+
                     if (response.stateUpdate) {
                         // 初始階段不接受屬性變更，以免覆蓋創角數值
                         if (response.stateUpdate.location) {
@@ -129,7 +133,8 @@ export function ActionPanel() {
                     }
 
                     // Generate quest arc in background (fire-and-forget)
-                    generateQuestArc(useGameStore.getState()).then(arc => {
+                    // 傳入 response.narrative 作為 previousSummary，讓弧線與開場身世/背景緊密連結
+                    generateQuestArc(useGameStore.getState(), response.narrative).then(arc => {
                         if (arc && arc.length > 0) {
                             updateWorldState({ questArc: arc, questArcIndex: 0, mainQuest: arc[0] });
                         }
