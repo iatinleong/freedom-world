@@ -34,7 +34,7 @@ function getDirectorDirectives(state: GameState): string {
   if (worldState.currentCombatTurns >= 4) {
     directives.push(`【最高優先令 — 戰鬥強制結算】戰鬥已持續 ${worldState.currentCombatTurns} 回合，本回合必須終結戰鬥：\n・narrative 寫出明確勝負結果（敵人逃跑/暈倒/死亡/雙方脫離）\n・戰鬥結束後，選項必須切換到戰後情境（搜查屍體、逃離現場、與NPC對話、包紮療傷）\n・禁止繼續任何攻防描寫`);
   } else if (worldState.currentCombatTurns >= 2) {
-    directives.push(`【戰鬥第 ${worldState.currentCombatTurns} 回合】必須出現明顯轉折（受傷加重、武器脫手、地形突變），為下回合結算鋪墊。選項不得重複使用上回合出現過的動作類型（如已有「施展身法」就不能再出現「施展身法/輕功」類選項）。`);
+    directives.push(`【戰鬥第 ${worldState.currentCombatTurns} 回合】必須出現明顯轉折（受傷加重、武器脫手、地形突變），為下回合結算鋪墊。4個選項的策略維度必須與上回合不同——戰況在演變，選項的方向也要跟著改變。`);
   }
 
   if (worldState.currentCombatTurns === 0 && worldState.pacingCounter >= 5) {
@@ -74,7 +74,7 @@ export function buildSystemPrompt(state: GameState): string {
   const skillStr = [...player.skills.basics, ...player.skills.internal]
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
-  return `你是《自由江湖》的說書人兼遊戲主持人，掌管這個金庸武俠世界，劇情要像金庸小說般精彩，但不要抄襲。
+  return `你是《自由江湖》的說書人兼遊戲主持人，掌管這個金庸武俠世界，劇情要像金庸小說般精彩。
 ${directorDirectives ? `\n━━ 導演指令（最高優先，必須遵守）━━\n${directorDirectives}\n` : ''}
 ━━ 前情提要 ━━
 ${summary || '（遊戲剛開始）'}
@@ -166,11 +166,9 @@ ${recentHistory || '（暫無）'}
 ・不可出現「去別處」「先不管這件事」等讓玩家偏離主線的選項
 
 每個選項都要讓玩家覺得「選哪個都有點可惜」。
-4個選項必須屬於不同類型，禁止同一回合出現兩個相同動作類型：
-  ✗ 不可同時出現兩個「施展身法/輕功」
-  ✗ 不可同時出現兩個「逼問/質問」
-  ✗ 不可同時出現兩個「攻擊/反擊」
-  ✓ 不同類型範例：戰鬥型 / 交涉型 / 逃跑型 / 謀略型（各一）
+4個選項代表4種不同的策略維度（每種最多一個）：
+  戰（直接動武）・智（謀略/欺騙）・交（交涉/社交）・走（逃脫/迂迴）
+  不論情境為何，都能從這4個維度找到對應的具體行動——這是原則，不是分類模板。
 禁止出現：「繼續走」「離開」「觀察」等無意義選項。
 每個選項只需一個 action 欄位，10-20 字，同時作為按鈕文字和下一回合的行動描述：
   ✓「趁亂偷襲領頭者，奪取腰間令牌」「拔刀橫擋喝問他的身分來歷」「壓低身形悄悄跟蹤至目的地」
