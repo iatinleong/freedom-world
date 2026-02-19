@@ -131,6 +131,8 @@ export interface GameState {
         mainQuest: string;              // 當前主線目標
         questHistory: string[];         // 已完成的主線列表
         questStageSummaries: string[];  // 每個已完成階段的摘要（與 questHistory 對齊）
+        questArc: string[];             // AI 編劇預生成的主線弧（10章一批）
+        questArcIndex: number;          // 目前在 questArc 中的位置
         questStartTurn: number;         // 當前主線開始時的 assistant turn 數（用於精確計算進度）
         plotProgress: number;           // 劇情進度 (0-100)
         pacingCounter: number;          // 節奏計數

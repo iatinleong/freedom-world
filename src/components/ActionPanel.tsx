@@ -5,7 +5,7 @@ import { useGameStore } from '@/lib/engine/store';
 import { useUsageStore } from '@/lib/engine/usageStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/engine/prompt';
-import { generateGameResponse, generateNextQuest, generateStageSummary } from '@/lib/engine/gemini';
+import { generateGameResponse, generateStageSummary, generateQuestArc } from '@/lib/engine/gemini';
 import { cn } from '@/lib/utils';
 
 // Strip markdown code fences that some models wrap around JSON
@@ -105,6 +105,13 @@ export function ActionPanel() {
                     if (response.options) {
                         setOptions(response.options);
                     }
+
+                    // Generate quest arc in background (fire-and-forget)
+                    generateQuestArc(useGameStore.getState()).then(arc => {
+                        if (arc && arc.length > 0) {
+                            updateWorldState({ questArc: arc, questArcIndex: 0, mainQuest: arc[0] });
+                        }
+                    });
 
                 } catch (error: any) {
                     console.error("Init failed", error);
@@ -212,6 +219,12 @@ export function ActionPanel() {
                     response.stateUpdate.removedTags?.forEach((tag: string) => currentTags.delete(tag));
                     updateWorld({ tags: Array.from(currentTags) });
                 }
+                if (response.stateUpdate.newLocation) {
+                    updateWorld({ location: response.stateUpdate.newLocation });
+                }
+                if (response.stateUpdate.weatherChange) {
+                    updateWorld({ weather: response.stateUpdate.weatherChange });
+                }
 
                 // Handle Items
                 if (response.stateUpdate.newItems) {
@@ -260,34 +273,47 @@ export function ActionPanel() {
                 setOptions(response.options);
             }
 
-            // --- Unified Quest + Stage Summary Logic ---
-            // Every 6 assistant turns: generate next quest stage AND a summary of the current stage
+            // --- Quest Arc Advancement (every 6 assistant turns) ---
             const assistantCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
             if (assistantCount > 0 && assistantCount % 6 === 0) {
                 const currentState = useGameStore.getState();
-                Promise.all([
-                    generateNextQuest(currentState),
-                    generateStageSummary(currentState),
-                ]).then(([quest, stageSummary]) => {
+                generateStageSummary(currentState).then(stageSummary => {
                     const ws = getGameState().worldState;
-                    const hasCurrentQuest = !!ws.mainQuest;
+                    const arc = ws.questArc ?? [];
+                    const currentIndex = ws.questArcIndex ?? 0;
+                    const nextIndex = currentIndex + 1;
+                    const nextQuest = arc[nextIndex] ?? null;
+
                     updateWorldState({
-                        mainQuest: quest ?? ws.mainQuest,
-                        questHistory: hasCurrentQuest
+                        mainQuest: nextQuest ?? ws.mainQuest,
+                        questHistory: ws.mainQuest
                             ? [...(ws.questHistory ?? []), ws.mainQuest]
                             : (ws.questHistory ?? []),
-                        questStageSummaries: hasCurrentQuest
+                        questStageSummaries: ws.mainQuest
                             ? [...(ws.questStageSummaries ?? []), stageSummary ?? '']
                             : (ws.questStageSummaries ?? []),
+                        questArcIndex: nextQuest ? nextIndex : currentIndex,
                         questStartTurn: assistantCount,
                     });
-                    // Also update rolling summary for AI context
+
+                    // Update rolling summary for AI context
                     if (stageSummary) {
                         const prevSummary = useGameStore.getState().summary;
                         updateSummary(prevSummary ? `${prevSummary}\n\n${stageSummary}` : stageSummary);
                     }
-                    if (quest) {
-                        addNotification({ type: 'achievement', title: '主線推進', description: quest, icon: '📜' });
+                    if (nextQuest) {
+                        addNotification({ type: 'achievement', title: '主線推進', description: nextQuest, icon: '📜' });
+                    }
+
+                    // When near end of arc, generate next batch in background
+                    if (nextIndex >= arc.length - 3) {
+                        const stateForArc = useGameStore.getState();
+                        generateQuestArc(stateForArc, stateForArc.summary).then(newArc => {
+                            if (newArc && newArc.length > 0) {
+                                const currentWs = getGameState().worldState;
+                                updateWorldState({ questArc: [...(currentWs.questArc ?? []), ...newArc] });
+                            }
+                        });
                     }
                 });
             }

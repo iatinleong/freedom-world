@@ -129,6 +129,8 @@ const INITIAL_STATE: GameState = {
         mainQuest: '初入江湖，尋找自己的身世線索',
         questHistory: [],
         questStageSummaries: [],
+        questArc: [],
+        questArcIndex: 0,
         questStartTurn: 0,
         plotProgress: 0,
         pacingCounter: 0,

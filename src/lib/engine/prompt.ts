@@ -28,6 +28,13 @@ function getDirectorDirectives(state: GameState): string {
     directives.push(`【主角瀕危警報 — 最高優先】玩家氣血僅剩 ${player.stats.hp}/${player.stats.maxHp}（${Math.round(hpRatio * 100)}%），生死一線！本回合必須出現救場轉機（援兵/敵人犯錯/地形/奇遇），hpChange 不得為負值。`);
   }
 
+  const QUEST_TURNS = 6;
+  const assistantCount = state.narrative.filter(l => l.role === 'assistant').length;
+  const turnsIntoQuest = Math.max(0, assistantCount - (worldState.questStartTurn ?? 0));
+  if (turnsIntoQuest >= QUEST_TURNS - 1 && worldState.mainQuest) {
+    directives.push(`【章節衝刺令 — 最高優先】當前章節「${worldState.mainQuest}」已進行 ${turnsIntoQuest}/${QUEST_TURNS} 回合，即將結算。本回合敘事必須在此目標上出現關鍵突破或明確結果，不得繼續鋪陳或拖延。`);
+  }
+
   return directives.join('\n');
 }
 
@@ -113,11 +120,7 @@ ${recentHistory || '（暫無）'}
 ・功能對應：膂力→傷害/破防 | 身法→閃避/逃跑 | 根骨→防禦/抗性 | 悟性→識破/學功 | 福緣→奇遇 | 魅力→NPC態度。
 
 ━━ 選項設計準則 ━━
-提供 4 個選項，標籤描述必須是具體動作（如「拔刀橫斬其咽喉」而非「攻擊」）：
-1. 主動強硬型——高難度屬性判定，成功則獲取關鍵物/重創敵手，失敗則代價慘重。
-2. 謹慎穩健型——利用現有武學或環境進行消耗，風險低但回報平平。
-3. 社交智取型——利用口才、魅力或悟性化解衝突，獲取資訊。
-4. 整備奇招型——尋求喘息/療傷機會，或利用高福緣進行出人意料的大膽嘗試。
+提供 4 個截然不同的選項，標籤描述必須是具體行動。
 
 每個選項都要讓玩家覺得「選哪個都有點可惜」。
 禁止出現：「繼續走」「離開」「觀察」等無意義選項。
@@ -132,6 +135,8 @@ action 是這個選項的詳細行動描述（30字以上），作為下一回�
 stateUpdate 規則（非常重要）：
 ・只填這回合「真正有變化」的欄位
 ・值為 0 的欄位【一律不寫】，例如沒受傷就不寫 hpChange，沒消耗內力就不寫 qiChange
+・地點變化：若玩家移動到新地點，必須填 newLocation（如「武當山後山」）；未移動則不寫
+・天氣變化：若天氣發生變化，填 weatherChange（如「暴雨」）；未變化則不寫
 
 attributeChanges 的 key 只能用以下7個，其他都是錯的：
   ✓ strength（膂力）/ agility（身法）/ constitution（根骨）/ intelligence（悟性）/ spirit（定力）/ luck（福緣）/ charm（魅力）
