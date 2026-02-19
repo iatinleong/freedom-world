@@ -54,7 +54,7 @@ export async function generateNextQuest(state: GameState): Promise<string | null
     const skillStr = [...player.skills.basics, ...player.skills.internal]
         .map(s => s.name).join('、') || '無';
 
-    const prompt = `你是武俠遊戲《自由江湖》的敘事導演。根據當前局勢，為玩家生成下一個主線目標。
+    const prompt = `你是武俠遊戲《自由江湖》的敘事導演。掌管這個金庸武俠世界，採用金庸般的劇情風格，根據當前局勢，為玩家生成下一個主線目標。
 
 當前狀態：
 地點：${world.location}

@@ -31,7 +31,7 @@ function getDirectorDirectives(state: GameState): string {
   }
 
   if (worldState.currentCombatTurns === 0 && worldState.pacingCounter >= 5) {
-    directives.push(`【節奏警示】已平靜 ${worldState.pacingCounter} 回合，立即引入突發事件打破僵局。`);
+    directives.push(`【情境推進】已平靜 ${worldState.pacingCounter} 回合，請推動劇情發展（如：揭示新線索、場景變換、或遭遇新角色），不一定要發生戰鬥，重點是讓故事向前流動。`);
   }
 
   const hpRatio = player.stats.hp / player.stats.maxHp;
