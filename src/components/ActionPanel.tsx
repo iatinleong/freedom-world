@@ -165,11 +165,7 @@ export function ActionPanel() {
 
                 // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
-                    const newHp = state.player.stats.hp + response.stateUpdate.hpChange;
-                    // Protagonist's halo: HP never drops to 0 from a single action unless player sought death
-                    const deathKeywords = ['赴死', '自盡', '殉道', '自刎', '跳崖'];
-                    const soughtDeath = deathKeywords.some(k => actionText.includes(k));
-                    updatePlayerStats({ hp: soughtDeath ? Math.max(0, newHp) : Math.max(1, newHp) });
+                    updatePlayerStats({ hp: Math.max(0, state.player.stats.hp + response.stateUpdate.hpChange) });
                 }
                 if (response.stateUpdate.qiChange) {
                     updatePlayerStats({ qi: Math.max(0, state.player.stats.qi + response.stateUpdate.qiChange) });
@@ -263,7 +259,12 @@ export function ActionPanel() {
             if (assistantCount > 0 && assistantCount % 15 === 0) {
                 generateNextQuest(useGameStore.getState()).then(quest => {
                     if (quest) {
-                        updateWorldState({ mainQuest: quest });
+                        const ws = getGameState().worldState;
+                        updateWorldState({
+                            mainQuest: quest,
+                            questHistory: ws.mainQuest ? [...(ws.questHistory ?? []), ws.mainQuest] : (ws.questHistory ?? []),
+                            questStartTurn: assistantCount,
+                        });
                         addNotification({ type: 'achievement', title: '主線更新', description: quest, icon: '📜' });
                     }
                 });

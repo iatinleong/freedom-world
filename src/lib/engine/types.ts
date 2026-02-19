@@ -128,9 +128,11 @@ export interface GameState {
     narrative: NarrativeLog[];
     summary: string; // Rolling summary of past events
     worldState: {
-        mainQuest: string;    // 當前主線目標
-        plotProgress: number; // 劇情進度 (0-100)
-        pacingCounter: number; // 節奏計數：正數代表和平，負數代表剛打完仗需修整
+        mainQuest: string;         // 當前主線目標
+        questHistory: string[];    // 已完成的主線列表
+        questStartTurn: number;    // 當前主線開始時的 assistant turn 數（用於精確計算進度）
+        plotProgress: number;      // 劇情進度 (0-100)
+        pacingCounter: number;     // 節奏計數
         currentCombatTurns: number; // 當前戰鬥已持續回合
     };
     options: Option[];

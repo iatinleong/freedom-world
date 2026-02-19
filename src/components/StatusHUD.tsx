@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Heart, Sparkles, Apple, Coins, Crown, X, Scroll, Settings } from 'lucide-react';
+import { ChevronDown, ChevronUp, Heart, Sparkles, Apple, Coins, Crown, X } from 'lucide-react';
 
 export function StatusHUD() {
-    const { player, world, worldState, equipTitle, setGameMenuOpen } = useGameStore();
+    const { player, world, equipTitle } = useGameStore();
     const { stats, name, title, unlockedTitles } = player;
     const [isExpanded, setIsExpanded] = useState(false);
     const [showTitleSelector, setShowTitleSelector] = useState(false);
@@ -24,7 +24,7 @@ export function StatusHUD() {
             {/* Title Selection Modal */}
             {showTitleSelector && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowTitleSelector(false)}>
-                    <div 
+                    <div
                         className="relative w-full max-w-sm bg-[#1a1a1a] border-2 border-wuxia-gold/30 rounded overflow-hidden shadow-2xl flex flex-col"
                         onClick={e => e.stopPropagation()}
                     >
@@ -64,10 +64,10 @@ export function StatusHUD() {
                 className="flex flex-wrap gap-x-4 gap-y-2 p-3 items-center cursor-pointer hover:bg-wuxia-gold/5 transition-all duration-300 group select-none"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                {/* Name & Title - New Section */}
+                {/* Name & Title */}
                 <div className="flex flex-col mr-2">
                     <span className="text-wuxia-gold font-serif font-bold tracking-widest text-base leading-none">{name}</span>
-                    <button 
+                    <button
                         onClick={handleTitleClick}
                         className="text-[10px] text-wuxia-gold/60 bg-wuxia-gold/10 px-1 rounded border border-wuxia-gold/20 hover:bg-wuxia-gold/20 hover:text-wuxia-gold transition-colors mt-1 w-fit"
                     >
@@ -136,50 +136,15 @@ export function StatusHUD() {
                     <span className="italic">{world.time.period}</span>
                 </div>
 
-                {/* Settings Button */}
-                <button 
-                    onClick={(e) => { e.stopPropagation(); setGameMenuOpen(true); }}
-                    className="p-1.5 rounded-sm hover:bg-white/10 text-white/40 hover:text-wuxia-gold transition-colors mr-1"
-                    title="遊戲設置"
-                >
-                    <Settings size={14} />
-                </button>
-
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-wuxia-gold/5 border border-wuxia-gold/10 text-wuxia-gold/40 group-hover:text-wuxia-gold/70 group-hover:border-wuxia-gold/30 transition-all">
                     {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 </span>
             </div>
 
-            {/* Main Quest Bar (Always Visible if active) */}
-            {worldState.mainQuest && (
-                <div className="px-4 pb-3 flex items-center gap-3 text-xs border-t border-wuxia-gold/5 pt-2 mx-1 animate-fade-in">
-                    <div className="flex items-center gap-1.5 shrink-0 text-wuxia-gold">
-                        <Scroll size={14} />
-                        <span className="font-serif tracking-wide font-bold">當前主線</span>
-                    </div>
-                    
-                    <span className="text-white/80 font-serif flex-1 truncate border-l border-white/10 pl-3">
-                        {worldState.mainQuest}
-                    </span>
-                    
-                    <div className="flex items-center gap-2 shrink-0" title={`劇情進度: ${Math.round(worldState.plotProgress)}%`}>
-                        <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-gradient-to-r from-wuxia-gold/40 to-wuxia-gold transition-all duration-1000 ease-out"
-                                style={{ width: `${Math.min(100, Math.max(0, worldState.plotProgress))}%` }}
-                            />
-                        </div>
-                        <span className="text-[10px] text-wuxia-gold/50 font-mono tabular-nums">
-                            {Math.round(worldState.plotProgress)}%
-                        </span>
-                    </div>
-                </div>
-            )}
-
             {/* Expanded Details */}
             {isExpanded && (
                 <div className="p-5 border-t border-wuxia-gold/20 space-y-5 animate-scroll-unfurl text-sm bg-black/80 ink-edge relative overflow-hidden">
-                    
+
                     {/* Background decoration */}
                     <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none select-none">
                          <div className="text-9xl font-serif text-wuxia-gold">武</div>
@@ -195,13 +160,13 @@ export function StatusHUD() {
 
                         <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                             {[
-                                { label: '膂力', value: stats.attributes?.strength ?? 0, icon: '💪' },
-                                { label: '身法', value: stats.attributes?.agility ?? 0, icon: '🦶' },
-                                { label: '根骨', value: stats.attributes?.constitution ?? 0, icon: '🦴' },
-                                { label: '悟性', value: stats.attributes?.intelligence ?? 0, icon: '🧠' },
-                                { label: '定力', value: stats.attributes?.spirit ?? 0, icon: '🧘' },
-                                { label: '福緣', value: stats.attributes?.luck ?? 0, icon: '🍀' },
-                                { label: '魅力', value: stats.attributes?.charm ?? 0, icon: '✨' },
+                                { label: '膂力', value: stats.attributes?.strength ?? 0 },
+                                { label: '身法', value: stats.attributes?.agility ?? 0 },
+                                { label: '根骨', value: stats.attributes?.constitution ?? 0 },
+                                { label: '悟性', value: stats.attributes?.intelligence ?? 0 },
+                                { label: '定力', value: stats.attributes?.spirit ?? 0 },
+                                { label: '福緣', value: stats.attributes?.luck ?? 0 },
+                                { label: '魅力', value: stats.attributes?.charm ?? 0 },
                             ].map((attr) => (
                                 <div key={attr.label} className="flex flex-col items-center justify-center p-2 rounded-sm bg-white/5 border border-white/5 hover:border-wuxia-gold/30 hover:bg-wuxia-gold/5 transition-colors group/attr cursor-default">
                                     <span className="text-[10px] text-white/40 mb-1 group-hover/attr:text-wuxia-gold/60 transition-colors font-serif">{attr.label}</span>
@@ -247,7 +212,7 @@ export function StatusHUD() {
                                 <span className="text-cyan-500/90 text-sm font-bold font-serif tracking-widest">天時地利</span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-cyan-900/20 to-transparent"></div>
                             </div>
-                            
+
                             <div className="flex flex-col gap-2 text-xs h-full justify-start">
                                 <div className="flex items-center gap-2 p-2 bg-white/5 rounded-sm border border-white/5">
                                     <span className="text-cyan-400 w-4 text-center">☁</span>
@@ -277,5 +242,4 @@ export function StatusHUD() {
             )}
         </div>
     );
-
 }
