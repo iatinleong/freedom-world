@@ -16,6 +16,7 @@ interface GameStore extends GameState {
     updateUsage: (inputTokens: number, outputTokens: number) => void;
     updateSummary: (summary: string) => void;
     addItem: (item: import('./types').Item) => void;
+    removeItem: (name: string, count: number) => void;
     learnSkill: (skill: import('./types').MartialArt) => void;
     addTitle: (title: string) => void;
     equipTitle: (title: string) => void;
@@ -370,6 +371,18 @@ export const useGameStore = create<GameStore>()(
                         },
                     };
                 }),
+
+            removeItem: (name, count) =>
+                set((state) => ({
+                    player: {
+                        ...state.player,
+                        inventory: state.player.inventory
+                            .map(item => item.name === name
+                                ? { ...item, count: item.count - count }
+                                : item)
+                            .filter(item => item.count > 0),
+                    },
+                })),
 
             addTitle: (newTitle) =>
                 set((state) => {

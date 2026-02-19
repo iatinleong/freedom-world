@@ -15,7 +15,7 @@ function parseJSON(text: string) {
 }
 
 export function ActionPanel() {
-    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, learnSkill, addTitle, addNotification } = useGameStore();
+    const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, removeItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
     const [playTime, setPlayTime] = useState(0);
@@ -269,6 +269,16 @@ export function ActionPanel() {
                         });
                 }
 
+                // Handle Removed/Consumed Items
+                if (response.stateUpdate.removedItems) {
+                    response.stateUpdate.removedItems
+                        .filter((item: any) => item.count > 0)
+                        .forEach((item: any) => {
+                            removeItem(item.name, item.count);
+                            addLog({ role: 'system', content: `消耗物品：${item.name} x${item.count}` });
+                        });
+                }
+
                 // Handle Skills
                 if (response.stateUpdate.newSkills) {
                     response.stateUpdate.newSkills.forEach((skill: any) => {
@@ -302,8 +312,24 @@ export function ActionPanel() {
                 setOptions(response.options);
             }
 
-            // --- Quest Arc Advancement (every 6 assistant turns) ---
+            // --- Time Advancement (every 3 assistant turns = ~1 shi-chen / 2 hours) ---
+            const TIME_PERIODS = ['子時', '丑時', '寅時', '卯時', '辰時', '巳時', '午時', '未時', '申時', '酉時', '戌時', '亥時'];
             const assistantCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
+            if (assistantCount > 0 && assistantCount % 3 === 0) {
+                const currentWorld = useGameStore.getState().world;
+                const periodIndex = TIME_PERIODS.indexOf(currentWorld.time.period);
+                const nextIndex = (periodIndex + 1) % TIME_PERIODS.length;
+                const dayAdvance = nextIndex === 0 ? 1 : 0; // 亥時→子時 跨日
+                updateWorld({
+                    time: {
+                        ...currentWorld.time,
+                        period: TIME_PERIODS[nextIndex],
+                        day: currentWorld.time.day + dayAdvance,
+                    },
+                });
+            }
+
+            // --- Quest Arc Advancement (every 6 assistant turns) ---
             if (assistantCount > 0 && assistantCount % 6 === 0) {
                 const currentState = useGameStore.getState();
                 generateStageSummary(currentState).then(stageSummary => {
