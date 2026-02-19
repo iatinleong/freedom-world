@@ -165,7 +165,11 @@ export function ActionPanel() {
 
                 // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
-                    updatePlayerStats({ hp: Math.max(0, state.player.stats.hp + response.stateUpdate.hpChange) });
+                    const newHp = state.player.stats.hp + response.stateUpdate.hpChange;
+                    // Protagonist's halo: HP never drops to 0 from a single action unless player sought death
+                    const deathKeywords = ['赴死', '自盡', '殉道', '自刎', '跳崖'];
+                    const soughtDeath = deathKeywords.some(k => actionText.includes(k));
+                    updatePlayerStats({ hp: soughtDeath ? Math.max(0, newHp) : Math.max(1, newHp) });
                 }
                 if (response.stateUpdate.qiChange) {
                     updatePlayerStats({ qi: Math.max(0, state.player.stats.qi + response.stateUpdate.qiChange) });
