@@ -98,6 +98,7 @@ export async function generateQuestArc(
     const existingArc = worldState?.questArc ?? [];
     const lastStages = existingArc.slice(-3).join(' → ');
     const context = previousSummary || summary || '（遊戲剛開始）';
+    const worldBg = worldState?.worldBackground || '';
 
     // Build a deduplicated list of ALL quests that must not be repeated
     const usedQuests = [
@@ -109,11 +110,11 @@ export async function generateQuestArc(
 
     const prompt = `你是武俠小說的主編，正在為《自由江湖》規劃一段冒險弧線（10個章節目標）。
 
-玩家資訊：
+${worldBg ? `江湖世界觀：\n${worldBg}\n` : ''}玩家資訊：
 ・姓名：${player.name}（${player.title}）
 ・當前地點：${world.location}
 ・武學：${skillStr}
-・劇情背景：${context}
+・主角前情：${context}
 ${lastStages ? `・前幾章走向：${lastStages}（請直接接續，不要重複）` : ''}
 ${usedStr ? `・以下目標已出現，嚴禁重複或相似：【${usedStr}】` : ''}
 

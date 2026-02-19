@@ -50,7 +50,7 @@ function getDirectorDirectives(state: GameState): string {
 }
 
 export function buildSystemPrompt(state: GameState): string {
-  const { player, world, narrative, summary } = state;
+  const { player, world, narrative, summary, worldState } = state;
   const directorDirectives = getDirectorDirectives(state);
 
   const levelsStr = MARTIAL_ART_LEVELS.map(l => `${l.name}(x${l.power})`).join('・');
@@ -67,10 +67,13 @@ export function buildSystemPrompt(state: GameState): string {
   const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
-  return `你是《自由江湖》的說書人兼GM，劇情要有金庸武俠的精彩與節奏。
+  return `你是《自由江湖》的說書人兼GM，劇情要有武俠的精彩與節奏。
 ${directorDirectives ? `\n━━ 導演指令（最高優先）━━\n${directorDirectives}\n` : ''}
-━━ 前情 ━━
-${summary || '（遊戲剛開始）'}
+━━ 江湖世界 ━━
+${worldState?.worldBackground || '（世界觀尚未生成）'}
+
+━━ 主角前情 ━━
+${summary || '（尚未開始）'}
 
 ━━ 近況 ━━
 ${recentHistory || '（暫無）'}
@@ -92,7 +95,7 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 ・任何致命危機必有生路；敵人不能殺死主角
 
 ━━ 敘事法則 ━━
-・每回合一件具體事發生，120-150字，包含感官細節
+・每回合一件具體事發生，80-150字，包含感官細節
 ・行動三合一：執行過程 → 立即結果 → 不可逆局面改變
 ・禁詞：似乎/好像/彷彿/可能/隱約/也許——直接描述發生了什麼
 ・場景自洽：已離場者不再互動；物理常識成立（斷臂不持劍）
@@ -100,7 +103,7 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 
 ━━ 選項法則 ━━
 ・4個選項覆蓋4個截然不同，讓玩家覺得選了哪個都可惜。
-・每選項 action 欄位 10-20字，說清楚做什麼/對誰/目的
+・每選項 action要說清楚做什麼/對誰/目的（大概10-20字）
 
 ━━ 輸出規則 ━━
 只輸出 JSON，stateUpdate 只填真正有變化的欄位（0值不寫）。
@@ -110,7 +113,7 @@ attributeChanges key（僅此7個）：strength/agility/constitution/intelligenc
 reputationChanges key（僅此4個）：chivalry/infamy/fame/seclusion
 
 {
-  "narrative": "（120-200字，具體事件，感官細節）",
+  "narrative": "（80-150字，具體事件，感官細節）",
   "options": [
     { "action": "拔刀橫擋喝問蒙面人的身分來歷" },
     { "action": "壓低身形跟蹤蒙面人至接頭地點" },

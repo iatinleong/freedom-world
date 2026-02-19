@@ -138,6 +138,7 @@ const INITIAL_STATE: GameState = {
     narrative: [],
     summary: '',
     worldState: {
+        worldBackground: '',
         mainQuest: '初入江湖，尋找自己的身世線索',
         questHistory: [],
         questStageSummaries: [],

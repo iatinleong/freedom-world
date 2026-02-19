@@ -129,6 +129,7 @@ export interface GameState {
     narrative: NarrativeLog[];
     summary: string; // Rolling summary of past events
     worldState: {
+        worldBackground: string;        // 江湖世界觀（勢力格局、時局、矛盾），一次性生成
         mainQuest: string;              // 當前主線目標
         questHistory: string[];         // 已完成的主線列表
         questStageSummaries: string[];  // 每個已完成階段的摘要（與 questHistory 對齊）

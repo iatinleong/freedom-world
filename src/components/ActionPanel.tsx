@@ -62,48 +62,90 @@ export function ActionPanel() {
 
                 try {
                     // ═══════════════════════════════════════════
-                    // STEP 1：生成背景故事
+                    // STEP 1：生成江湖世界背景
                     // ═══════════════════════════════════════════
-                    const backstoryPrompt = `
-你是《自由江湖》的說書人，為玩家生成金庸武俠風格的角色背景故事。
+                    const worldPrompt = `
+你是武俠世界的創世說書人，為《自由江湖》生成一個獨特的武俠江湖世界觀。
+所有內容必須完全原創，不得使用任何現有IP的角色名稱、地名或設定。
 
-角色資料：
-・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
-・膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
-
-【背景故事要求（200-300字）】
-・第三人稱旁白，金庸武俠白話文筆法，一氣呵成
-・涵蓋：出身家世、師承門派、重要過去事件（失去什麼/得到什麼）、核心執念、與當前江湖時局的關聯
-・根骨高→體魄天賦異稟；悟性高→資質驚人；福緣高→奇遇不斷；魅力高→人緣極廣
-・門派必須從以下清單中選（或選「江湖散人」）：
-  武當、少林、丐幫、峨嵋、華山、崆峒、朝廷、天機閣、碧血盟、烈火教、玄冰宗、青鋒劍宗、滄瀾幫、夜鴉堂
-・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
+【江湖背景要求（200-300字）】
+以流暢的第三人稱旁白呈現，涵蓋以下五個面向，一氣呵成，不分標題：
+① 時局概述：朝代氛圍、政局穩定與否、官府與江湖的關係
+② 主要勢力（6-8個）：各勢力的立場（正道/邪道/中立）、功法特色、當前影響力
+③ 勢力關係：誰與誰結盟、誰與誰為敵、誰在擴張或式微
+④ 近期江湖大事：1-2件震動武林的事件（懸案/秘笈現世/盟主更迭/滅門血案等）
+⑤ 核心矛盾：驅動整個故事世界的主要張力（一句話點明）
 
 只回傳 JSON：
 {
-  "backstory": "200-300字背景故事",
+  "worldNarrative": "200-300字江湖背景（給玩家看的敘述）",
+  "factions": [
+    { "name": "勢力名稱", "alignment": "正道|邪道|中立", "martialStyle": "功法特色一句話", "status": "當前處境" },
+    "...共6-8個勢力"
+  ],
+  "centralConflict": "核心矛盾一句話"
+}
+                    `.trim();
+
+                    const { text: worldJson, usage: worldUsage } = await generateGameResponse(worldPrompt, "生成江湖世界");
+                    if (worldUsage) addUsage(worldUsage.promptTokenCount || 0, worldUsage.candidatesTokenCount || 0);
+
+                    const worldResponse = parseJSON(worldJson);
+                    const worldNarrative: string = worldResponse.worldNarrative || '';
+                    const factions: any[] = worldResponse.factions || [];
+                    const factionNames = factions.map((f: any) => f.name).join('、') || '江湖散人';
+
+                    // 顯示江湖背景給玩家
+                    addLog({ role: 'assistant', content: worldNarrative });
+                    // 存入 worldState.worldBackground，供後續所有 prompt 使用
+                    updateWorldState({ worldBackground: worldNarrative });
+
+                    // ═══════════════════════════════════════════
+                    // STEP 2：生成主角背景故事
+                    // ═══════════════════════════════════════════
+                    const backstoryPrompt = `
+你是《自由江湖》的說書人，根據已建立的江湖世界觀，為玩家生成主角的背景故事。
+
+江湖世界觀：
+${worldNarrative}
+
+主角資料：
+・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
+・膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
+
+【主角背景故事要求（200-300字）】
+・第三人稱旁白，武俠白話文筆法，一氣呵成
+・涵蓋：出身家世、師承門派（必須是上方世界觀中存在的勢力之一，或「江湖散人」）、重要過去事件、核心執念、與當前江湖局勢的個人關聯
+・根骨高→體魄天賦異稟；悟性高→資質驚人；福緣高→奇遇不斷；魅力高→人緣極廣
+・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
+
+可選門派（來自上方世界觀）：${factionNames}、江湖散人
+
+只回傳 JSON：
+{
+  "backstory": "200-300字主角背景",
   "relations": {
-    "sect": "門派名（必須從上方清單選或填江湖散人）",
+    "sect": "所屬門派（必須是世界觀中的勢力或江湖散人）",
     "master": "師父名（無則填「無」）"
   },
   "stateUpdate": {
     "newItems": [{ "id": "唯一id", "name": "物品名", "description": "描述", "type": "weapon|armor|consumable|material|book", "count": 1 }],
     "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }],
-    "initialEquipment": { "weapon": "武器名（無則不填）", "armor": "護甲名（無則不填）" }
+    "initialEquipment": { "weapon": "武器名（無則省略）", "armor": "護甲名（無則省略）" }
   }
 }
-注意：newItems/newSkills/initialEquipment 僅限背景故事中明確擁有的起始物品、武功與裝備，若無則省略該欄位。
+注意：newItems/newSkills/initialEquipment 僅限背景故事中明確擁有的，若無則省略欄位或回傳空陣列。
                     `.trim();
 
-                    const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成背景故事");
+                    const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成主角背景");
                     if (backstoryUsage) addUsage(backstoryUsage.promptTokenCount || 0, backstoryUsage.candidatesTokenCount || 0);
 
                     const backstoryResponse = parseJSON(backstoryJson);
                     const backstory: string = backstoryResponse.backstory || '';
 
-                    // 顯示背景故事給玩家
+                    // 顯示主角背景給玩家
                     addLog({ role: 'assistant', content: backstory });
-                    // 存入 summary 作為整場遊戲的背景基底
+                    // 存入 summary 作為主角前情基底
                     updateSummary(backstory);
 
                     // 處理門派/師承
@@ -133,7 +175,7 @@ export function ActionPanel() {
                     }
 
                     // ═══════════════════════════════════════════
-                    // STEP 2：生成主線劇情弧（await，讓開篇能參考第一章目標）
+                    // STEP 3：生成主線劇情弧（await，讓開篇能參考第一章目標）
                     // ═══════════════════════════════════════════
                     const arc = await generateQuestArc(useGameStore.getState(), backstory);
                     const firstQuest = arc?.[0] || '';
@@ -142,22 +184,20 @@ export function ActionPanel() {
                     }
 
                     // ═══════════════════════════════════════════
-                    // STEP 3：生成開篇場景（參考背景故事 + 第一章目標）
+                    // STEP 4：生成開篇場景
                     // ═══════════════════════════════════════════
                     const openingPrompt = `
-你是《自由江湖》的說書人，根據角色背景與第一章目標，生成玩家進入遊戲的第一幕場景。
+你是《自由江湖》的說書人，根據世界觀、主角背景與第一章目標，生成玩家進入遊戲的第一幕場景。
 
-角色背景：
-${backstory}
-
-第一章目標：${firstQuest || '開始江湖之旅'}
+江湖世界觀摘要：${worldResponse.centralConflict || worldNarrative.substring(0, 100)}
+主角背景：${backstory}
+第一章目標：${firstQuest || '踏入江湖'}
 
 【開篇場景要求（80-150字）】
-・第二人稱「你」，帶入感強
-・呈現角色當下所在的具體場景：地點、時辰、天氣、感官細節（聲音/氣味/光線）
-・開篇氛圍多元，不必然是緊張打鬥——可以是清晨趕路、市集偶遇、寺廟靜修、客棧等待，自然引出第一章目標
-・結尾給玩家留下一個明確的行動起點，引出選項
-・語感：金庸武俠白話文，乾淨俐落，無廢字
+・第二人稱「你」，強烈帶入感
+・呈現具體的當下場景：地點、時辰、天氣、感官細節（聲音/氣味/光線）
+・氛圍多元，不限打鬥——清晨趕路、市集偶遇、寺廟靜修、客棧等待皆可
+・自然銜接第一章目標，結尾留下一個明確的行動起點
 ・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
 
 只回傳 JSON：
