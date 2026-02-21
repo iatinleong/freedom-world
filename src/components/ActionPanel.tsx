@@ -111,6 +111,19 @@ export function ActionPanel() {
                     // ═══════════════════════════════════════════
                     // STEP 2：生成主角背景故事
                     // ═══════════════════════════════════════════
+                    // Map attribute values to narrative descriptors (no numbers)
+                    const attrDesc = (val: number, hi: string, mid: string, lo: string) =>
+                        val >= 8 ? hi : val >= 5 ? mid : lo;
+                    const attrFlavors = [
+                        `膂力：${attrDesc(player.stats.attributes.strength, '天生神力、力壓千鈞', '氣力尋常、不強不弱', '體力薄弱、難以持久')}`,
+                        `身法：${attrDesc(player.stats.attributes.agility, '身形如燕、靈動如風', '行動穩健、不快不慢', '動作遲緩、身形笨拙')}`,
+                        `根骨：${attrDesc(player.stats.attributes.constitution, '根骨奇佳、天生俠骨', '體質平常、尚在正常', '根骨羸弱、難以承受重創')}`,
+                        `悟性：${attrDesc(player.stats.attributes.intelligence, '悟性超群、一點即通', '資質尋常、勤能補拙', '資質略鈍、需苦練方成')}`,
+                        `定力：${attrDesc(player.stats.attributes.spirit, '定力如山、心如止水', '心境平和、略有波動', '心性浮躁、難以凝神')}`,
+                        `福緣：${attrDesc(player.stats.attributes.luck, '福星高照、際遇非凡', '際遇平平、隨緣而定', '時運不濟、諸事多阻')}`,
+                        `魅力：${attrDesc(player.stats.attributes.charm, '風采出眾、令人傾心', '外貌平凡、中規中矩', '面容平庸、不易讓人留下印象')}`,
+                    ].join('；');
+
                     const backstoryPrompt = `
 你是《自由江湖》的說書人，根據已建立的江湖世界觀，為玩家生成主角的背景故事。
 以金庸武俠小說的筆法寫作——第三人稱旁白，白話文，有畫面感，人物立體鮮活。
@@ -120,12 +133,13 @@ ${worldNarrative}
 
 主角資料：
 ・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
+・天賦資質（請自然融入背景敘述，不得照抄這些描述詞，也不得出現任何數字）：${attrFlavors}
 
 【主角背景故事要求（200-300字）】
 ・第三人稱旁白，一氣呵成，不分段標題
 ・涵蓋：出身家世、師承門派（必須是上方世界觀中存在的勢力之一，或「江湖散人」）、重要過去事件、核心執念、與當前江湖局勢的個人關聯
-・用具體的事件和細節塑造人物，不用抽象描述
-・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
+・天賦資質要體現在具體事件或性格中，而非用形容詞堆砌
+・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」、任何數字
 
 可選門派（來自上方世界觀）：${factionNames}、江湖散人
 
