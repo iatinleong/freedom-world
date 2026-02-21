@@ -14,9 +14,10 @@ import { CharacterPanel } from '@/components/CharacterPanel';
 import { DeathScreen } from '@/components/DeathScreen';
 import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem';
 import { GameMenu } from '@/components/GameMenu';
+import { User, Scroll, Settings } from 'lucide-react';
 
 export default function Home() {
-  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, player, loadGameState } = useGameStore();
+  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, isQuestPanelOpen, setQuestPanelOpen, setGameMenuOpen, player, loadGameState } = useGameStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { restoreLatestAutoSave } = useSaveGameStore();
   const [mounted, setMounted] = useState(false);
@@ -50,7 +51,7 @@ export default function Home() {
 
   return (
     <>
-      <main className="flex h-screen flex-col bg-background text-foreground overflow-hidden max-w-4xl mx-auto border-x border-wuxia-gold/20 shadow-2xl shadow-black relative z-10 scroll-border">
+      <main className="flex h-screen flex-col bg-background text-foreground overflow-hidden w-full border-x border-wuxia-gold/20 shadow-2xl shadow-black relative z-10 scroll-border">
         {/* 頂部裝飾線 */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-wuxia-gold/40 to-transparent z-50"></div>
 
@@ -62,19 +63,37 @@ export default function Home() {
 
         {/* Game Title - Only show when game started */}
         {isGameStarted && (
-          <header className="relative shrink-0 flex items-center justify-between px-8 py-4 border-b border-wuxia-gold/20 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm paper-edge z-50">
-            {/* 標題裝飾 - 左側 */}
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-wuxia-gold/30 text-base">【</div>
-
-            <div className="flex flex-col items-center mx-auto">
+          <header className="relative shrink-0 flex items-center px-6 py-3 border-b border-wuxia-gold/20 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm paper-edge z-50">
+            {/* 標題（置中） */}
+            <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2">
               <h1 className="ancient-title text-2xl tracking-[0.5em] text-wuxia-gold drop-shadow-lg">自由江湖</h1>
-              <span className="text-[10px] text-wuxia-gold/40 font-serif tracking-[0.8em] uppercase opacity-70 mt-1">Freedom Jianghu</span>
+              <span className="text-[10px] text-wuxia-gold/40 font-serif tracking-[0.8em] uppercase opacity-70">Freedom Jianghu</span>
             </div>
 
-            {/* 標題裝飾 - 右側 */}
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-wuxia-gold/30 text-base">】</div>
-
-            <span className="seal-stamp text-[10px] px-2 py-0.5 absolute right-4 top-4 rotate-12 opacity-80 shadow-lg">v0.1.0</span>
+            {/* 右側導覽按鈕 */}
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={() => setCharacterPanelOpen(true)}
+                className="w-9 h-9 bg-black/60 border border-wuxia-gold/30 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group"
+                title="角色面板"
+              >
+                <User className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
+              </button>
+              <button
+                onClick={() => setQuestPanelOpen(true)}
+                className="relative w-9 h-9 bg-black/60 border border-wuxia-gold/30 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group"
+                title="江湖記事"
+              >
+                <Scroll className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
+              </button>
+              <button
+                onClick={() => setGameMenuOpen(true)}
+                className="w-9 h-9 bg-black/60 border border-wuxia-gold/30 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group"
+                title="遊戲設置"
+              >
+                <Settings className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
+              </button>
+            </div>
           </header>
         )}
 

@@ -14,8 +14,6 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
     const [activeTab, setActiveTab] = useState<'info' | 'inventory' | 'skills' | 'relations'>('info');
     const { player } = useGameStore();
 
-    const expToNextLevel = player.stats.level * 100; // 简化计算
-    const expProgress = (player.stats.exp / expToNextLevel) * 100;
 
     const getMeridianName = (key: string) => {
         const names: Record<string, string> = {
@@ -105,25 +103,13 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                         {/* 角色信息 */}
                         {activeTab === 'info' && (
                             <div className="space-y-6">
-                                {/* 等級和經驗 */}
-                                <div className="p-4 bg-wuxia-gold/5 border border-wuxia-gold/20 rounded-lg space-y-3">
+                                {/* 等級 */}
+                                <div className="p-4 bg-wuxia-gold/5 border border-wuxia-gold/20 rounded-lg">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-serif text-wuxia-gold">等級</span>
+                                        <span className="text-sm font-serif text-wuxia-gold">江湖等級</span>
                                         <span className="text-2xl font-bold text-wuxia-gold">
                                             Lv.{player.stats.level}
                                         </span>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-xs text-white/60 mb-1">
-                                            <span>經驗值</span>
-                                            <span>{player.stats.exp} / {expToNextLevel}</span>
-                                        </div>
-                                        <div className="h-2 bg-black/50 rounded-full overflow-hidden border border-wuxia-gold/30">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-wuxia-bronze via-wuxia-gold to-wuxia-gold transition-all duration-500"
-                                                style={{ width: `${Math.min(expProgress, 100)}%` }}
-                                            />
-                                        </div>
                                     </div>
                                 </div>
 

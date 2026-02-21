@@ -2,7 +2,6 @@ export type Attribute = 'strength' | 'agility' | 'constitution' | 'intelligence'
 
 export interface PlayerStats {
     level: number;
-    exp: number;
     hp: number;
     maxHp: number;
     qi: number;
@@ -24,7 +23,6 @@ export interface PlayerStats {
         chivalry: number; // 俠義
         infamy: number; // 惡名
         fame: number; // 威名
-        seclusion: number; // 隱逸
     };
     origin: string; // 出身
     originDefined: boolean; // 出身定型狀態
@@ -144,6 +142,7 @@ export interface GameState {
     isGameStarted: boolean;
     isCharacterPanelOpen: boolean;
     isGameMenuOpen: boolean;
+    isQuestPanelOpen: boolean;
     notifications: any[];
     isProcessing: boolean;
     usage: {

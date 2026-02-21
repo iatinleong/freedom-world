@@ -3,18 +3,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { cn } from '@/lib/utils';
-import { X, Scroll, User, Settings, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Scroll, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Typewriter } from './Typewriter';
 
 export function GameTerminal() {
     const narrative = useGameStore((state) => state.narrative);
     const worldState = useGameStore((state) => state.worldState);
-    const setCharacterPanelOpen = useGameStore((state) => state.setCharacterPanelOpen);
-    const isCharacterPanelOpen = useGameStore((state) => state.isCharacterPanelOpen);
-    const setGameMenuOpen = useGameStore((state) => state.setGameMenuOpen);
+    const isQuestPanelOpen = useGameStore((state) => state.isQuestPanelOpen);
+    const setQuestPanelOpen = useGameStore((state) => state.setQuestPanelOpen);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const [showQuestPanel, setShowQuestPanel] = useState(false);
     const [expandedStage, setExpandedStage] = useState<number | null>(null);
 
     useEffect(() => {
@@ -37,41 +35,9 @@ export function GameTerminal() {
     return (
         <div className="flex-1 overflow-y-auto p-6 space-y-8 font-serif text-lg leading-loose text-foreground/90 paper-edge bg-gradient-to-b from-black/40 to-black/60 bamboo-texture relative scroll-smooth">
 
-            {/* Floating Action Buttons */}
-            {!isCharacterPanelOpen && (
-                <div className="fixed top-16 right-4 z-40 flex flex-col gap-2">
-                    <button
-                        onClick={() => setCharacterPanelOpen(true)}
-                        className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
-                        title="角色面板"
-                    >
-                        <User className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
-                    </button>
-
-                    <button
-                        onClick={() => setShowQuestPanel(true)}
-                        className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg relative"
-                        title="江湖記事"
-                    >
-                        <Scroll className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
-                        {worldState?.mainQuest && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-wuxia-gold/80 border border-black/60" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => setGameMenuOpen(true)}
-                        className="w-10 h-10 bg-black/80 border border-wuxia-gold/30 rounded-sm backdrop-blur-md flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group shadow-lg"
-                        title="遊戲設置"
-                    >
-                        <Settings className="w-4 h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
-                    </button>
-                </div>
-            )}
-
             {/* Quest + Chronicle Panel */}
-            {showQuestPanel && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowQuestPanel(false)}>
+            {isQuestPanelOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setQuestPanelOpen(false)}>
                     <div
                         className="relative w-full max-w-lg max-h-[85vh] bg-[#1a1a1a] border-2 border-wuxia-gold/30 rounded overflow-hidden shadow-2xl flex flex-col"
                         onClick={e => e.stopPropagation()}
@@ -82,7 +48,7 @@ export function GameTerminal() {
                                 <Scroll className="w-5 h-5 text-wuxia-gold" />
                                 <h2 className="text-xl font-serif text-wuxia-gold tracking-widest">江湖記事</h2>
                             </div>
-                            <button onClick={() => setShowQuestPanel(false)} className="text-white/50 hover:text-white transition-colors">
+                            <button onClick={() => setQuestPanelOpen(false)} className="text-white/50 hover:text-white transition-colors">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>

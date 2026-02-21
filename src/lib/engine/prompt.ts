@@ -82,7 +82,7 @@ ${recentHistory || '（暫無）'}
 地點：${world.location}｜${world.time.period}｜${world.weather}（${world.weatherEffect}）[${world.tags.join(',')}]
 ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.stats.hp}/${player.stats.maxHp}｜內力${player.stats.qi}/${player.stats.maxQi}｜飢餓${player.stats.hunger}｜道德${player.stats.moral}
 膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
-聲望：俠義${player.stats.reputation.chivalry} 惡名${player.stats.reputation.infamy} 威名${player.stats.reputation.fame} 隱逸${player.stats.reputation.seclusion}
+聲望：俠義${player.stats.reputation.chivalry} 惡名${player.stats.reputation.infamy} 威名${player.stats.reputation.fame}
 武學：${skillStr}｜裝備：${player.equipment.weapon || '無'}/${player.equipment.armor || '無'}
 物品：${player.inventory.map((i: any) => `${i.name}x${i.count}`).join('、') || '無'}${player.statusEffects.length ? `｜異常：${player.statusEffects.join('、')}` : ''}
 
@@ -93,6 +93,21 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 ・HP 不得低於1；當前${player.stats.hp}，hpChange 下限 ${-(player.stats.hp - 1)}
 ・HP ≤ ${Math.ceil(player.stats.maxHp * 0.3)} 時 hpChange 不得為負
 ・任何致命危機必有生路；敵人不能殺死主角
+
+━━ 武學戰鬥體系 ━━
+【外功——攻防招式】直接造成傷害：
+・hpChange = -(膂力×2 + 品階加成) × 內功倍率 - 目標根骨防禦
+・品階加成：基礎+0 進階+5 上乘+12 絕世+25 神功+50
+・參考值：膂力5→約-10；膂力10→約-20；膂力20→約-40
+【內功——輔助心法】不直接傷害，而是：
+・倍增外功威力（初窺×1.1；爐火純青×2.0；返璞歸真×3.0）
+・療傷回血（hpChange 正值）；恢復內力（qiChange 正值）
+・特殊狀態（定身、護體、破防等）
+【輕功——身法閃避】不直接傷害，而是：
+・閃避敵攻（使傷害大幅降低或歸零）
+・奇襲先手、快速脫身、追擊敵人
+・身法越高，逃跑/追擊/閃避成功率越高
+【屬性上限】所有屬性最高20；attributeChanges 依事件重要性給+1~+3
 
 ━━ 敘事法則 ━━
 ・每回合一件具體事發生，80-150字，包含感官細節
@@ -111,7 +126,7 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 情報：得知可前往地點→第1選項為前往該地，或已移動則填 newLocation。
 newTags/removedTags 僅限地形/環境/天氣標籤（如「山林」「薄霧」「廢墟」），嚴禁填入NPC名稱、門派或人際關係。
 attributeChanges key（僅此7個）：strength/agility/constitution/intelligence/spirit/luck/charm
-reputationChanges key（僅此4個）：chivalry/infamy/fame/seclusion
+reputationChanges key（僅此3個）：chivalry/infamy/fame
 
 {
   "narrative": "（80-150字，具體事件，感官細節）",
@@ -124,7 +139,6 @@ reputationChanges key（僅此4個）：chivalry/infamy/fame/seclusion
   "stateUpdate": {
     "hungerChange": -1,
     "hpChange": -15,
-    "expChange": 10,
     "newItems": [{ "name": "物品名", "count": 1, "type": "consumable", "description": "簡短描述" }],
     "removedItems": [{ "name": "金創藥", "count": 1 }],
     "newSkills": [{ "name": "武功名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }],

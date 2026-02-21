@@ -185,7 +185,7 @@ export function StatusHUD() {
                                 <span className="text-wuxia-crimson/90 text-sm font-bold font-serif tracking-widest">江湖聲望</span>
                                 <div className="h-px flex-1 bg-gradient-to-r from-wuxia-crimson/20 to-transparent"></div>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="grid grid-cols-3 gap-2 text-xs">
                                 <div className="flex justify-between items-center px-3 py-2 bg-emerald-950/30 border border-emerald-900/50 rounded-sm">
                                     <span className="text-emerald-500/80">俠義</span>
                                     <span className="text-emerald-400 font-bold">{stats.reputation.chivalry}</span>
@@ -197,10 +197,6 @@ export function StatusHUD() {
                                 <div className="flex justify-between items-center px-3 py-2 bg-amber-950/30 border border-amber-900/50 rounded-sm">
                                     <span className="text-amber-500/80">威名</span>
                                     <span className="text-amber-400 font-bold">{stats.reputation.fame}</span>
-                                </div>
-                                <div className="flex justify-between items-center px-3 py-2 bg-slate-900/30 border border-slate-800/50 rounded-sm">
-                                    <span className="text-slate-400/80">隱逸</span>
-                                    <span className="text-slate-300 font-bold">{stats.reputation.seclusion}</span>
                                 </div>
                             </div>
                         </div>

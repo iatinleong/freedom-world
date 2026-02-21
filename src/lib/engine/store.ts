@@ -32,6 +32,8 @@ interface GameStore extends GameState {
     isCharacterPanelOpen: boolean;
     isGameMenuOpen: boolean;
     setGameMenuOpen: (isOpen: boolean) => void;
+    isQuestPanelOpen: boolean;
+    setQuestPanelOpen: (isOpen: boolean) => void;
     notifications: any[];
 }
 
@@ -43,7 +45,6 @@ const INITIAL_STATE: GameState = {
         gender: 'male',
         stats: {
             level: 1,
-            exp: 0,
             hp: 20,
             maxHp: 20,
             qi: 10,
@@ -65,7 +66,6 @@ const INITIAL_STATE: GameState = {
                 chivalry: 0,
                 infamy: 0,
                 fame: 0,
-                seclusion: 0,
             },
             origin: '出身未定',
             originDefined: false,
@@ -154,6 +154,7 @@ const INITIAL_STATE: GameState = {
     isGameStarted: false,
     isCharacterPanelOpen: false,
     isGameMenuOpen: false,
+    isQuestPanelOpen: false,
     notifications: [],
     usage: {
         totalCost: 0,
@@ -171,8 +172,10 @@ export const useGameStore = create<GameStore>()(
             isGameStarted: false,
             isCharacterPanelOpen: false,
             isGameMenuOpen: false,
+            isQuestPanelOpen: false,
 
             setGameMenuOpen: (isOpen) => set({ isGameMenuOpen: isOpen }),
+            setQuestPanelOpen: (isOpen) => set({ isQuestPanelOpen: isOpen }),
 
             addLog: (log) =>
                 set((state) => ({
@@ -193,10 +196,12 @@ export const useGameStore = create<GameStore>()(
                         
                         // Deep merge attributes if provided
                         if (statsUpdates.attributes) {
-                            newStats.attributes = {
-                                ...currentStats.attributes,
-                                ...statsUpdates.attributes
-                            };
+                            const ATTR_MAX = 20;
+                            const merged = { ...currentStats.attributes, ...statsUpdates.attributes };
+                            // Cap all attributes at 20
+                            newStats.attributes = Object.fromEntries(
+                                Object.entries(merged).map(([k, v]) => [k, Math.min(ATTR_MAX, Math.max(1, v as number))])
+                            ) as typeof merged;
 
                             // --- LOGIC REINFORCEMENT: Derived Stats ---
                             // If constitution (根骨) changes, update maxHp (根骨 x 20)
@@ -565,8 +570,8 @@ export const useGameStore = create<GameStore>()(
 
             getGameState: () => {
                 const state = get();
-                const { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, usage, notifications } = state;
-                return { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, usage, notifications };
+                const { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, isQuestPanelOpen, usage, notifications } = state;
+                return { player, world, worldState, system, narrative, options, isProcessing, summary, isGameStarted, isCharacterPanelOpen, isGameMenuOpen, isQuestPanelOpen, usage, notifications };
             }
         }),
         {
@@ -615,7 +620,8 @@ export const useGameStore = create<GameStore>()(
                     player: mergedPlayer,
                     worldState: mergedWorldState,
                     isCharacterPanelOpen: false, // Force panel closed on load
-                    isProcessing: false, // Force processing false on load
+                    isQuestPanelOpen: false,     // Force panel closed on load
+                    isProcessing: false,          // Force processing false on load
                 };
             },
         })

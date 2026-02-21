@@ -324,9 +324,6 @@ ${worldNarrative}
                 if (response.stateUpdate.hungerChange) {
                     updatePlayerStats({ hunger: Math.max(0, state.player.stats.hunger + response.stateUpdate.hungerChange) });
                 }
-                if (response.stateUpdate.expChange) {
-                    updatePlayerStats({ exp: state.player.stats.exp + response.stateUpdate.expChange });
-                }
                 if (response.stateUpdate.moneyChange) {
                     updatePlayerStats({ money: state.player.stats.money + response.stateUpdate.moneyChange });
                 }
