@@ -66,7 +66,8 @@ export function ActionPanel() {
                     // ═══════════════════════════════════════════
                     const worldPrompt = `
 你是武俠世界的創世說書人，為《自由江湖》生成一個獨特的武俠江湖世界觀。
-所有內容必須完全原創，不得使用任何現有IP的角色名稱、地名或設定。
+以金庸武俠小說的筆法寫作——白話文、有畫面感、人物與勢力鮮活立體。
+所有人名、地名、勢力名稱必須完全原創，不得沿用任何現有作品。
 
 【江湖背景要求（200-300字）】
 以流暢的第三人稱旁白呈現，涵蓋以下五個面向，一氣呵成，不分標題：
@@ -83,9 +84,9 @@ export function ActionPanel() {
     {
       "name": "勢力名稱",
       "alignment": "正道|邪道|中立",
-      "philosophy": "門派理念（如：以武入道、順天應命、利益至上）",
-      "martialStyle": "功法特色（如：剛猛外功為主、以柔克剛的內力、飄逸輕功身法）",
-      "personality": "待人處事風格（如：重義輕財、行事冷酷、廣結善緣）",
+      "philosophy": "門派理念",
+      "martialStyle": "功法特色",
+      "personality": "待人處事風格",
       "status": "當前處境（強盛/式微/擴張中/內亂/蟄伏）"
     }
   ],
@@ -112,18 +113,18 @@ export function ActionPanel() {
                     // ═══════════════════════════════════════════
                     const backstoryPrompt = `
 你是《自由江湖》的說書人，根據已建立的江湖世界觀，為玩家生成主角的背景故事。
+以金庸武俠小說的筆法寫作——第三人稱旁白，白話文，有畫面感，人物立體鮮活。
 
 江湖世界觀：
 ${worldNarrative}
 
 主角資料：
 ・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
-・膂力${player.stats.attributes.strength} 身法${player.stats.attributes.agility} 根骨${player.stats.attributes.constitution} 悟性${player.stats.attributes.intelligence} 定力${player.stats.attributes.spirit} 福緣${player.stats.attributes.luck} 魅力${player.stats.attributes.charm}
 
 【主角背景故事要求（200-300字）】
-・第三人稱旁白，武俠白話文筆法，一氣呵成
+・第三人稱旁白，一氣呵成，不分段標題
 ・涵蓋：出身家世、師承門派（必須是上方世界觀中存在的勢力之一，或「江湖散人」）、重要過去事件、核心執念、與當前江湖局勢的個人關聯
-・根骨高→體魄天賦異稟；悟性高→資質驚人；福緣高→奇遇不斷；魅力高→人緣極廣
+・用具體的事件和細節塑造人物，不用抽象描述
 ・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」
 
 可選門派（來自上方世界觀）：${factionNames}、江湖散人
@@ -187,6 +188,8 @@ ${worldNarrative}
                     const arc = await generateQuestArc(useGameStore.getState(), backstory);
                     const firstQuest = arc?.[0] || '';
                     if (arc && arc.length > 0) {
+                        // questStartTurn 設為開篇後的 assistant 數（世界+背景已加 2 個 log）
+                        // 開篇 log 會在 Step 4 加入，所以這裡先記錄完成後的起點
                         updateWorldState({ questArc: arc, questArcIndex: 0, mainQuest: arc[0] });
                     }
 
@@ -241,6 +244,11 @@ ${worldNarrative}
                     if (openingResponse.options) {
                         setOptions(normalizeOptions(openingResponse.options));
                     }
+
+                    // 設定 questStartTurn：跳過世界背景+主角背景+開篇共3個init log
+                    // 讓主線進度計算從第一個真正的玩家操作回合才開始
+                    const initLogCount = useGameStore.getState().narrative.filter(l => l.role === 'assistant').length;
+                    updateWorldState({ questStartTurn: initLogCount });
 
                 } catch (error: any) {
                     console.error("Init failed", error);
@@ -431,8 +439,10 @@ ${worldNarrative}
                 });
             }
 
-            // --- Quest Arc Advancement (every 6 assistant turns) ---
-            if (assistantCount > 0 && assistantCount % 6 === 0) {
+            // --- Quest Arc Advancement (every 6 gameplay turns, offset from questStartTurn) ---
+            const questStartTurn = useGameStore.getState().worldState?.questStartTurn ?? 0;
+            const turnsIntoCurrentQuest = assistantCount - questStartTurn;
+            if (turnsIntoCurrentQuest > 0 && turnsIntoCurrentQuest % 6 === 0) {
                 const currentState = useGameStore.getState();
                 generateStageSummary(currentState).then(stageSummary => {
                     const ws = getGameState().worldState;

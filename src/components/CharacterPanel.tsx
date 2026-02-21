@@ -317,14 +317,14 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                         {/* 武學技能 */}
                         {activeTab === 'skills' && (
                             <div className="space-y-6">
-                                {/* 基礎武學 */}
+                                {/* 外功 */}
                                 <div className="space-y-3">
                                     <h3 className="text-sm font-serif text-wuxia-gold tracking-wide flex items-center gap-2">
                                         <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                        基礎武學
+                                        外功
                                     </h3>
                                     {player.skills.basics.length === 0 ? (
-                                        <p className="text-center py-8 text-white/40 text-sm">尚未習得任何基礎武學</p>
+                                        <p className="text-center py-8 text-white/40 text-sm">尚未習得任何外功</p>
                                     ) : (
                                         <div className="space-y-3">
                                             {player.skills.basics.map((skill, idx) => (

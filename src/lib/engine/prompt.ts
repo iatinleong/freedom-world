@@ -109,6 +109,7 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 只輸出 JSON，stateUpdate 只填真正有變化的欄位（0值不寫）。
 物品：獲得→newItems；使用/失去→removedItems；同名自動疊加。
 情報：得知可前往地點→第1選項為前往該地，或已移動則填 newLocation。
+newTags/removedTags 僅限地形/環境/天氣標籤（如「山林」「薄霧」「廢墟」），嚴禁填入NPC名稱、門派或人際關係。
 attributeChanges key（僅此7個）：strength/agility/constitution/intelligence/spirit/luck/charm
 reputationChanges key（僅此4個）：chivalry/infamy/fame/seclusion
 
