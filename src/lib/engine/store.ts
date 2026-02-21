@@ -196,7 +196,7 @@ export const useGameStore = create<GameStore>()(
                         
                         // Deep merge attributes if provided
                         if (statsUpdates.attributes) {
-                            const ATTR_MAX = 20;
+                            const ATTR_MAX = 100;
                             const merged = { ...currentStats.attributes, ...statsUpdates.attributes };
                             // Cap all attributes at 20
                             newStats.attributes = Object.fromEntries(

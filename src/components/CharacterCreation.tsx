@@ -141,9 +141,9 @@ export function CharacterCreation() {
                                 <span className="text-[10px] text-white/50 mb-1">{ATTRIBUTE_NAMES[key]}</span>
                                 <span className={cn(
                                     "text-lg font-bold font-mono",
-                                    value >= 9 ? "text-wuxia-gold" : 
-                                    value >= 7 ? "text-wuxia-gold/80" : 
-                                    value <= 3 ? "text-white/30" : "text-white/60"
+                                    value >= 9 ? "text-wuxia-gold" :
+                                    value >= 6 ? "text-wuxia-gold/80" :
+                                    value <= 2 ? "text-white/30" : "text-white/60"
                                 )}>
                                     {value}
                                 </span>
