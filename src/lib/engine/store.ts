@@ -575,7 +575,7 @@ export const useGameStore = create<GameStore>()(
             }
         }),
         {
-            name: 'freedom-jianghu-storage-v5',
+            name: 'freedom-jianghu-storage-v6',
             // Deep merge persisted state with initial state to handle missing fields
             merge: (persistedState: any, currentState: GameStore) => {
                 if (!persistedState) return currentState;
