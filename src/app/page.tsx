@@ -183,10 +183,137 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <a href="#pricing" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
+        <a href="#features" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
           <span className="text-[10px] tracking-widest">SCROLL</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </a>
+      </section>
+
+      {/* ── 核心亮點 ── */}
+      <section id="features" className="border-t border-white/5">
+
+        {/* 亮點一：輸入玩法 */}
+        <div className="py-24 px-6 border-b border-white/5">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點一</p>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">⌨️ 一個輸入框，就是你的全世界</h2>
+            <p className="text-white/50 mb-8 leading-relaxed">
+              還在玩「選項 A、B、C」的傳統遊戲嗎？在《自由江湖》中，對話框是你唯一的武器。
+            </p>
+            <div className="mb-8">
+              <p className="text-fw-gold/80 font-serif mb-4">你寫得出，它就演得活：</p>
+              <ul className="space-y-4">
+                {[
+                  '想「在酒館酒後亂性，強擄客官」？可以。',
+                  '想「趁師父閉關時，偷偷在丹藥裡下毒」？隨你。',
+                  '想「在比武擂台上脫衣嘲諷對手」？沒人擋得住。',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/70 leading-relaxed">
+                    <span className="text-fw-gold/40 mt-1 shrink-0">▸</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="border-l-2 border-fw-gold/30 pl-5">
+              <p className="text-fw-gold/70 font-serif mb-1">拒絕套路</p>
+              <p className="text-white/50 leading-relaxed text-sm">這裡沒有標準答案。你的每一次奇思妙想，都會引發不可逆轉的江湖巨變。</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 亮點二：18+ */}
+        <div className="py-24 px-6 border-b border-white/5 bg-white/[0.02]">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點二</p>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">🔞 剝去濾鏡，看見最真實的人性</h2>
+            <p className="text-white/50 mb-8 leading-relaxed">
+              江湖不僅有刀光劍影，還有慾望、背叛與禁忌的煙火。
+            </p>
+            <div className="space-y-6">
+              <div className="border-l-2 border-fw-gold/30 pl-5">
+                <p className="text-fw-gold/70 font-serif mb-1">無碼的成人互動</p>
+                <p className="text-white/50 leading-relaxed text-sm">憑藉強大的敘事引擎，你可以與 NPC 發展出超乎想像的親密關係，或在黑暗的暗巷中執行最殘酷的惡行。</p>
+              </div>
+              <div className="border-l-2 border-fw-gold/30 pl-5">
+                <p className="text-fw-gold/70 font-serif mb-1">善惡由你</p>
+                <p className="text-white/50 leading-relaxed text-sm">你可以成為受萬人景仰的俠義之士，也可以成為一個沉溺於權力與美色的混世魔王。在這個世界，我們不審查你的靈魂，只呈現你的選擇。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 亮點三：活世界 */}
+        <div className="py-24 px-6 border-b border-white/5">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點三</p>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">🧠 擁有記憶的說書人</h2>
+            <p className="text-white/50 mb-8 leading-relaxed">
+              這不只是文字堆砌，而是一個動態演進的生態系統。
+            </p>
+            <ul className="space-y-6">
+              {[
+                { title: '因果連鎖', desc: '你在新手村殺的一個路人，可能會讓你在十年後的京城遭到全城通緝。' },
+                { title: '精準回饋', desc: '每一段描寫都包含感官細節。說書人會根據你的屬性（膂力、身法、悟性）與當前環境，為你親筆撰寫獨一無二的戰鬥與奇遇。' },
+                { title: '永不中斷的傳奇', desc: '滾動摘要系統確保了故事的連貫性，你的每一刻成長與墮落，都會被刻在江湖的歷史中。' },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="text-fw-gold/40 mt-1 shrink-0">▸</span>
+                  <div>
+                    <p className="text-fw-gold/70 font-serif mb-1">{item.title}</p>
+                    <p className="text-white/50 leading-relaxed text-sm">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* 亮點四：RPG 深度 */}
+        <div className="py-24 px-6 border-b border-white/5 bg-white/[0.02]">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點四</p>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">📊 隱藏在文字下的精密齒輪</h2>
+            <p className="text-white/50 mb-8 leading-relaxed">
+              別被文字外表騙了，這是一款硬核的數值 RPG。
+            </p>
+            <ul className="space-y-6">
+              {[
+                { title: '七大根骨定乾坤', desc: '膂力決定攻防、身法決定閃避、悟性決定學招速度、福緣決定奇遇。' },
+                { title: '動態武學體系', desc: '從基礎外功到神功心法，你的修為會精確影響系統對戰鬥結果的判定。' },
+                { title: '名望與稱號', desc: '俠義、惡名、威名，你的名號將決定 NPC 對你的態度——是夾道歡迎，還是拔劍相向？' },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="text-fw-gold/40 mt-1 shrink-0">▸</span>
+                  <div>
+                    <p className="text-fw-gold/70 font-serif mb-1">{item.title}</p>
+                    <p className="text-white/50 leading-relaxed text-sm">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* 最終 CTA */}
+        <div className="py-24 px-6 text-center">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <p className="text-xl sm:text-2xl font-serif text-white/80 leading-relaxed">
+              「江湖很大，但我只想玩得大。」
+            </p>
+            <p className="text-white/40 leading-relaxed">
+              不要再被預設的結局束縛。現在就踏入《自由江湖》，<br className="hidden sm:block" />
+              體驗那種「只要我想，沒什麼不可以」的極致快感。
+            </p>
+            <div className="pt-4">
+              <Link href="/game"
+                className="inline-block px-12 py-5 bg-fw-gold text-black font-bold text-sm tracking-widest rounded hover:bg-fw-gold/90 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:shadow-[0_0_60px_rgba(212,175,55,0.5)]">
+                立即啟程，撰寫你的不歸路
+              </Link>
+            </div>
+          </div>
+        </div>
+
       </section>
 
       {/* ── 訂閱方案 ── */}
