@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "自由江湖 (Freedom Jianghu)",
-  description: "A text-based Wuxia RPG where text is physics.",
+  title: "自由世界 Freedom World",
+  description: "一個活著的開放小說世界。你的每一個抉擇，都將永久改變它的走向。",
 };
 
 export default function RootLayout({

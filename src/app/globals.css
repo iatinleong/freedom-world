@@ -40,6 +40,9 @@
 
   --color-wuxia-gold: var(--color-gold);
   --color-wuxia-crimson: var(--color-crimson);
+
+  /* 自由世界官網配色 */
+  --color-fw-gold: var(--color-gold);
   --color-wuxia-ink: var(--color-ink-light);
   --color-wuxia-jade: var(--color-jade);
   --color-wuxia-vermillion: var(--color-vermillion);
