@@ -47,16 +47,23 @@ function Particles() {
 // ── 訂閱卡片 ──────────────────────────────────────────────
 interface PlanCardProps {
   name: string;
-  price: string;
+  usdPrice: number;
   period: string;
-  originalPrice?: string;
+  usdOriginal?: number;
   badge?: string;
   features: string[];
   highlight?: boolean;
   note?: string;
+  rate: number | null;
 }
 
-function PlanCard({ name, price, period, originalPrice, badge, features, highlight, note }: PlanCardProps) {
+function toTwd(usd: number, rate: number | null) {
+  if (!rate) return '---';
+  return `NT$${Math.round(usd * rate)}`;
+}
+
+function PlanCard({ name, usdPrice, period, usdOriginal, badge, features, highlight, note, rate }: PlanCardProps) {
+  const loading = rate === null;
   return (
     <div className={`relative flex flex-col rounded-xl border p-7 transition-all duration-300
       ${highlight
@@ -70,10 +77,14 @@ function PlanCard({ name, price, period, originalPrice, badge, features, highlig
       <div className="mb-6">
         <p className="text-sm text-white/50 tracking-widest uppercase font-mono mb-2">{name}</p>
         <div className="flex items-end gap-2">
-          <span className={`text-4xl font-bold ${highlight ? 'text-fw-gold' : 'text-white'}`}>{price}</span>
+          <span className={`text-4xl font-bold transition-all ${highlight ? 'text-fw-gold' : 'text-white'} ${loading ? 'opacity-40' : ''}`}>
+            {loading ? '---' : toTwd(usdPrice, rate)}
+          </span>
           <span className="text-white/50 text-sm pb-1">{period}</span>
         </div>
-        {originalPrice && <p className="text-xs text-white/30 line-through mt-1">{originalPrice}</p>}
+        {usdOriginal && rate && (
+          <p className="text-xs text-white/30 line-through mt-1">{toTwd(usdOriginal, rate)} / 年</p>
+        )}
         {note && <p className="text-xs text-fw-gold/70 mt-2">{note}</p>}
       </div>
       <ul className="space-y-3 flex-1 mb-7">
@@ -97,10 +108,19 @@ function PlanCard({ name, price, period, originalPrice, badge, features, highlig
 // ── 主頁面 ────────────────────────────────────────────────
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
+  const [rate, setRate] = useState<number | null>(null);
+
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handler);
     return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/exchange-rate')
+      .then(r => r.json())
+      .then(d => setRate(d.rate))
+      .catch(() => setRate(32)); // fallback
   }, []);
 
   return (
@@ -175,14 +195,22 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <p className="text-xs text-fw-gold/60 tracking-[0.5em] uppercase font-mono mb-3">Pricing</p>
             <h2 className="text-3xl font-serif text-white mb-4">選擇你的方案</h2>
-            <p className="text-sm text-white/40">所有方案可跨世界使用・回合不限使用哪個世界</p>
+            <div className="flex items-center justify-center gap-2">
+              <p className="text-sm text-white/40">所有方案可跨世界使用・回合不限使用哪個世界</p>
+              {rate && (
+                <span className="text-xs text-white/25 font-mono">
+                  （匯率 1 USD = {rate.toFixed(1)} TWD）
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             <PlanCard
               name="月費"
-              price="US$8"
+              usdPrice={8}
               period="/ 月"
+              rate={rate}
               features={[
                 '每日 60 回合',
                 '跨所有開放世界',
@@ -192,11 +220,12 @@ export default function LandingPage() {
             />
             <PlanCard
               name="年費"
-              price="US$72"
+              usdPrice={72}
               period="/ 年"
-              originalPrice="US$96 / 年"
+              usdOriginal={96}
               badge="省 25%"
               note="相當於每月 US$6，節省 2 個月費用"
+              rate={rate}
               features={[
                 '每日 60 回合',
                 '跨所有開放世界',
@@ -207,8 +236,9 @@ export default function LandingPage() {
             />
             <PlanCard
               name="即時補充"
-              price="US$4.99"
+              usdPrice={4.99}
               period="/ 次"
+              rate={rate}
               features={[
                 '補充 300 回合',
                 '永久有效，不過期',
