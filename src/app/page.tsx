@@ -176,120 +176,17 @@ export default function LandingPage() {
               className="px-10 py-4 bg-fw-gold text-black font-bold text-sm tracking-widest rounded hover:bg-fw-gold/90 transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_50px_rgba(212,175,55,0.5)]">
               立即體驗
             </Link>
-            <a href="#features"
+            <a href="#pricing"
               className="px-10 py-4 border border-white/20 text-white/70 text-sm tracking-widest rounded hover:border-fw-gold/50 hover:text-white transition-all">
-              了解更多
+              查看方案
             </a>
           </div>
         </div>
 
-        <a href="#features" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
+        <a href="#pricing" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
           <span className="text-[10px] tracking-widest">SCROLL</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </a>
-      </section>
-
-      {/* ── 文案區塊 ── */}
-      <section id="features" className="py-32 px-6 border-t border-white/5">
-        <div className="max-w-2xl mx-auto space-y-32">
-
-          {/* 自由輸入 */}
-          <div className="text-center space-y-6">
-            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono">Freedom of Action</p>
-            <p className="text-2xl sm:text-3xl font-serif text-white leading-relaxed">
-              有人遇到了江湖第一殺手。<br />
-              AI 給了四個選項，<br />
-              他一個都沒選。
-            </p>
-            <p className="text-white/50 font-mono text-sm border border-white/10 rounded-lg px-6 py-4 inline-block bg-white/3">
-              我裝作沒看見，繼續喝茶
-            </p>
-            <p className="text-lg text-white/70 font-serif leading-relaxed">
-              殺手在他對面坐下，說：「有意思。」<br />
-              三章後，那個殺手成了他師父。
-            </p>
-            <p className="text-white/40 text-sm leading-relaxed">
-              你可以選 AI 給的路，也可以走自己的。<br />世界都會回應。
-            </p>
-          </div>
-
-          {/* 不可逆 */}
-          <div className="text-center space-y-6">
-            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono">No Undo</p>
-            <p className="text-2xl sm:text-3xl font-serif text-white leading-relaxed">
-              她選擇出賣了那個人。
-            </p>
-            <p className="text-lg text-white/70 font-serif leading-relaxed">
-              以為只是一個選項，以為可以回頭。<br />
-              但那個人的師兄弟，六章後，<br />認出了她的臉。
-            </p>
-            <p className="text-white/40 text-sm">
-              這個世界沒有讀檔。你做過的事，永遠留在這裡。
-            </p>
-          </div>
-
-          {/* 每局新世界 */}
-          <div className="text-center space-y-6">
-            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono">Infinite Worlds</p>
-            <p className="text-2xl sm:text-3xl font-serif text-white leading-relaxed">
-              你不知道今天開局的江湖，<br />是什麼樣的底色。
-            </p>
-            <p className="text-lg text-white/70 font-serif leading-relaxed">
-              可能是武林秘典重現、各方爭奪的亂世。<br />
-              可能是一樁滅門血案，昨晚才剛發生。<br />
-              可能是盛世之下某個你還不知道的裂縫。
-            </p>
-            <p className="text-white/40 text-sm">
-              AI 在你進入之前，已經把這個世界建好了。<br />
-              沒有兩個人活在同一個江湖裡。
-            </p>
-          </div>
-
-          {/* 無審查 — 明顯暗示 */}
-          <div className="text-center space-y-6">
-            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono">Uncensored</p>
-            <p className="text-2xl sm:text-3xl font-serif text-white leading-relaxed">
-              有些故事，<br />在別的地方不能寫完。
-            </p>
-            <p className="text-lg text-white/70 font-serif leading-relaxed">
-              主角與仇人之間的張力，可以去任何地方。<br />
-              師徒之間，可以比武功更複雜。<br />
-              酒後的江湖夜晚，不需要在清醒前剪掉。
-            </p>
-            <p className="text-white/40 text-sm">
-              這裡沒有審查員。你的故事，你決定它走到哪裡。
-            </p>
-          </div>
-
-          {/* 屬性 */}
-          <div className="text-center space-y-6">
-            <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono">Your Character Matters</p>
-            <p className="text-2xl sm:text-3xl font-serif text-white leading-relaxed">
-              你的天賦，<br />決定世界如何看你。
-            </p>
-            <p className="text-lg text-white/70 font-serif leading-relaxed">
-              魅力夠高——追你的殺手，忍不住留你一命。<br />
-              福緣夠深——隨手翻過一塊石頭，底下是秘笈。<br />
-              悟性夠強——旁觀別人打架，就能把招式學走。
-            </p>
-            <p className="text-white/40 text-sm">
-              AI 讀得懂你的數值，而且它真的照著用。
-            </p>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center space-y-8">
-            <p className="text-2xl sm:text-3xl font-serif text-white/90 leading-relaxed">
-              不是選項遊戲。不是劇情遊戲。<br />
-              是你帶著一個角色，走進一個活著的世界。
-            </p>
-            <Link href="/game"
-              className="inline-block px-12 py-5 bg-fw-gold text-black font-bold text-sm tracking-widest rounded hover:bg-fw-gold/90 transition-all shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:shadow-[0_0_60px_rgba(212,175,55,0.5)]">
-              從這裡開始
-            </Link>
-          </div>
-
-        </div>
       </section>
 
       {/* ── 訂閱方案 ── */}
