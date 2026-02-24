@@ -71,30 +71,34 @@ export function ActionPanel() {
                    
 
                     const worldPrompt = `
-你是武俠世界的創世說書人，為《自由江湖》生成一個獨一無二的江湖。
-用金庸的寫作手法和劇情風格——白話文，有肌理感，讓人讀了就身歷其境。
+你是武俠世界的創世說書人，為《自由江湖》勾勒一個廣闊且生動的半架空江湖。
+這是一個歷代武俠小說大師筆下（如金庸、古龍等）的傳奇都曾發生過的世界，而我們的故事，發生在那些叱吒風雲的英雄落幕多年之後。
+請用武俠小說特有的筆觸——白話文、富含肌理感與恩怨情仇，讓人一讀便能感受到刀光劍影與快意恩仇。
 
+【勢力與格局】
+請將以下勢力融入這個世界，賦予他們在「後傳奇時代」的全新處境與相互交織的恩怨：
+少林、武當、點蒼山、血蓮教、朝廷、華山、藥王殿、唐門、日月神教、逍遙派。
 
-以第三人稱旁白，一氣呵成地寫出這個江湖的面貌（200-300字）。
-不必逐條交代背景——抓住最有張力的幾條線：這裡的氣息是什麼？裂痕從哪裡來？
-哪些人或勢力正在推動或阻止那場無可避免的風暴？讓讀者讀完就想活在這個世界裡。
+【生成要求】
+以第三人稱旁白，一氣呵成地寫出這個江湖的當下局勢（200-300字）。
+重點描繪當下江湖的「氣息」與「核心矛盾」——是風雨欲來的壓抑？還是群雄並起的混亂？
+讓讀者讀完立刻就有踏入這片江湖、攪動風雲的衝動。
 
 只回傳 JSON：
 {
-  "worldNarrative": "200-300字江湖背景（給玩家看的敘述）",
+  "worldNarrative": "200-300字江湖背景（給玩家看的敘述，聚焦於當前的江湖局勢與氛圍）",
   "factions": [
     {
       "name": "勢力名稱",
-      "alignment": "正道|邪道|中立",
-      "philosophy": "門派理念",
-      "martialStyle": "功法特色",
-      "personality": "待人處事風格",
-      "status": "當前處境（強盛/式微/擴張中/內亂/蟄伏）"
+      "alignment": "正道|邪道|中立|朝廷",
+      "philosophy": "門派核心理念或追求",
+      "martialStyle": "武學風格與特色",
+      "personality": "行事作風",
+      "status": "當前處境"
     }
   ],
-  "centralConflict": "核心矛盾一句話"
+  "centralConflict": "用一句話總結當前江湖最大的矛盾或即將爆發的危機"
 }
-6-8個勢力，各有鮮明立場與功法特色，不得雷同。勢力之間要有具體的恩怨或利益關係。
                     `.trim();
 
                     const { text: worldJson, usage: worldUsage } = await generateGameResponse(worldPrompt, "生成江湖世界");
@@ -113,52 +117,41 @@ export function ActionPanel() {
                     // ═══════════════════════════════════════════
                     // STEP 2：生成主角背景故事
                     // ═══════════════════════════════════════════
-                    // Map attribute values to narrative descriptors (no numbers)
-                    const attrDesc = (val: number, hi: string, mid: string, lo: string) =>
-                        val >= 8 ? hi : val >= 5 ? mid : lo;
-                    const attrFlavors = [
-                        `膂力：${attrDesc(player.stats.attributes.strength, '天生神力、力壓千鈞', '氣力尋常、不強不弱', '體力薄弱、難以持久')}`,
-                        `身法：${attrDesc(player.stats.attributes.agility, '身形如燕、靈動如風', '行動穩健、不快不慢', '動作遲緩、身形笨拙')}`,
-                        `根骨：${attrDesc(player.stats.attributes.constitution, '根骨奇佳、天生俠骨', '體質平常、尚在正常', '根骨羸弱、難以承受重創')}`,
-                        `悟性：${attrDesc(player.stats.attributes.intelligence, '悟性超群、一點即通', '資質尋常、勤能補拙', '資質略鈍、需苦練方成')}`,
-                        `定力：${attrDesc(player.stats.attributes.spirit, '定力如山、心如止水', '心境平和、略有波動', '心性浮躁、難以凝神')}`,
-                        `福緣：${attrDesc(player.stats.attributes.luck, '福星高照、際遇非凡', '際遇平平、隨緣而定', '時運不濟、諸事多阻')}`,
-                        `魅力：${attrDesc(player.stats.attributes.charm, '風采出眾、令人傾心', '外貌平凡、中規中矩', '面容平庸、不易讓人留下印象')}`,
-                    ].join('；');
 
                     const backstoryPrompt = `
-你是《自由江湖》的說書人，根據已建立的江湖世界觀，為玩家生成主角的背景故事。
-以金庸武俠小說的筆法寫作——第三人稱旁白，白話文，有畫面感，人物立體鮮活。
+你是《自由江湖》的專屬說書人，現在請你根據剛剛勾勒的江湖局勢，為我們的主角譜寫一段引人入勝的身世背景。
+請延續武俠小說的獨特筆觸——第三人稱旁白，白話文中帶點文言的凝練，寫出人物的立體感與宿命感。
 
-江湖世界觀：
+【當前江湖局勢】
 ${worldNarrative}
 
-主角資料：
+【主角基本資料】
 ・姓名：${player.name}（${player.gender === 'male' ? '男' : '女'}）
-・天賦資質（請自然融入背景敘述，不得照抄這些描述詞，也不得出現任何數字）：${attrFlavors}
 
-【主角背景故事要求（200-300字）】
-・第三人稱旁白，一氣呵成，不分段標題
-・涵蓋：出身家世、師承門派（必須是上方世界觀中存在的勢力之一，或「江湖散人」）、重要過去事件、核心執念、與當前江湖局勢的個人關聯
-・天賦資質要自然體現在具體事件或性格中，而非用形容詞堆砌
-・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」、任何數字
+【生成要求】
+請用200-300字，一氣呵成地講述主角的來歷。
+內容需自然融入以下元素，但不必生硬羅列：
+1. 出身來歷與師承（必須是上方世界觀中存在的勢力之一，或是無門無派的「江湖散人」）。
+2. 一段刻骨銘心的過往或遭遇。
+3. 驅使主角踏入這渾水江湖的「核心執念」（如：復仇、尋人、追求武道巔峰、或身不由己的捲入）。
+4. 主角與當前江湖主要矛盾的某種微妙聯繫。
 
-可選門派（來自上方世界觀）：${factionNames}、江湖散人
+可選門派（來自當前江湖）：${factionNames}、江湖散人
 
 只回傳 JSON：
 {
-  "backstory": "200-300字主角背景",
+  "backstory": "200-300字主角背景故事（給玩家看的敘述，要有強烈的帶入感與武俠氛圍）",
   "relations": {
     "sect": "所屬門派（必須是世界觀中的勢力或江湖散人）",
-    "master": "師父名（無則填「無」）"
+    "master": "師父名號（無則填「無」）"
   },
   "stateUpdate": {
     "newItems": [{ "id": "唯一id", "name": "物品名", "description": "描述", "type": "weapon|armor|consumable|material|book", "count": 1 }],
-    "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎", "level": "初窺門徑" }],
+    "newSkills": [{ "name": "功法名", "type": "external|internal|light", "rank": "基礎|進階|上乘|絕學", "level": "初窺門徑" }],
     "initialEquipment": { "weapon": "武器名（無則省略）", "armor": "護甲名（無則省略）" }
   }
 }
-注意：newItems/newSkills/initialEquipment 僅限背景故事中明確擁有的，若無則省略欄位或回傳空陣列。
+注意：newItems/newSkills/initialEquipment 僅限背景故事中明確提到的事物，若無則省略該欄位或回傳空陣列。
                     `.trim();
 
                     const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成主角背景");
