@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { useUsageStore } from '@/lib/engine/usageStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
+import { useAuthStore } from '@/lib/supabase/authStore';
+import { useQuotaStore } from '@/lib/supabase/quotaStore';
 import { buildSystemPrompt, buildUserPrompt } from '@/lib/engine/prompt';
 import { generateGameResponse, generateStageSummary, generateQuestArc } from '@/lib/engine/gemini';
 import { cn } from '@/lib/utils';
@@ -35,6 +37,8 @@ export function ActionPanel() {
     const { isProcessing, setProcessing, addLog, updatePlayerStats, updateWorld, updateWorldState, updateRelations, updateEquipment, options, setOptions, narrative, getGameState, summary, updateSummary, addItem, removeItem, learnSkill, addTitle, addNotification } = useGameStore();
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
+    const { user } = useAuthStore();
+    const { turnsRemaining, consumeTurn } = useQuotaStore();
     const [playTime, setPlayTime] = useState(0);
     const [customAction, setCustomAction] = useState('');
     const hasInitialized = useRef(false); // Ref to track initialization status
@@ -64,24 +68,12 @@ export function ActionPanel() {
                     // ═══════════════════════════════════════════
                     // STEP 1：生成江湖世界背景
                     // ═══════════════════════════════════════════
-                    const WORLD_SEEDS = [
-                        '亂世將至——朝廷積弱，地方豪強各據一方，江湖與廟堂的界線正在崩解',
-                        '盛世暗流——太平盛世之下，一樁滅門血案撕開了武林表面的平靜',
-                        '武典現世——傳說中的曠世秘笈重現人間，各方勢力明爭暗鬥，刀光劍影遍布江湖',
-                        '正道式微——邪道崛起已逾十年，昔日名門正派或覆滅、或妥協、或蟄伏待機',
-                        '神秘滅門——武林第一大派一夜之間被夷為平地，凶手身份成為天下最大的懸案',
-                        '新舊交替——上一代的恩怨情仇尚未了結，新生代俠客已開始書寫自己的江湖',
-                        '外患入侵——域外勢力覬覦中原，江湖各派在抵禦與合縱連橫之間各懷算盤',
-                        '武林大會——十年一度的武林盛事在即，各方勢力暗中佈局，爭奪武林盟主之位',
-                    ];
-                    const worldSeed = WORLD_SEEDS[Math.floor(Math.random() * WORLD_SEEDS.length)];
+                   
 
                     const worldPrompt = `
 你是武俠世界的創世說書人，為《自由江湖》生成一個獨一無二的江湖。
-筆法師承金庸——白話文，有肌理感，讓人讀了就身歷其境。
-所有人名、地名、勢力名稱必須完全原創，不得沿用任何現有作品。
+用金庸的寫作手法和劇情風格——白話文，有肌理感，讓人讀了就身歷其境。
 
-這個世界的底色是：「${worldSeed}」
 
 以第三人稱旁白，一氣呵成地寫出這個江湖的面貌（200-300字）。
 不必逐條交代背景——抓住最有張力的幾條線：這裡的氣息是什麼？裂痕從哪裡來？
@@ -148,7 +140,7 @@ ${worldNarrative}
 【主角背景故事要求（200-300字）】
 ・第三人稱旁白，一氣呵成，不分段標題
 ・涵蓋：出身家世、師承門派（必須是上方世界觀中存在的勢力之一，或「江湖散人」）、重要過去事件、核心執念、與當前江湖局勢的個人關聯
-・天賦資質要體現在具體事件或性格中，而非用形容詞堆砌
+・天賦資質要自然體現在具體事件或性格中，而非用形容詞堆砌
 ・禁止出現：「似乎」「好像」「彷彿」「可能」「隱約」、任何數字
 
 可選門派（來自上方世界觀）：${factionNames}、江湖散人
@@ -292,6 +284,12 @@ ${worldNarrative}
     const handleAction = async (actionText: string, displayText?: string) => {
         if (!actionText.trim() || isProcessing) return;
 
+        // 額度檢查：不足時阻止行動
+        if (turnsRemaining <= 0) {
+            addNotification({ type: 'system', title: '回合額度不足', description: '請聯繫管理員或購買補充包以繼續冒險', icon: '⏳' });
+            return;
+        }
+
         const prevOptions = useGameStore.getState().options; // Save for error recovery
         setProcessing(true);
         addLog({ role: 'user', content: displayText || actionText });
@@ -311,6 +309,9 @@ ${worldNarrative}
             const response = parseJSON(responseJson);
 
             addLog({ role: 'assistant', content: response.narrative });
+
+            // 扣除一回合額度
+            if (user) void consumeTurn(user.id);
 
             if (response.stateUpdate) {
                 // --- SMART GM: PLOT & COMBAT PACING (client-side detection) ---
@@ -567,7 +568,7 @@ ${worldNarrative}
                         <button
                             key={option.id || idx}
                             onClick={() => handleAction(option.action)}
-                            disabled={isProcessing}
+                            disabled={isProcessing || turnsRemaining <= 0}
                             className={cn(
                                 "wuxia-card relative group overflow-hidden p-3 text-left min-h-[4rem]",
                                 "flex items-center gap-3",
@@ -623,40 +624,57 @@ ${worldNarrative}
 
             {/* Custom Action Input */}
             {options.length > 0 && (
-                <div className="px-4 pb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                            <input
-                                type="text"
-                                value={customAction}
-                                onChange={(e) => setCustomAction(e.target.value.slice(0, 20))}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && customAction.trim() && !isProcessing) {
+                <div className="px-4 pb-4 space-y-2">
+                    {/* 額度不足提示 */}
+                    {turnsRemaining <= 0 ? (
+                        <div className="flex items-center justify-center gap-2 py-3 border border-wuxia-gold/20 rounded-sm bg-black/40">
+                            <span className="text-wuxia-gold/40 text-sm font-serif">⏳</span>
+                            <span className="text-white/40 text-xs font-serif tracking-wide">回合額度已用盡，無法繼續行動</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    value={customAction}
+                                    onChange={(e) => setCustomAction(e.target.value.slice(0, 20))}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && customAction.trim() && !isProcessing) {
+                                            handleAction(customAction.trim());
+                                            setCustomAction('');
+                                        }
+                                    }}
+                                    placeholder="自由行動 (20字內)..."
+                                    disabled={isProcessing}
+                                    className="w-full px-4 py-2 bg-black/50 border border-wuxia-gold/30 rounded-sm text-white text-sm font-serif placeholder:text-white/30 focus:border-wuxia-gold focus:outline-none transition-colors disabled:opacity-50"
+                                    maxLength={20}
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30 font-mono">
+                                    {customAction.length}/20
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (customAction.trim() && !isProcessing) {
                                         handleAction(customAction.trim());
                                         setCustomAction('');
                                     }
                                 }}
-                                placeholder="自由行動 (20字內)..."
-                                disabled={isProcessing}
-                                className="w-full px-4 py-2 bg-black/50 border border-wuxia-gold/30 rounded-sm text-white text-sm font-serif placeholder:text-white/30 focus:border-wuxia-gold focus:outline-none transition-colors disabled:opacity-50"
-                                maxLength={20}
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30 font-mono">
-                                {customAction.length}/20
-                            </span>
+                                disabled={isProcessing || !customAction.trim()}
+                                className="px-4 py-2 bg-wuxia-gold/20 border border-wuxia-gold/40 rounded-sm text-wuxia-gold text-sm font-serif hover:bg-wuxia-gold/30 hover:border-wuxia-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                行動
+                            </button>
                         </div>
-                        <button
-                            onClick={() => {
-                                if (customAction.trim() && !isProcessing) {
-                                    handleAction(customAction.trim());
-                                    setCustomAction('');
-                                }
-                            }}
-                            disabled={isProcessing || !customAction.trim()}
-                            className="px-4 py-2 bg-wuxia-gold/20 border border-wuxia-gold/40 rounded-sm text-wuxia-gold text-sm font-serif hover:bg-wuxia-gold/30 hover:border-wuxia-gold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            行動
-                        </button>
+                    )}
+                    {/* 剩餘額度指示 */}
+                    <div className="flex justify-end">
+                        <span className={cn(
+                            "text-[10px] font-mono tracking-wide",
+                            turnsRemaining <= 0 ? "text-red-400/60" : turnsRemaining <= 10 ? "text-yellow-400/60" : "text-white/20"
+                        )}>
+                            剩餘 {turnsRemaining} 回合
+                        </span>
                     </div>
                 </div>
             )}

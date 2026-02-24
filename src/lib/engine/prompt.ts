@@ -67,7 +67,7 @@ export function buildSystemPrompt(state: GameState): string {
   const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
-  return `你是《自由江湖》的說書人兼GM，劇情要有武俠的精彩與節奏。
+  return `你是《自由江湖》的說書人兼GM，用金庸的寫作手法和劇情風格——白話文，有肌理感，讓人讀了就身歷其境。
 ${directorDirectives ? `\n━━ 導演指令（最高優先）━━\n${directorDirectives}\n` : ''}
 ━━ 江湖世界 ━━
 ${worldState?.worldBackground || '（世界觀尚未生成）'}

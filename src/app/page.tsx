@@ -162,10 +162,10 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-xl sm:text-2xl text-white/90 font-serif leading-relaxed mb-4">
-            別人的武俠，讀完就結束了。
+            別的武俠世界，讀完就結束了。
           </p>
           <p className="text-xl sm:text-2xl text-fw-gold font-serif leading-relaxed mb-10">
-            這個武俠，只有你能完成。
+            這個武俠世界，只有你能書寫。
           </p>
           <p className="text-sm text-white/35 mb-10">
             目前小說的題材有：<span className="text-fw-gold/70">武俠</span>　<span className="text-white/25">（待擴充中）</span>
@@ -198,7 +198,7 @@ export default function LandingPage() {
             <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點一</p>
             <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">⌨️ 一個輸入框，就是你的全世界</h2>
             <p className="text-white/50 mb-8 leading-relaxed">
-              還在玩「選項 A、B、C」的傳統遊戲嗎？在《自由江湖》中，對話框是你唯一的武器。
+              還在玩「選項 A、B、C」的傳統遊戲嗎？在《自由江湖》中，對話框是你編寫世界的工具。
             </p>
             <div className="mb-8">
               <p className="text-fw-gold/80 font-serif mb-4">你寫得出，它就演得活：</p>
@@ -299,7 +299,7 @@ export default function LandingPage() {
         <div className="py-24 px-6 text-center">
           <div className="max-w-2xl mx-auto space-y-6">
             <p className="text-xl sm:text-2xl font-serif text-white/80 leading-relaxed">
-              「江湖很大，但我只想玩得大。」
+              「江湖很大，走出屬於你的路。」
             </p>
             <p className="text-white/40 leading-relaxed">
               不要再被預設的結局束縛。現在就踏入《自由江湖》，<br className="hidden sm:block" />

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '@/lib/engine/store';
 import { useAuthStore } from '@/lib/supabase/authStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
+import { useQuotaStore } from '@/lib/supabase/quotaStore';
 import { AuthScreen } from '@/components/AuthScreen';
 import { CharacterCreation } from '@/components/CharacterCreation';
 import { GameTerminal } from '@/components/GameTerminal';
@@ -20,6 +21,7 @@ export default function GamePage() {
   const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, isQuestPanelOpen, setQuestPanelOpen, setGameMenuOpen, player, loadGameState } = useGameStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { restoreLatestAutoSave } = useSaveGameStore();
+  const { fetchQuota } = useQuotaStore();
   const [mounted, setMounted] = useState(false);
   const [restored, setRestored] = useState(false);
 
@@ -28,16 +30,19 @@ export default function GamePage() {
     initialize();
   }, [initialize]);
 
-  // On login, restore latest auto-save if game hasn't started yet
+  // On login: load quota and restore latest auto-save
   useEffect(() => {
-    if (user && !isGameStarted && !restored) {
-      setRestored(true);
-      restoreLatestAutoSave().then(save => {
-        if (save) loadGameState(save.gameState, save.sessionId);
-      });
+    if (user) {
+      fetchQuota(user.id);
+      if (!isGameStarted && !restored) {
+        setRestored(true);
+        restoreLatestAutoSave().then(save => {
+          if (save) loadGameState(save.gameState, save.sessionId);
+        });
+      }
     }
     if (!user) setRestored(false);
-  }, [user, isGameStarted, restored, restoreLatestAutoSave, loadGameState]);
+  }, [user, isGameStarted, restored, fetchQuota, restoreLatestAutoSave, loadGameState]);
 
   if (!mounted || isAuthLoading) return null;
 
