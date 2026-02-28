@@ -197,6 +197,15 @@ export function GameTerminal() {
                                 : "animate-dry-ink"
                         )}
                     >
+                        {log.role === 'assistant' && log.type && (
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-wuxia-gold/30"></div>
+                                <span className="text-xs font-serif tracking-[0.4em] text-wuxia-gold/60 px-1" style={{ marginRight: '-0.4em' }}>
+                                    {log.type === 'backstory' ? '角色背景' : '開篇'}
+                                </span>
+                                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-wuxia-gold/30"></div>
+                            </div>
+                        )}
                         {log.role === 'user' ? (
                             <div className="relative max-w-[80%] bg-gradient-to-br from-wuxia-ink-blue/40 to-black/60 border border-wuxia-gold/20 px-5 py-3 rounded-tr-none rounded-bl-xl rounded-tl-xl rounded-br-sm shadow-lg backdrop-blur-sm group">
                                 <span className="text-wuxia-gold/90 font-serif tracking-wide italic">{log.content}</span>

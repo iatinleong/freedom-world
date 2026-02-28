@@ -69,6 +69,7 @@ export interface NarrativeLog {
     role: 'system' | 'user' | 'assistant';
     content: string;
     timestamp: number;
+    type?: 'backstory' | 'opening';
 }
 
 export interface Option {

@@ -212,7 +212,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                     const backstory: string = backstoryResponse.backstory || '';
 
                     // 顯示主角背景給玩家
-                    addLog({ role: 'assistant', content: backstory });
+                    addLog({ role: 'assistant', content: backstory, type: 'backstory' });
                     // 存入 summary 作為主角前情基底
                     updateSummary(backstory);
 
@@ -294,7 +294,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                     const openingResponse = parseJSON(openingJson);
 
                     // 顯示開篇場景
-                    addLog({ role: 'assistant', content: openingResponse.narrative });
+                    addLog({ role: 'assistant', content: openingResponse.narrative, type: 'opening' });
 
                     if (openingResponse.stateUpdate) {
                         if (openingResponse.stateUpdate.location) updateWorld({ location: openingResponse.stateUpdate.location });
