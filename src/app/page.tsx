@@ -184,7 +184,7 @@ export default function LandingPage() {
         </div>
 
         <a href="#features" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
-          <span className="text-[10px] tracking-widest">SCROLL</span>
+          <span className="text-[10px] tracking-widest pl-[0.1em]">SCROLL</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </a>
       </section>
@@ -416,7 +416,7 @@ export default function LandingPage() {
 
           <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-white/20">© 2026 自由世界 Freedom World. All rights reserved.</p>
-            <Link href="/game" className="text-xs text-fw-gold/50 hover:text-fw-gold transition-colors tracking-widest">
+            <Link href="/game" className="text-xs text-fw-gold/50 hover:text-fw-gold transition-colors tracking-widest pl-[0.1em]">
               進入遊戲 →
             </Link>
           </div>

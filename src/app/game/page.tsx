@@ -62,8 +62,8 @@ export default function GamePage() {
         {isGameStarted && (
           <header className="relative shrink-0 flex items-center px-6 py-3 border-b border-wuxia-gold/20 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm paper-edge z-50">
             <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2">
-              <h1 className="ancient-title text-2xl tracking-[0.5em] text-wuxia-gold drop-shadow-lg">自由江湖</h1>
-              <span className="text-[10px] text-wuxia-gold/40 font-serif tracking-[0.8em] uppercase opacity-70">Freedom Jianghu</span>
+              <h1 className="ancient-title text-2xl tracking-[0.5em] pl-[0.5em] text-wuxia-gold drop-shadow-lg">自由江湖</h1>
+              <span className="text-[10px] text-wuxia-gold/40 font-serif tracking-[0.8em] pl-[0.8em] uppercase opacity-70">Freedom Jianghu</span>
             </div>
             <div className="ml-auto flex items-center gap-2">
               <button onClick={() => setCharacterPanelOpen(true)} className="w-9 h-9 bg-black/60 border border-wuxia-gold/30 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group" title="角色面板">
