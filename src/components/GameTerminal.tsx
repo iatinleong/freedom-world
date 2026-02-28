@@ -181,10 +181,10 @@ export function GameTerminal() {
 
             {/* Content Container */}
             <div className="relative z-10 space-y-8 pb-20">
-                <div className="flex items-center justify-center opacity-30 my-8">
-                    <div className="h-px w-12 bg-wuxia-gold/40"></div>
-                    <div className="mx-4 text-[10px] text-wuxia-gold tracking-[0.5em]">江湖纪事</div>
-                    <div className="h-px w-12 bg-wuxia-gold/40"></div>
+                <div className="flex items-center justify-center opacity-60 my-6">
+                    <div className="h-px w-12 bg-wuxia-gold/50"></div>
+                    <div className="mx-4 text-xs text-wuxia-gold/80 font-serif tracking-[0.5em]" style={{ marginRight: '-0.5em' }}>江湖纪事</div>
+                    <div className="h-px w-12 bg-wuxia-gold/50"></div>
                 </div>
 
                 {narrative.map((log, index) => (

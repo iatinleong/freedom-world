@@ -183,10 +183,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <a href="#features" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors">
-          <span className="text-[10px] tracking-widest" style={{ marginRight: '-0.1em' }}>SCROLL</span>
-          <ChevronDown className="w-4 h-4 animate-bounce" />
-        </a>
       </section>
 
       {/* ── 核心亮點 ── */}

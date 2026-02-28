@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Backpack, Swords, BookOpen, Users, Heart, X } from 'lucide-react';
+import { User, Backpack, Swords, BookOpen, X } from 'lucide-react';
 import { useGameStore } from '@/lib/engine/store';
 import { cn } from '@/lib/utils';
 
@@ -11,24 +11,8 @@ interface CharacterPanelProps {
 }
 
 export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
-    const [activeTab, setActiveTab] = useState<'info' | 'inventory' | 'skills' | 'relations'>('info');
+    const [activeTab, setActiveTab] = useState<'inventory' | 'skills'>('inventory');
     const { player } = useGameStore();
-
-
-    const getMeridianName = (key: string) => {
-        const names: Record<string, string> = {
-            ren: '任脈',
-            du: '督脈',
-            chong: '衝脈',
-            dai: '帶脈',
-            yinqiao: '陰蹺脈',
-            yangqiao: '陽蹺脈',
-            yinwei: '陰維脈',
-            yangwei: '陽維脈',
-            central: '中脈',
-        };
-        return names[key] || key;
-    };
 
     return (
         <>
@@ -77,10 +61,8 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                     {/* Tabs */}
                     <div className="flex gap-2 px-6 pt-4 shrink-0 overflow-x-auto">
                         {[
-                            { id: 'info', icon: User, label: '角色信息' },
                             { id: 'inventory', icon: Backpack, label: '背包裝備' },
                             { id: 'skills', icon: Swords, label: '武學技能' },
-                            { id: 'relations', icon: Users, label: '江湖關係' },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -100,114 +82,6 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
 
                     {/* Content */}
                     <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-                        {/* 角色信息 */}
-                        {activeTab === 'info' && (
-                            <div className="space-y-6">
-                                {/* 等級 */}
-                                <div className="p-4 bg-wuxia-gold/5 border border-wuxia-gold/20 rounded-lg">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-serif text-wuxia-gold">江湖等級</span>
-                                        <span className="text-2xl font-bold text-wuxia-gold">
-                                            Lv.{player.stats.level}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* 道德傾向 */}
-                                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-white/70">道德傾向</span>
-                                        <span className={cn(
-                                            'px-3 py-1 rounded-sm text-sm font-bold',
-                                            player.stats.moral === 'Good' && 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40',
-                                            player.stats.moral === 'Neutral' && 'bg-slate-500/20 text-slate-300 border border-slate-500/40',
-                                            player.stats.moral === 'Evil' && 'bg-red-500/20 text-red-400 border border-red-500/40'
-                                        )}>
-                                            {player.stats.moral}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* 經脈狀態 */}
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-serif text-wuxia-gold tracking-wide flex items-center gap-2">
-                                        <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                        經脈狀態
-                                    </h3>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {Object.entries(player.meridians).map(([key, isOpen]) => (
-                                            <div
-                                                key={key}
-                                                className={cn(
-                                                    'p-3 rounded-sm border text-center text-sm transition-all',
-                                                    isOpen
-                                                        ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-400'
-                                                        : 'bg-white/5 border-white/10 text-white/40'
-                                                )}
-                                            >
-                                                {getMeridianName(key)}
-                                                {isOpen && <span className="ml-2">✓</span>}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* 特殊技能 */}
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-serif text-wuxia-gold tracking-wide flex items-center gap-2">
-                                        <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                        特殊技能
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {[
-                                            { key: 'medicine', label: '醫術', icon: '⚕️' },
-                                            { key: 'poison', label: '毒術', icon: '☠️' },
-                                            { key: 'stealth', label: '潛行', icon: '🥷' },
-                                            { key: 'insight', label: '洞察', icon: '👁️' },
-                                        ].map((skill) => (
-                                            <div key={skill.key} className="p-3 bg-white/5 border border-white/10 rounded-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-white/70">
-                                                        {skill.icon} {skill.label}
-                                                    </span>
-                                                    <span className="text-wuxia-gold font-bold">
-                                                        {player.specialSkills[skill.key as keyof typeof player.specialSkills]}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* 傷勢和狀態效果 */}
-                                {(player.injuries.length > 0 || player.statusEffects.length > 0) && (
-                                    <div className="space-y-3">
-                                        <h3 className="text-sm font-serif text-wuxia-crimson tracking-wide flex items-center gap-2">
-                                            <Heart className="w-4 h-4" />
-                                            傷勢與狀態
-                                        </h3>
-                                        {player.injuries.length > 0 && (
-                                            <div className="space-y-2">
-                                                {player.injuries.map((injury, idx) => (
-                                                    <div key={idx} className="p-2 bg-red-900/20 border border-red-600/30 rounded-sm text-xs text-red-400">
-                                                        ⚠️ {injury}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {player.statusEffects.length > 0 && (
-                                            <div className="space-y-2">
-                                                {player.statusEffects.map((effect, idx) => (
-                                                    <div key={idx} className="p-2 bg-blue-900/20 border border-blue-600/30 rounded-sm text-xs text-blue-400">
-                                                        ✨ {effect}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
 
                         {/* 背包裝備 */}
                         {activeTab === 'inventory' && (
@@ -388,81 +262,6 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
                             </div>
                         )}
 
-                        {/* 江湖關係 */}
-                        {activeTab === 'relations' && (
-                            <div className="space-y-6">
-                                {/* 師門信息 */}
-                                <div className="p-4 bg-wuxia-gold/5 border border-wuxia-gold/20 rounded-lg space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-white/70">師父</span>
-                                        <span className="text-wuxia-gold font-bold">{player.relations.master}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-white/70">門派</span>
-                                        <span className="text-wuxia-gold font-bold">{player.relations.sect}</span>
-                                    </div>
-                                </div>
-
-                                {/* 門派好感度 */}
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-serif text-wuxia-gold tracking-wide flex items-center gap-2">
-                                        <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                        各派關係
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {Object.entries(player.relations.sectAffinity)
-                                            .sort(([, a], [, b]) => b - a)
-                                            .map(([sect, affinity]) => (
-                                                <div key={sect} className="p-3 bg-white/5 border border-white/10 rounded-sm">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <span className="text-sm text-white/70">{sect}</span>
-                                                        <span className={cn(
-                                                            'text-sm font-bold',
-                                                            affinity >= 70 && 'text-emerald-400',
-                                                            affinity >= 40 && affinity < 70 && 'text-wuxia-gold',
-                                                            affinity < 40 && 'text-red-400'
-                                                        )}>
-                                                            {affinity}
-                                                        </span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-black/50 rounded-full overflow-hidden border border-white/10">
-                                                        <div
-                                                            className={cn(
-                                                                'h-full transition-all duration-500',
-                                                                affinity >= 70 && 'bg-emerald-500',
-                                                                affinity >= 40 && affinity < 70 && 'bg-wuxia-gold',
-                                                                affinity < 40 && 'bg-red-500'
-                                                            )}
-                                                            style={{ width: `${affinity}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-
-                                {/* 同伴 */}
-                                {player.companions.length > 0 && (
-                                    <div className="space-y-3">
-                                        <h3 className="text-sm font-serif text-wuxia-gold tracking-wide flex items-center gap-2">
-                                            <Users className="w-4 h-4" />
-                                            同行伙伴 ({player.companions.length})
-                                        </h3>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {player.companions.map((companion, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="p-3 bg-emerald-900/20 border border-emerald-600/30 rounded-sm text-center"
-                                                >
-                                                    <div className="text-2xl mb-1">👤</div>
-                                                    <div className="text-sm text-emerald-300 font-serif">{companion}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
             </div>
         </>

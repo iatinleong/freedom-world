@@ -87,7 +87,7 @@ export function ActionPanel() {
                         '少林寺', '武當派', '華山派', '峨嵋派',  '崑崙派',
                         '點蒼山', '天山派', '逍遙派', '忘憂派', '丐幫', '唐門', '藥王殿',
                         '日月神教', '血蓮教', '鬼王宗', '五毒教', '星宿派',
-                        '錦衣衛', '六扇門', '明教', '天地會', '俠客島',
+                        '六扇門', '明教',  '俠客島',
                     ];
                     const selectedFactions = [...FACTION_POOL].sort(() => Math.random() - 0.5).slice(0, 8).join('、');
 
@@ -104,19 +104,19 @@ export function ActionPanel() {
 例如某正派的鎮派之寶，可能是當年從邪派奪來的血腥戰利品，又或者是當年從邪派的叛徒，武功同邪派同宗同源；某邪派的掌門，可能曾經是個行俠仗義的好人，因為某些原因而走上邪道；某中立勢力，可能是幕後黑手操控整個江湖的幕府。
 當然也可以有不反轉的劇情。
 【生成要求】
-以第三人稱旁白，一氣呵成地寫出這個江湖的當下局勢（200-300字）。
+以第三人稱旁白，一氣呵成地寫出這個江湖的當下局勢（300-500字）。
 以具體場景或傳聞切入，不必逐一介紹門派——讓氛圍與事件說話。
 融入一兩件足以打破江湖平衡的近期大事（神兵出世、掌門暴斃、秘典失蹤、滅門慘案等），點明哪些勢力牽涉其中。
 讓讀者讀完立刻就有踏入這片江湖、攪動風雲的衝動。
 
 只回傳 JSON：
 {
-  "worldNarrative": "200-300字江湖背景（以場景/傳聞切入，渲染氛圍，不做門派逐一介紹）",
+  "worldNarrative": "300-500字江湖背景（以場景/傳聞切入，渲染氛圍，不做門派逐一介紹）",
   "factions": [
     {
       "name": "勢力名稱",
       "alignment": "正道|邪道|中立|朝廷",
-      "philosophy": "門派核心理念或追求，可含不為人知的黑暗面",
+      "philosophy": "門派核心理念或追求",
       "martialStyle": "武學風格與特色",
       "personality": "行事作風",
       "status": "具體處境，例如：掌門暴斃、群龍無首，各長老明爭暗鬥",
@@ -191,7 +191,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 
 只回傳 JSON：
 {
-  "backstory": "200-300字主角背景故事（給玩家看的敘述，要有強烈的帶入感與武俠氛圍）",
+  "backstory": "200-300字主角背景故事（直接從故事開始，不加任何標題、標籤或章節名稱）",
   "relations": {
     "sect": "所屬門派（必須是世界觀中的勢力或江湖散人）",
     "master": "師父名號（無則填「無」）"
@@ -264,6 +264,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 第一章目標：${firstQuest || '踏入江湖'}
 
 【開篇場景要求（80-150字）】
+・直接從場景開始，不加任何標題、標籤或章節名稱
 ・第二人稱「你」，強烈帶入感
 ・呈現具體的當下場景：地點、時辰、天氣、感官細節（聲音/氣味/光線）
 ・氛圍多元，不限打鬥——清晨趕路、市集偶遇、寺廟靜修、客棧等待皆可
@@ -598,10 +599,10 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 
             {/* 選項標題 */}
             {options.length > 0 && (
-                <div className="flex items-center justify-center gap-3 py-4 opacity-80">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-wuxia-gold/20 to-transparent"></div>
-                    <span className="text-[10px] text-wuxia-gold/60 font-serif tracking-widest">抉擇時刻</span>
-                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-wuxia-gold/20 to-transparent"></div>
+                <div className="flex items-center justify-center gap-3 py-3">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-wuxia-gold/30 to-transparent"></div>
+                    <span className="text-xs text-wuxia-gold/80 font-serif tracking-widest">抉擇時刻</span>
+                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-wuxia-gold/30 to-transparent"></div>
                 </div>
             )}
 
@@ -614,7 +615,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                             onClick={() => handleAction(option.action)}
                             disabled={isProcessing || turnsRemaining <= 0}
                             className={cn(
-                                "wuxia-card relative group overflow-hidden p-3 text-left min-h-[4rem]",
+                                "wuxia-card relative group overflow-hidden p-2.5 sm:p-3 text-left min-h-[2.75rem] sm:min-h-[4rem]",
                                 "flex items-center gap-3",
                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                 "animate-slide-up hover:bg-white/5 transition-all"
@@ -711,15 +712,6 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                             </button>
                         </div>
                     )}
-                    {/* 剩餘額度指示 */}
-                    <div className="flex justify-end">
-                        <span className={cn(
-                            "text-[10px] font-mono tracking-wide",
-                            turnsRemaining <= 0 ? "text-red-400/60" : turnsRemaining <= 10 ? "text-yellow-400/60" : "text-white/20"
-                        )}>
-                            剩餘 {turnsRemaining} 回合
-                        </span>
-                    </div>
                 </div>
             )}
 
