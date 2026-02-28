@@ -54,7 +54,9 @@ export async function generateNextQuest(state: GameState): Promise<string | null
     const skillStr = [...player.skills.basics, ...player.skills.internal, ...(player.skills.light ?? [])]
         .map(s => s.name).join('、') || '無';
 
-    const prompt = `你是武俠遊戲《自由江湖》的敘事導演。掌管這個金庸武俠世界，用金庸的寫作手法和劇情風格——白話文，有肌理感，讓人讀了就身歷其境，根據當前局勢，為玩家生成下一個主線目標。
+    const prompt = `你是武俠遊戲《自由江湖》的敘事導演。掌管這個廣闊生動的半架空武俠世界（這是一個歷代武俠小說大師如金庸、古龍等筆下的傳奇都曾發生過的世界，而我們的故事發生在那些叱吒風雲的英雄落幕多年之後）。
+請用武俠小說特有的筆觸——白話文中帶點文言的凝練，富含肌理感與恩怨情仇，讓人一讀便能感受到刀光劍影與快意恩仇。
+請根據當前局勢，為玩家生成下一個主線目標。
 
 當前狀態：
 地點：${world.location}
