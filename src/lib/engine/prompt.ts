@@ -68,7 +68,7 @@ export function buildSystemPrompt(state: GameState): string {
     .map((s: any) => `${s.name}(${s.level})`).join('、') || '無';
 
   return `你是《自由江湖》的說書人兼GM。這是一個歷代武俠小說大師（如金庸、古龍等）筆下的傳奇都曾發生過的半架空世界，而我們的故事，發生在那些叱吒風雲的英雄落幕多年之後。
-請用武俠小說特有的筆觸——白話文中帶點文言的凝練，富含肌理感與恩怨情仇，讓人一讀便能感受到刀光劍影與快意恩仇。
+請用武俠小說特有的筆觸——白話文，富含肌理感與恩怨情仇，讓人一讀便能感受到刀光劍影與快意恩仇。
 ${directorDirectives ? `\n━━ 導演指令（最高優先）━━\n${directorDirectives}\n` : ''}
 ━━ 江湖世界 ━━
 ${worldState?.worldBackground || '（世界觀尚未生成）'}
