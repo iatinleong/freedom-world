@@ -99,9 +99,9 @@ export function ActionPanel() {
 這個世界的底色是：「${worldSeed}」
 
 【世界觀的層次】
-・表層（70%）：金庸筆下的江湖底子——俠義、恩仇、情義、血性，讓讀者立刻有代入感
+・表層（60%）：金庸筆下的江湖底子——俠義、恩仇、情義、血性，讓讀者立刻有代入感
 ・深層（20%）：埋一兩個歷史謊言——某個眾人景仰的英雄，當年的「義舉」其實是一場掩蓋；某門派的立派根基，是百年前一場不為人知的背叛；掌門知道，弟子不知道
-・暗線（10%）：一處讓人細思恐極的細節——某個一直存在的習俗、禁忌或傳說，細想之下竟讓人後背發涼
+・暗線（20%）：一處讓人細思恐極的細節——某個一直存在的習俗、禁忌或傳說，細想之下竟讓人後背發涼
 
 【勢力與格局】
 本局登場的勢力為：${selectedFactions}。
@@ -591,7 +591,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
     };
 
     return (
-        <div className="flex flex-col border-t border-wuxia-gold/20 bg-gradient-to-b from-black/95 to-wuxia-ink-blue/30 backdrop-blur-xl relative paper-edge pb-4">
+        <div className="flex flex-col border-t border-wuxia-gold/20 bg-gradient-to-b from-black/95 to-wuxia-ink-blue/30 backdrop-blur-xl relative paper-edge" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
             {/* 頂部裝飾線 */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-wuxia-gold/40 to-transparent"></div>
 
@@ -626,14 +626,14 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 
             {/* Options Grid (2x2) */}
             {options.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 pb-2">
+                <div className="grid grid-cols-2 gap-2 px-4 pb-2">
                     {options.slice(0, 4).map((option, idx) => (
                         <button
                             key={option.id || idx}
                             onClick={() => handleAction(option.action)}
                             disabled={isProcessing || turnsRemaining <= 0}
                             className={cn(
-                                "wuxia-card relative group overflow-hidden p-2.5 sm:p-3 text-left min-h-[2.75rem] sm:min-h-[4rem]",
+                                "wuxia-card relative group overflow-hidden p-2 sm:p-3 text-left min-h-[2.5rem] sm:min-h-[4rem]",
                                 "flex items-center gap-3",
                                 "disabled:opacity-50 disabled:cursor-not-allowed",
                                 "animate-slide-up hover:bg-white/5 transition-all"
