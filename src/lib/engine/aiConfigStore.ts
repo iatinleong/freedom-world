@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type AIProvider = 'gemini' | 'grok' | 'claude' | 'deepseek';
+export type AIProvider = 'gemini' | 'grok' | 'claude' | 'deepseek' | 'openai';
 
 export interface ModelOption {
     id: string;
@@ -37,6 +37,12 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelOption[]> = {
         { id: 'deepseek-chat', name: 'DeepSeek V3', desc: '快速・極省費用', inputPrice: 0.27, outputPrice: 1.10, badge: '推薦' },
         { id: 'deepseek-reasoner', name: 'DeepSeek R1', desc: '深度推理・回應較慢', inputPrice: 0.55, outputPrice: 2.19 },
     ],
+    openai: [
+        { id: 'gpt-5-nano', name: 'GPT-5 Nano', desc: '最快・最省費用', inputPrice: 0.10, outputPrice: 0.40, badge: '推薦' },
+        { id: 'gpt-5-mini', name: 'GPT-5 Mini', desc: '輕量快速', inputPrice: 0.30, outputPrice: 1.20 },
+        { id: 'gpt-5.2-chat-latest', name: 'GPT-5.2 Instant', desc: '最新快速版', inputPrice: 1.75, outputPrice: 14.00 },
+        { id: 'gpt-5.2', name: 'GPT-5.2 Thinking', desc: '最強推理能力', inputPrice: 1.75, outputPrice: 14.00 },
+    ],
 };
 
 export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string }> = {
@@ -44,6 +50,7 @@ export const PROVIDER_INFO: Record<AIProvider, { name: string; label: string }> 
     grok:     { name: 'xAI Grok',         label: 'Grok'     },
     claude:   { name: 'Anthropic Claude', label: 'Claude'   },
     deepseek: { name: 'DeepSeek',         label: 'DeepSeek' },
+    openai:   { name: 'OpenAI',           label: 'OpenAI'   },
 };
 
 // Configure via environment variables — no UI config screen needed.
