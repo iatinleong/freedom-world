@@ -531,52 +531,55 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
             const questStartTurn = useGameStore.getState().worldState?.questStartTurn ?? 0;
             const turnsIntoCurrentQuest = assistantCount - questStartTurn;
             if (turnsIntoCurrentQuest > 0 && turnsIntoCurrentQuest % 6 === 0) {
+                const ws = getGameState().worldState;
+                const arc = ws.questArc ?? [];
+                const currentIndex = ws.questArcIndex ?? 0;
+                const usedQuests = new Set([...(ws.questHistory ?? []), ws.mainQuest ?? ''].filter(Boolean));
+
+                // 1. 立即同步切換主線進度，避免玩家快速點擊時發生 Race Condition
+                let nextIndex = currentIndex + 1;
+                while (nextIndex < arc.length && usedQuests.has(arc[nextIndex])) {
+                    nextIndex++;
+                }
+                const nextQuest = arc[nextIndex] ?? null;
+                const oldQuest = ws.mainQuest;
+
+                updateWorldState({
+                    mainQuest: nextQuest ?? ws.mainQuest,
+                    questHistory: oldQuest
+                        ? [...(ws.questHistory ?? []), oldQuest]
+                        : (ws.questHistory ?? []),
+                    questArcIndex: nextQuest ? nextIndex : currentIndex,
+                    questStartTurn: assistantCount, // 立即重置起始回合
+                });
+
+                if (nextQuest) {
+                    addNotification({ type: 'achievement', title: '主線推進', description: nextQuest, icon: '📜' });
+                }
+
+                // 2. 異步生成上一階段的摘要與更新
                 const currentState = useGameStore.getState();
                 generateStageSummary(currentState).then(stageSummary => {
-                    const ws = getGameState().worldState;
-                    const arc = ws.questArc ?? [];
-                    const currentIndex = ws.questArcIndex ?? 0;
-                    const usedQuests = new Set([...(ws.questHistory ?? []), ws.mainQuest ?? ''].filter(Boolean));
-
-                    // Skip any arc entries already used (dedup protection)
-                    let nextIndex = currentIndex + 1;
-                    while (nextIndex < arc.length && usedQuests.has(arc[nextIndex])) {
-                        nextIndex++;
-                    }
-                    const nextQuest = arc[nextIndex] ?? null;
-
-                    updateWorldState({
-                        mainQuest: nextQuest ?? ws.mainQuest,
-                        questHistory: ws.mainQuest
-                            ? [...(ws.questHistory ?? []), ws.mainQuest]
-                            : (ws.questHistory ?? []),
-                        questStageSummaries: ws.mainQuest
-                            ? [...(ws.questStageSummaries ?? []), stageSummary ?? '']
-                            : (ws.questStageSummaries ?? []),
-                        questArcIndex: nextQuest ? nextIndex : currentIndex,
-                        questStartTurn: assistantCount,
-                    });
-
-                    // Update rolling summary for AI context
                     if (stageSummary) {
+                        const latestWs = getGameState().worldState;
+                        updateWorldState({
+                            questStageSummaries: [...(latestWs.questStageSummaries ?? []), stageSummary]
+                        });
                         const prevSummary = useGameStore.getState().summary;
                         updateSummary(prevSummary ? `${prevSummary}\n\n${stageSummary}` : stageSummary);
                     }
-                    if (nextQuest) {
-                        addNotification({ type: 'achievement', title: '主線推進', description: nextQuest, icon: '📜' });
-                    }
-
-                    // When near end of arc, generate next batch in background
-                    if (nextIndex >= arc.length - 3) {
-                        const stateForArc = useGameStore.getState();
-                        generateQuestArc(stateForArc, stateForArc.summary).then(newArc => {
-                            if (newArc && newArc.length > 0) {
-                                const currentWs = getGameState().worldState;
-                                updateWorldState({ questArc: [...(currentWs.questArc ?? []), ...newArc] });
-                            }
-                        });
-                    }
                 });
+
+                // 3. 接近用完時，異步擴充目標
+                if (nextIndex >= arc.length - 3) {
+                    const stateForArc = useGameStore.getState();
+                    generateQuestArc(stateForArc, stateForArc.summary).then(newArc => {
+                        if (newArc && newArc.length > 0) {
+                            const currentWs = getGameState().worldState;
+                            updateWorldState({ questArc: [...(currentWs.questArc ?? []), ...newArc] });
+                        }
+                    });
+                }
             }
 
         } catch (error: any) {
