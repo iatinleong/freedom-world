@@ -8,6 +8,10 @@ function getDirectorDirectives(state: GameState): string {
   if (!worldState) return '';
   const directives: string[] = [];
 
+  const QUEST_TURNS = 6;
+  const assistantCount = state.narrative.filter(l => l.role === 'assistant').length;
+  const turnsIntoQuest = Math.max(0, assistantCount - (worldState.questStartTurn ?? 0));
+
   if (worldState.mainQuest) {
     const arc = worldState.questArc ?? [];
     const arcIndex = worldState.questArcIndex ?? 0;
@@ -22,6 +26,27 @@ function getDirectorDirectives(state: GameState): string {
       lines.push(`・下一目標「${nextChapter}」——本回合埋下過渡契機`);
     }
     directives.push(lines.join('\n'));
+
+    // 章節三段式：根據在章節內的位置，指示當前的敘事節奏
+    if (turnsIntoQuest <= 1) {
+      directives.push(
+        `【鋪陳入局（第${turnsIntoQuest + 1}/${QUEST_TURNS}回合）】` +
+        `建立場景與人物，讓線索自然浮現。` +
+        `選項偏向探索、觀察、接觸人物，語氣輕鬆——為後續衝突埋伏筆，此刻不必強行製造緊張感。`
+      );
+    } else if (turnsIntoQuest <= 3) {
+      directives.push(
+        `【衝突浮現（第${turnsIntoQuest + 1}/${QUEST_TURNS}回合）】` +
+        `事情開始複雜，出現一個具體的困難或對抗。` +
+        `選項中至少一個要求玩家正面面對衝突（打、強闖、逼問、當面揭穿），禁止四個選項全是迂迴潛行。`
+      );
+    } else {
+      directives.push(
+        `【決斷收局（第${turnsIntoQuest + 1}/${QUEST_TURNS}回合）】` +
+        `必須做出不可逆的決定，本章留下明確結果（成功/失敗/代價），並為下一章埋下伏筆。` +
+        `選項應有份量感，每個選擇都帶有清晰的後果預示。`
+      );
+    }
   }
 
   if (worldState.currentCombatTurns >= 4) {
@@ -31,19 +56,12 @@ function getDirectorDirectives(state: GameState): string {
   }
 
   if (worldState.currentCombatTurns === 0 && worldState.pacingCounter >= 5) {
-    directives.push(`【情境推進】已平靜 ${worldState.pacingCounter} 回合，請推動劇情發展（如：揭示新線索、場景變換、或遭遇新角色），不一定要發生戰鬥，重點是讓故事向前流動。`);
+    directives.push(`【情境推進】已平靜 ${worldState.pacingCounter} 回合，推動劇情發展（揭示新線索、場景變換、遭遇新角色）。重點是讓故事向前流動，不一定要有戰鬥。`);
   }
 
   const hpRatio = player.stats.hp / player.stats.maxHp;
   if (hpRatio <= 0.3 && hpRatio > 0) {
     directives.push(`【瀕危警報】HP ${player.stats.hp}/${player.stats.maxHp}，本回合必須出現救場轉機，hpChange 不得為負。`);
-  }
-
-  const QUEST_TURNS = 6;
-  const assistantCount = state.narrative.filter(l => l.role === 'assistant').length;
-  const turnsIntoQuest = Math.max(0, assistantCount - (worldState.questStartTurn ?? 0));
-  if (turnsIntoQuest >= QUEST_TURNS - 1 && worldState.mainQuest) {
-    directives.push(`【章節衝刺】「${worldState.mainQuest}」已進行 ${turnsIntoQuest}/${QUEST_TURNS} 回合，本回合必須出現關鍵突破或明確結果。`);
   }
 
   return directives.join('\n\n');
@@ -121,8 +139,9 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 ・屬性影響：膂力→攻防 | 身法→閃避逃跑 | 根骨→防禦抗傷 | 悟性→識破學功 | 福緣→奇遇 | 魅力→NPC態度
 
 ━━ 選項法則 ━━
-・4個選項覆蓋4個截然不同，讓玩家覺得選了哪個都可惜。
-・每選項 action要說清楚做什麼/對誰/目的（大概10-20字）
+・4個選項由當前場景自然產生，覆蓋不同的行動維度，讓玩家覺得每個都捨不得放棄。
+・選項類型跟著場景走：場景有敵人→有正面對抗選項；場景有NPC→有社交/談判選項；場景有線索→有探查選項；場景有退路→有撤離選項。禁止四個選項全屬同一類型（例如全是潛行、全是逃跑、全是問話）。
+・每選項 action 說清楚做什麼/對誰/目的（10-20字）
 
 ━━ 輸出規則 ━━
 只輸出 JSON，stateUpdate 只填真正有變化的欄位（0值不寫）。
