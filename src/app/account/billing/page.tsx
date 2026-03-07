@@ -1,5 +1,6 @@
 import { getSupabase } from '@/lib/supabase/client';
 import { redirect } from 'next/navigation';
+import OrderRow from './OrderRow'; // We will create this client component
 
 export default async function BillingPage() {
     const supabase = getSupabase();
@@ -51,35 +52,19 @@ export default async function BillingPage() {
                                     <th className="p-4 font-medium">金額</th>
                                     <th className="p-4 font-medium">狀態</th>
                                     <th className="p-4 font-medium">日期</th>
+                                    <th className="p-4 font-medium">操作</th>
                                 </tr>
                             </thead>
                             <tbody className="text-sm">
                                 {!orders || orders.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="p-8 text-center text-neutral-500">
+                                        <td colSpan={6} className="p-8 text-center text-neutral-500">
                                             尚無交易紀錄
                                         </td>
                                     </tr>
                                 ) : (
                                     orders.map((order) => (
-                                        <tr key={order.id} className="border-b border-neutral-800/50 hover:bg-neutral-800/20 transition-colors">
-                                            <td className="p-4 font-mono text-neutral-400 text-xs">{order.merchant_order_no}</td>
-                                            <td className="p-4">{order.item_desc}</td>
-                                            <td className="p-4">NT$ {order.amount}</td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    order.status === 'SUCCESS' ? 'bg-green-900/30 text-green-400 border border-green-800' :
-                                                    order.status === 'FAILED' ? 'bg-red-900/30 text-red-400 border border-red-800' :
-                                                    'bg-amber-900/30 text-amber-400 border border-amber-800'
-                                                }`}>
-                                                    {order.status === 'SUCCESS' ? '交易成功' : 
-                                                     order.status === 'FAILED' ? '交易失敗' : '等待付款'}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-neutral-500">
-                                                {new Date(order.created_at).toLocaleString('zh-TW')}
-                                            </td>
-                                        </tr>
+                                        <OrderRow key={order.id} order={order} />
                                     ))
                                 )}
                             </tbody>
