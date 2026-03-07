@@ -23,11 +23,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="zh-TW">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        {children}
+        <main className="flex-grow">
+          {children}
+        </main>
+        <footer className="text-center p-6 text-sm text-neutral-500 bg-neutral-950 border-t border-neutral-900">
+          <p>© 2026 自由江湖 Freedom World.</p>
+          <p>本網站由 自由世界 獨立開發與營運</p>
+          <p>客服信箱：freedomworld1023@gmail.com | 客服專線：0989851023</p>
+        </footer>
       </body>
     </html>
   );
