@@ -4,12 +4,18 @@ import { decryptTradeInfo, createTradeSha } from '@/lib/newebpay';
 
 // NotifyURL 是在背景執行的，沒有使用者的登入 session
 // 因此我們必須使用 Service Role Key 來擁有權限修改所有使用者的額度與訂單
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+function getSupabaseAdmin() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Missing Supabase environment variables for admin client');
+    }
+    return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export async function POST(req: Request) {
     try {
+        const supabaseAdmin = getSupabaseAdmin();
         const formData = await req.formData();
         const tradeInfo = formData.get('TradeInfo') as string;
         const tradeSha = formData.get('TradeSha') as string;
