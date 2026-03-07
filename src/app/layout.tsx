@@ -32,7 +32,7 @@ export default function RootLayout({
         </main>
         <footer className="text-center p-6 text-sm text-neutral-500 bg-neutral-950 border-t border-neutral-900">
           <p>© 2026 自由江湖 Freedom World.</p>
-          <p>本網站由 自由世界 獨立開發與營運</p>
+          <p>本網站由 自由世界 獨立開發與營運 | 網站負責人：陳人瑜</p>
           <p>客服信箱：freedomworld1023@gmail.com | 客服專線：0989851023</p>
         </footer>
       </body>
