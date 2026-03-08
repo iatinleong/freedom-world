@@ -35,8 +35,9 @@ export async function POST(req: Request) {
 
         // 嘗試從 Header 讀取 Authorization token (由前端傳來)
         const authHeader = req.headers.get('Authorization');
+        let token = '';
         if (authHeader) {
-            const token = authHeader.replace('Bearer ', '');
+            token = authHeader.replace('Bearer ', '');
             const { data: { user }, error } = await supabase.auth.getUser(token);
             if (user) {
                 userId = user.id;
@@ -47,10 +48,19 @@ export async function POST(req: Request) {
              return NextResponse.json({ error: '請先登入。' }, { status: 401 });
         }
 
+        // 重建一個帶有使用者權限的 Supabase 客戶端，這樣才能通過 RLS 寫入訂單
+        const supabaseUserClient = createClient(supabaseUrl, supabaseKey, {
+            global: {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        });
+
         // 2. 建立訂單 (寫入 Supabase)
         const merchantOrderNo = `FW_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
         
-        const { error: insertError } = await supabase
+        const { error: insertError } = await supabaseUserClient
             .from('orders')
             .insert({
                 user_id: userId,
