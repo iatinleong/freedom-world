@@ -10,7 +10,6 @@ import { CharacterCreation } from '@/components/CharacterCreation';
 import { GameTerminal } from '@/components/GameTerminal';
 import { ActionPanel } from '@/components/ActionPanel';
 import { StatusHUD } from '@/components/StatusHUD';
-import { CostMonitor } from '@/components/CostMonitor';
 import { CharacterPanel } from '@/components/CharacterPanel';
 import { DeathScreen } from '@/components/DeathScreen';
 import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem';
@@ -109,7 +108,6 @@ export default function GamePage() {
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-wuxia-gold/40 to-transparent z-50"></div>
       </main>
 
-      <CostMonitor />
       <GlobalNotificationSystem />
       <GameMenu />
     </>
