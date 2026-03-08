@@ -379,45 +379,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/10 py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-10">
-            <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                <Globe className="w-5 h-5 text-fw-gold" />
-                <span className="font-serif text-fw-gold tracking-widest">自由世界</span>
-                <span className="text-white/30 text-xs font-mono">Freedom World</span>
-              </div>
-              <p className="text-xs text-white/30 leading-relaxed max-w-xs">
-                你的每一個抉擇，都將永久改變世界的走向。
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-4 text-center md:text-right">
-              <p className="text-xs text-white/30 tracking-widest uppercase font-mono mb-1">Contact</p>
-              <a href="mailto:iatinleong@gmail.com"
-                className="flex items-center justify-center md:justify-end gap-3 text-sm text-white/60 hover:text-fw-gold transition-colors group">
-                <Mail className="w-4 h-4 text-fw-gold/50 group-hover:text-fw-gold" />
-                iatinleong@gmail.com
-              </a>
-              <a href="tel:0921637738"
-                className="flex items-center justify-center md:justify-end gap-3 text-sm text-white/60 hover:text-fw-gold transition-colors group">
-                <Phone className="w-4 h-4 text-fw-gold/50 group-hover:text-fw-gold" />
-                0921-637-738
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-white/20">© 2026 自由世界 Freedom World. All rights reserved.</p>
-            <Link href="/game" className="text-xs text-fw-gold/50 hover:text-fw-gold transition-colors tracking-widest" style={{ marginRight: '-0.1em' }}>
-              進入遊戲 →
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
