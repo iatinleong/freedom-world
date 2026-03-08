@@ -26,22 +26,26 @@ export async function POST(req: Request) {
         
         // TODO: 取得目前登入的使用者 ID
         // 這裡暫時使用 mock 的 user_id，你需要接上你的 Auth 邏輯
-        const supabase = getSupabase();
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(supabaseUrl, supabaseKey);
         
+        let userId = null;
+
         // 嘗試從 Header 讀取 Authorization token (由前端傳來)
         const authHeader = req.headers.get('Authorization');
         if (authHeader) {
             const token = authHeader.replace('Bearer ', '');
-            await supabase.auth.setSession({ access_token: token, refresh_token: '' });
+            const { data: { user }, error } = await supabase.auth.getUser(token);
+            if (user) {
+                userId = user.id;
+            }
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user) {
+        if (!userId) {
              return NextResponse.json({ error: '請先登入。' }, { status: 401 });
         }
-        
-        const userId = session.user.id;
 
         // 2. 建立訂單 (寫入 Supabase)
         const merchantOrderNo = `FW_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
