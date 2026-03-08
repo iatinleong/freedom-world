@@ -31,7 +31,7 @@ function PlanCard({ planId, name, usdPrice, period, badge, features, highlight, 
                 ? 'border-wuxia-gold bg-gradient-to-b from-wuxia-gold/10 to-transparent shadow-[0_0_40px_rgba(212,175,55,0.15)]'
                 : 'border-white/15 bg-white/5 hover:border-white/30'}`}>
             {badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-wuxia-gold text-black text-xs font-bold rounded-full tracking-wider">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-wuxia-gold text-black text-xs font-bold rounded-full tracking-wider whitespace-nowrap">
                     {badge}
                 </div>
             )}
