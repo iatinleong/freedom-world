@@ -97,7 +97,7 @@ export function StoreSection() {
             // 如果沒登入，跳轉到首頁或顯示錯誤 (我們在 API 已經擋 401 了)
             if (response.status === 401) {
                  alert('請先登入遊戲後再進行儲值');
-                 router.push('/');
+                 router.push('/game');
                  return;
             }
 
