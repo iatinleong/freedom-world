@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/engine/store';
 import { useAuthStore } from '@/lib/supabase/authStore';
 import { useSaveGameStore } from '@/lib/engine/saveGameStore';
@@ -18,8 +19,8 @@ import { User, Scroll, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export default function GamePage() {
-  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, isQuestPanelOpen, setQuestPanelOpen, setGameMenuOpen, player, loadGameState } = useGameStore();
+function GameContent() {
+  const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, isQuestPanelOpen, setQuestPanelOpen, setGameMenuOpen, player, loadGameState, addNotification } = useGameStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { restoreLatestAutoSave } = useSaveGameStore();
   const { fetchQuota, turnsRemaining } = useQuotaStore();
@@ -30,6 +31,31 @@ export default function GamePage() {
     setMounted(true);
     initialize();
   }, [initialize]);
+
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!mounted || !user) return;
+    
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      addNotification({
+        type: 'achievement',
+        title: '盤纏已送達',
+        description: '少俠，您的回合數已成功入帳，快去闖蕩江湖吧！'
+      });
+      router.replace('/game');
+    } else if (paymentStatus === 'failed') {
+      addNotification({
+        type: 'system',
+        title: '儲值失敗',
+        description: '少俠，您的交易未能完成，請稍後再試。'
+      });
+      router.replace('/game');
+    }
+  }, [mounted, user, searchParams, router, addNotification]);
 
   // On login: load quota and restore latest auto-save
   useEffect(() => {
@@ -116,5 +142,14 @@ export default function GamePage() {
       <GlobalNotificationSystem />
       <GameMenu />
     </>
+  );
+}
+
+
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-black text-wuxia-gold">載入中...</div>}>
+      <GameContent />
+    </Suspense>
   );
 }
