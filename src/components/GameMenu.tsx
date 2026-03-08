@@ -195,26 +195,22 @@ export function GameMenu() {
                                             </div>
                                         </div>
 
-                                        {/* Game Info */}
+                                        {/* Store Link */}
                                         <div className="space-y-3">
                                             <h3 className="text-sm font-serif text-wuxia-gold/80 tracking-wide flex items-center gap-2">
                                                 <span className="w-1 h-4 bg-wuxia-gold/60 rounded-sm"></span>
-                                                遊戲信息
+                                                黑市商人
                                             </h3>
-                                            <div className="space-y-2 pl-4 text-xs text-white/50 font-mono">
-                                                <div className="flex justify-between p-2 bg-white/5 rounded-sm">
-                                                    <span>版本</span>
-                                                    <span className="text-wuxia-gold">v0.1.0</span>
-                                                </div>
-                                                <div className="flex justify-between p-2 bg-white/5 rounded-sm">
-                                                    <span>引擎</span>
-                                                    <span className="text-wuxia-gold">{modelLabel}</span>
-                                                </div>
-                                                <div className="flex justify-between p-2 bg-white/5 rounded-sm">
-                                                    <span>框架</span>
-                                                    <span className="text-wuxia-gold">Next.js 16 + React 19</span>
-                                                </div>
-                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setGameMenuOpen(false);
+                                                    router.push('/store');
+                                                }}
+                                                className="w-full flex items-center justify-between p-3 rounded-sm bg-white/5 border border-amber-900/30 hover:border-amber-500/50 hover:bg-amber-900/20 transition-all group"
+                                            >
+                                                <span className="text-sm text-amber-500/80 group-hover:text-amber-400 font-bold">前往儲值</span>
+                                                <span className="text-lg">💰</span>
+                                            </button>
                                         </div>
                                     </>
                                 ) : (

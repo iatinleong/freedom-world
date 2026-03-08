@@ -95,12 +95,12 @@ function PlanCard({ name, usdPrice, period, usdOriginal, badge, features, highli
           </li>
         ))}
       </ul>
-      <button className={`w-full py-3 rounded-lg font-serif tracking-wider text-sm transition-all
+      <Link href="/store" className={`w-full py-3 rounded-lg font-serif tracking-wider text-sm transition-all text-center block
         ${highlight
           ? 'bg-fw-gold text-black hover:bg-fw-gold/90 font-bold'
           : 'border border-white/20 text-white/70 hover:border-white/50 hover:text-white'}`}>
         選擇方案
-      </button>
+      </Link>
     </div>
   );
 }
@@ -192,7 +192,7 @@ export default function LandingPage() {
         <div className="py-24 px-6 border-b border-white/5">
           <div className="max-w-3xl mx-auto">
             <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點一</p>
-            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">⌨️ 一個輸入框，就是你的全世界</h2>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">一個輸入框，由你來編寫劇情的走向</h2>
             <p className="text-white/50 mb-8 leading-relaxed">
               還在玩「選項 A、B、C」的傳統遊戲嗎？在《自由江湖》中，對話框是你編寫世界的工具。
             </p>
@@ -222,7 +222,7 @@ export default function LandingPage() {
         <div className="py-24 px-6 border-b border-white/5 bg-white/[0.02]">
           <div className="max-w-3xl mx-auto">
             <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點二</p>
-            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">🔞 剝去濾鏡，看見最真實的人性</h2>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">剝去濾鏡，看見最真實的人性</h2>
             <p className="text-white/50 mb-8 leading-relaxed">
               江湖不僅有刀光劍影，還有慾望、背叛與禁忌的煙火。
             </p>
@@ -243,7 +243,7 @@ export default function LandingPage() {
         <div className="py-24 px-6 border-b border-white/5">
           <div className="max-w-3xl mx-auto">
             <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點三</p>
-            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">🧠 擁有記憶的說書人</h2>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">擁有記憶的說書人</h2>
             <p className="text-white/50 mb-8 leading-relaxed">
               這不只是文字堆砌，而是一個動態演進的生態系統。
             </p>
@@ -269,13 +269,13 @@ export default function LandingPage() {
         <div className="py-24 px-6 border-b border-white/5 bg-white/[0.02]">
           <div className="max-w-3xl mx-auto">
             <p className="text-xs text-fw-gold/50 tracking-[0.5em] uppercase font-mono mb-4">核心亮點四</p>
-            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">📊 隱藏在文字下的精密齒輪</h2>
+            <h2 className="text-2xl sm:text-3xl font-serif text-white mb-2">隱藏在文字下的精密齒輪</h2>
             <p className="text-white/50 mb-8 leading-relaxed">
               別被文字外表騙了，這是一款硬核的數值 RPG。
             </p>
             <ul className="space-y-6">
               {[
-                { title: '七大根骨定乾坤', desc: '膂力決定攻防、身法決定閃避、悟性決定學招速度、福緣決定奇遇。' },
+                { title: '七大屬性定乾坤', desc: '膂力決定攻防、身法決定閃避、悟性決定學招速度、福緣決定奇遇。' },
                 { title: '動態武學體系', desc: '從基礎外功到神功心法，你的修為會精確影響系統對戰鬥結果的判定。' },
                 { title: '名望與稱號', desc: '俠義、惡名、威名，你的名號將決定 NPC 對你的態度——是夾道歡迎，還是拔劍相向？' },
               ].map((item, i) => (
