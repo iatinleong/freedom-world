@@ -86,9 +86,23 @@ export function StoreSection() {
         setError(null);
 
         try {
+            // 先從前端取得目前的 token，確保後端 API 能認得我們
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                 alert('請先登入遊戲後再進行儲值');
+                 router.push('/game');
+                 return;
+            }
+
             const response = await fetch('/api/payment/checkout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}` // 明確帶上 Token
+                },
                 body: JSON.stringify({ planId }),
             });
 
