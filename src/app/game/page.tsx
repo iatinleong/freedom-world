@@ -15,6 +15,7 @@ import { DeathScreen } from '@/components/DeathScreen';
 import { GlobalNotificationSystem } from '@/components/GlobalNotificationSystem';
 import { GameMenu } from '@/components/GameMenu';
 import { User, Scroll, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export default function GamePage() {
@@ -77,6 +78,10 @@ export default function GamePage() {
             </div>
             {/* 右：功能按鈕 */}
             <div className="flex items-center gap-1.5 sm:gap-2 justify-end">
+              <Link href="/store" className="relative w-8 h-8 sm:w-9 sm:h-9 bg-wuxia-gold/10 border border-wuxia-gold/50 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/20 transition-all group overflow-hidden" title="儲值 (黑市商人)">
+                <div className="absolute inset-0 bg-wuxia-gold/20 animate-pulse"></div>
+                <span className="text-sm sm:text-base relative z-10 drop-shadow-md">💰</span>
+              </Link>
               <button onClick={() => setCharacterPanelOpen(true)} className="w-8 h-8 sm:w-9 sm:h-9 bg-black/60 border border-wuxia-gold/30 rounded-sm flex items-center justify-center hover:bg-wuxia-gold/10 hover:border-wuxia-gold/60 transition-all group" title="角色面板">
                 <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-wuxia-gold/70 group-hover:text-wuxia-gold" />
               </button>
