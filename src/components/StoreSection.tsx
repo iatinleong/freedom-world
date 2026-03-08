@@ -87,8 +87,8 @@ export function StoreSection() {
 
         try {
             // 先從前端取得目前的 token，確保後端 API 能認得我們
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
+            const { getSupabase } = await import('@/lib/supabase/client');
+            const supabase = getSupabase();
             const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) {
