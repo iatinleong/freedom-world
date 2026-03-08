@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Settings, HelpCircle, X, Volume2, VolumeX, Maximize2, Minimize2, Save, RotateCcw, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SaveGameManager } from './SaveGameManager';
@@ -10,6 +11,7 @@ import { useSaveGameStore } from '@/lib/engine/saveGameStore';
 import { useAIConfigStore, PROVIDER_INFO, PROVIDER_MODELS } from '@/lib/engine/aiConfigStore';
 
 export function GameMenu() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'settings' | 'help' | 'saves'>('settings');
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
