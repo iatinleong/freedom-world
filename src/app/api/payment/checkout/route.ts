@@ -65,6 +65,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: '建立訂單失敗。' }, { status: 500 });
         }
 
+        // 取得當前的 baseUrl (優先使用環境變數，否則使用請求的 origin，方便 Vercel Preview 測試)
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
+
         // 3. 準備藍新金流 TradeInfo 參數
         const tradeInfoParams = {
             MerchantID: getMerchantId(),
@@ -74,10 +77,10 @@ export async function POST(req: Request) {
             MerchantOrderNo: merchantOrderNo,
             Amt: selectedPlan.amount,
             ItemDesc: selectedPlan.desc,
-            // 回傳網址 (需要設定 ngrok 或正式網域，開發期先寫 localhost 會無法接收)
-            ReturnURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/game?payment=success`,
-            NotifyURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/payment/notify`,
-            ClientBackURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/store`, // 返回遊戲商店
+            // 回傳網址
+            ReturnURL: `${baseUrl}/game?payment=success`,
+            NotifyURL: `${baseUrl}/api/payment/notify`,
+            ClientBackURL: `${baseUrl}/store`, // 返回遊戲商店
             // PWA / 行動端體驗優化
             WalletDisplayMode: 0, // 0 = 根據用戶設備自動跳轉 APP (非強制顯示 QR code)
             TradeLimit: 900,      // 交易有效時間 15 分鐘 (900秒)
