@@ -119,12 +119,11 @@ export function StoreSection() {
                 throw new Error(data.error || '結帳發起失敗');
             }
 
-            // 根據環境決定要打測試機還是正式機
             // 測試機: https://ccore.newebpay.com/MPG/mpg_gateway
             // 正式機: https://core.newebpay.com/MPG/mpg_gateway
-            const defaultActionUrl = process.env.NODE_ENV === 'production' 
-                ? 'https://core.newebpay.com/MPG/mpg_gateway'
-                : 'https://ccore.newebpay.com/MPG/mpg_gateway';
+            // 因為 Vercel 部署預設 NODE_ENV 都是 production，我們這裡先強制預設為測試機，
+            // 等您正式上線時，只要在 Vercel 後台設定 NEXT_PUBLIC_NEWEBPAY_URL 為正式機網址即可。
+            const defaultActionUrl = 'https://ccore.newebpay.com/MPG/mpg_gateway';
 
             const actionUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL || defaultActionUrl;
 
