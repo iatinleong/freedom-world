@@ -37,16 +37,19 @@ export async function POST(req: Request) {
         console.log('Decrypted Notify Data:', decryptedData);
         
         // 藍新回傳的 Status 為 'SUCCESS' 才代表付款成功
-        const { Status, MerchantOrderNo, Result } = decryptedData;
+        const { Status, Result } = decryptedData;
         const resultObj = typeof Result === 'string' ? JSON.parse(Result) : Result;
+        const MerchantOrderNo = resultObj?.MerchantOrderNo;
 
-        if (Status !== 'SUCCESS') {
-            console.warn(`Payment failed for order ${MerchantOrderNo}. Status: ${Status}`);
+        if (Status !== 'SUCCESS' || !MerchantOrderNo) {
+            console.warn(`Payment failed or missing OrderNo. Status: ${Status}`);
             // 更新訂單為失敗
-            await supabaseAdmin
-                .from('orders')
-                .update({ status: 'FAILED' })
-                .eq('merchant_order_no', MerchantOrderNo);
+            if (MerchantOrderNo) {
+                await supabaseAdmin
+                    .from('orders')
+                    .update({ status: 'FAILED' })
+                    .eq('merchant_order_no', MerchantOrderNo);
+            }
                 
             return NextResponse.json({ status: 'Payment Failed Received' });
         }
