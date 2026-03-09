@@ -53,7 +53,7 @@ export function decryptTradeInfo(encryptedTradeInfo: string): Record<string, any
         return JSON.parse(decrypted);
     } catch (e) {
         const params = new URLSearchParams(decrypted);
-        const result = {};
+        const result: Record<string, any> = {};
         for (const [key, value] of params.entries()) {
             result[key] = value;
         }
