@@ -91,7 +91,7 @@ export async function POST(req: Request) {
             Amt: selectedPlan.amount,
             ItemDesc: selectedPlan.desc,
             // 回傳網址
-            ReturnURL: `${baseUrl}/game?payment=success`,
+            ReturnURL: `${baseUrl}/api/payment/return`,
             NotifyURL: `${baseUrl}/api/payment/notify`,
             ClientBackURL: `${baseUrl}/store`, // 返回遊戲商店
             // PWA / 行動端體驗優化
