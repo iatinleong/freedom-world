@@ -119,7 +119,14 @@ export function StoreSection() {
                 throw new Error(data.error || '結帳發起失敗');
             }
 
-            const actionUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL || 'https://core.newebpay.com/MPG/mpg_gateway';
+            // 根據環境決定要打測試機還是正式機
+            // 測試機: https://ccore.newebpay.com/MPG/mpg_gateway
+            // 正式機: https://core.newebpay.com/MPG/mpg_gateway
+            const defaultActionUrl = process.env.NODE_ENV === 'production' 
+                ? 'https://core.newebpay.com/MPG/mpg_gateway'
+                : 'https://ccore.newebpay.com/MPG/mpg_gateway';
+
+            const actionUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL || defaultActionUrl;
 
             const form = document.createElement('form');
             form.method = 'POST';
