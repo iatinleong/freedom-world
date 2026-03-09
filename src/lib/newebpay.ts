@@ -49,23 +49,19 @@ export function decryptTradeInfo(encryptedTradeInfo: string): Record<string, any
     let decrypted = decipher.update(encryptedTradeInfo, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
-    // Parse the query string back into an object
-    const params = new URLSearchParams(decrypted);
-    const result: Record<string, any> = {};
-    for (const [key, value] of params.entries()) {
-        result[key] = value;
-    }
-    
-    // In Notify JSON response, Result might be a JSON string itself
-    if (result.Result && typeof result.Result === 'string' && result.Result.startsWith('{')) {
-        try {
-            result.Result = JSON.parse(result.Result);
-        } catch (e) {
-            // keep as string if parsing fails
+    try {
+        return JSON.parse(decrypted);
+    } catch (e) {
+        const params = new URLSearchParams(decrypted);
+        const result = {};
+        for (const [key, value] of params.entries()) {
+            result[key] = value;
         }
+        if (result.Result && typeof result.Result === 'string' && result.Result.startsWith('{')) {
+            try { result.Result = JSON.parse(result.Result); } catch (err) {}
+        }
+        return result;
     }
-
-    return result;
 }
 
 /**
