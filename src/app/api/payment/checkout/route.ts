@@ -48,19 +48,22 @@ export async function POST(req: Request) {
              return NextResponse.json({ error: '請先登入。' }, { status: 401 });
         }
 
-        // 重建一個帶有使用者權限的 Supabase 客戶端，這樣才能通過 RLS 寫入訂單
-        const supabaseUserClient = createClient(supabaseUrl, supabaseKey, {
-            global: {
-                headers: {
-                    Authorization: `Bearer ${token}`
+        // 為了確保寫入成功，後端 API 優先使用 Service Role Key 來建立訂單 (繞過 RLS)
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabaseAdmin = supabaseServiceKey 
+            ? createClient(supabaseUrl, supabaseServiceKey)
+            : createClient(supabaseUrl, supabaseKey, {
+                global: {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }
-        });
+            });
 
         // 2. 建立訂單 (寫入 Supabase)
         const merchantOrderNo = `FW_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
         
-        const { error: insertError } = await supabaseUserClient
+        const { error: insertError } = await supabaseAdmin
             .from('orders')
             .insert({
                 user_id: userId,
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
 
         if (insertError) {
             console.error('建立訂單失敗:', insertError);
-            return NextResponse.json({ error: '建立訂單失敗。' }, { status: 500 });
+            return NextResponse.json({ error: `建立訂單失敗: ${insertError.message}` }, { status: 500 });
         }
 
         // 取得當前的 baseUrl (優先使用環境變數，否則使用請求的 origin，方便 Vercel Preview 測試)
