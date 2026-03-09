@@ -89,7 +89,7 @@ export async function POST(req: Request) {
             Version: '2.3', // 根據最新手冊更新為 2.3
             MerchantOrderNo: merchantOrderNo,
             Amt: selectedPlan.amount,
-            ItemDesc: selectedPlan.desc,
+            ItemDesc: selectedPlan.desc, CREDIT: 1, WEBATM: 0, VACC: 0, CVS: 0, BARCODE: 0,
             // 回傳網址
             ReturnURL: `${baseUrl}/api/payment/return`,
             NotifyURL: `${baseUrl}/api/payment/notify`,
