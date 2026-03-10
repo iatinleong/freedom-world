@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from 'next/link';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,8 +33,17 @@ export default function RootLayout({
         </main>
         <footer className="text-center p-6 text-sm text-neutral-500 bg-neutral-950 border-t border-neutral-900">
           <p>© 2026 自由江湖 Freedom World.</p>
-          <p>本網站由 自由世界 獨立開發與營運 | 網站負責人：陳人瑜</p>
-          <p>客服信箱：freedomworld1023@gmail.com | 客服專線：0989851023</p>
+          <p className="mt-1">本網站由 自由世界 獨立開發與營運 | 網站負責人：陳人瑜</p>
+          <p className="mt-1">客服信箱：freedomworld1023@gmail.com | 客服專線：0989851023</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs">
+            <Link href="/policy" className="hover:text-neutral-300 transition-colors">服務條款</Link>
+            <span className="hidden sm:inline">|</span>
+            <Link href="/policy" className="hover:text-neutral-300 transition-colors">隱私權政策</Link>
+            <span className="hidden sm:inline">|</span>
+            <Link href="/policy" className="hover:text-neutral-300 transition-colors">退款政策</Link>
+            <span className="hidden sm:inline">|</span>
+            <Link href="/policy" className="hover:text-neutral-300 transition-colors">消費者權益</Link>
+          </div>
         </footer>
       </body>
     </html>
