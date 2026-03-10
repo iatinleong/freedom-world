@@ -23,11 +23,11 @@ export const useQuotaStore = create<QuotaStore>((set, get) => ({
             .maybeSingle();
 
         if (!data) {
-            // 新用戶：建立初始額度 0
+            // 新用戶：建立初始額度 10
             await supabase
                 .from('user_quotas')
-                .insert({ user_id: userId, turns_remaining: 0 });
-            set({ turnsRemaining: 0, isLoading: false });
+                .insert({ user_id: userId, turns_remaining: 10 });
+            set({ turnsRemaining: 10, isLoading: false });
         } else {
             set({ turnsRemaining: data.turns_remaining, isLoading: false });
         }

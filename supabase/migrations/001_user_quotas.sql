@@ -3,7 +3,7 @@
 
 create table if not exists user_quotas (
   user_id         uuid primary key references auth.users(id) on delete cascade,
-  turns_remaining integer not null default 0,
+  turns_remaining integer not null default 10,
   updated_at      timestamptz not null default now()
 );
 
