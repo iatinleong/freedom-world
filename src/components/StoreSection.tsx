@@ -58,7 +58,7 @@ function PlanCard({ planId, name, usdPrice, period, badge, features, highlight, 
             <button
                 onClick={() => onCheckout(planId)}
                 disabled={isLoading}
-                className={`w-full py-3 rounded-lg font-serif tracking-wider text-sm transition-all text-center block disabled:opacity-50 disabled:cursor-not-allowed
+                className={`w-full py-3 rounded-lg font-serif tracking-wider text-sm transition-all text-center block disabled:opacity-50 disabled:cursor-not-allowed  
         ${highlight
                         ? 'bg-wuxia-gold text-black hover:bg-wuxia-gold/90 font-bold'
                         : 'border border-white/20 text-white/70 hover:border-white/50 hover:text-white'}`}
@@ -100,7 +100,7 @@ export function StoreSection() {
 
             const response = await fetch('/api/payment/checkout', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}` // 明確帶上 Token
                 },
@@ -120,11 +120,10 @@ export function StoreSection() {
                 throw new Error(data.error || '結帳發起失敗');
             }
 
-            // 測試機: https://ccore.newebpay.com/MPG/mpg_gateway
+            // 因為您的商店代號 (MS1820413366) 是正式環境的代號，
+            // 且我們正在等待藍新金流審核通過，所以這裡直接固定打向正式機。
             // 正式機: https://core.newebpay.com/MPG/mpg_gateway
-            // 因為 Vercel 部署預設 NODE_ENV 都是 production，我們這裡先強制預設為測試機，
-            // 等您正式上線時，只要在 Vercel 後台設定 NEXT_PUBLIC_NEWEBPAY_URL 為正式機網址即可。
-            const defaultActionUrl = 'https://ccore.newebpay.com/MPG/mpg_gateway';
+            const defaultActionUrl = 'https://core.newebpay.com/MPG/mpg_gateway';
 
             const actionUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL || defaultActionUrl;
 
@@ -233,10 +232,20 @@ export function StoreSection() {
                 </div>
 
                 <div className="mt-8 p-5 rounded-lg border border-white/10 bg-white/3 text-center max-w-2xl mx-auto">
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-white/50 mb-4">
                         <Sparkles className="w-3 h-3 inline mr-2 text-wuxia-gold/60" />
                         目前正式上線前為免費體驗期，訂閱系統即將開放
                     </p>
+                    
+                    <div className="flex flex-wrap justify-center gap-4 text-xs text-white/40 pt-4 border-t border-white/5">
+                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">服務條款</Link>
+                        <span className="hidden sm:inline">|</span>
+                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">隱私權政策</Link>
+                        <span className="hidden sm:inline">|</span>
+                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">退款政策</Link>
+                        <span className="hidden sm:inline">|</span>
+                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">消費者權益</Link>
+                    </div>
                 </div>
             </div>
         </section>

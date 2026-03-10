@@ -24,8 +24,6 @@ export async function POST(req: Request) {
         
         const selectedPlan = PLANS[planId as keyof typeof PLANS];
         
-        // TODO: 取得目前登入的使用者 ID
-        // 這裡暫時使用 mock 的 user_id，你需要接上你的 Auth 邏輯
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
         const { createClient } = await import('@supabase/supabase-js');
@@ -89,7 +87,7 @@ export async function POST(req: Request) {
             Version: '2.3', // 根據最新手冊更新為 2.3
             MerchantOrderNo: merchantOrderNo,
             Amt: selectedPlan.amount,
-            ItemDesc: selectedPlan.desc, CREDIT: 1, WEBATM: 0, VACC: 0, CVS: 0, BARCODE: 0,
+            ItemDesc: selectedPlan.desc,
             // 回傳網址
             ReturnURL: `${baseUrl}/api/payment/return`,
             NotifyURL: `${baseUrl}/api/payment/notify`,
