@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Check, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface PlanCardProps {
     planId: string;
