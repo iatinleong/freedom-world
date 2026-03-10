@@ -232,20 +232,10 @@ export function StoreSection() {
                 </div>
 
                 <div className="mt-8 p-5 rounded-lg border border-white/10 bg-white/3 text-center max-w-2xl mx-auto">
-                    <p className="text-sm text-white/50 mb-4">
+                    <p className="text-sm text-white/50">
                         <Sparkles className="w-3 h-3 inline mr-2 text-wuxia-gold/60" />
                         目前正式上線前為免費體驗期，訂閱系統即將開放
                     </p>
-                    
-                    <div className="flex flex-wrap justify-center gap-4 text-xs text-white/40 pt-4 border-t border-white/5">
-                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">服務條款</Link>
-                        <span className="hidden sm:inline">|</span>
-                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">隱私權政策</Link>
-                        <span className="hidden sm:inline">|</span>
-                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">退款政策</Link>
-                        <span className="hidden sm:inline">|</span>
-                        <Link href="/policy" className="hover:text-wuxia-gold transition-colors">消費者權益</Link>
-                    </div>
                 </div>
             </div>
         </section>
