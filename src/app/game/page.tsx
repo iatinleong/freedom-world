@@ -23,7 +23,7 @@ function GameContent() {
   const { isGameStarted, isCharacterPanelOpen, setCharacterPanelOpen, isQuestPanelOpen, setQuestPanelOpen, setGameMenuOpen, player, loadGameState, addNotification } = useGameStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { restoreLatestAutoSave } = useSaveGameStore();
-  const { fetchQuota, turnsRemaining } = useQuotaStore();
+  const { fetchQuota, turnsRemaining, isLoading: isQuotaLoading } = useQuotaStore();
   const [mounted, setMounted] = useState(false);
   const [restored, setRestored] = useState(false);
   
@@ -92,9 +92,9 @@ function GameContent() {
             <div className="flex items-center">
               <span className={cn(
                 "text-xs font-mono tabular-nums tracking-wide",
-                turnsRemaining <= 0 ? "text-red-400" : turnsRemaining <= 10 ? "text-yellow-400/80" : "text-wuxia-gold/50"
+                isQuotaLoading ? "text-wuxia-gold/50 animate-pulse" : turnsRemaining <= 0 ? "text-red-400" : turnsRemaining <= 10 ? "text-yellow-400/80" : "text-wuxia-gold/50"
               )}>
-                餘 {turnsRemaining} 回合
+                {isQuotaLoading ? '點算盤纏中...' : `餘 ${turnsRemaining} 回合`}
               </span>
             </div>
             {/* 中間：標題 */}

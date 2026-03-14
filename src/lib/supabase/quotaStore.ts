@@ -16,20 +16,46 @@ export const useQuotaStore = create<QuotaStore>((set, get) => ({
 
     fetchQuota: async (userId) => {
         set({ isLoading: true });
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from('user_quotas')
             .select('turns_remaining')
             .eq('user_id', userId)
             .maybeSingle();
 
-        if (!data) {
-            // 新用戶：建立初始額度 10
-            await supabase
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching quota:', error);
+        }
+
+        // 如果找不到資料，或是資料庫預設值/Trigger錯誤導致剛註冊是0回合，我們補發給他 10 回合
+        if (!data || data.turns_remaining === null) {
+            const { error: upsertError } = await supabase
                 .from('user_quotas')
-                .insert({ user_id: userId, turns_remaining: 10 });
+                .upsert({ user_id: userId, turns_remaining: 10 }, { onConflict: 'user_id' });
+            
+            if (upsertError) console.error('Error inserting initial quota:', upsertError);
             set({ turnsRemaining: 10, isLoading: false });
         } else {
-            set({ turnsRemaining: data.turns_remaining, isLoading: false });
+            let turns = data.turns_remaining;
+            
+            // 處理某些舊 Trigger 可能將新用戶預設設為 0 的問題
+            if (turns === 0) {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user && user.created_at) {
+                    const createdAt = new Date(user.created_at).getTime();
+                    const now = Date.now();
+                    const isNewUser = (now - createdAt) < 5 * 60 * 1000; // 5分鐘內註冊
+                    
+                    if (isNewUser) {
+                        turns = 10;
+                        await supabase
+                            .from('user_quotas')
+                            .update({ turns_remaining: 10 })
+                            .eq('user_id', userId);
+                    }
+                }
+            }
+
+            set({ turnsRemaining: turns, isLoading: false });
         }
     },
 

@@ -38,7 +38,7 @@ export function ActionPanel() {
     const { addUsage, incrementSession } = useUsageStore();
     const { autoSave } = useSaveGameStore();
     const { user } = useAuthStore();
-    const { turnsRemaining, consumeTurn } = useQuotaStore();
+    const { turnsRemaining, consumeTurn, isLoading } = useQuotaStore();
     const [playTime, setPlayTime] = useState(0);
     const [customAction, setCustomAction] = useState('');
     const hasInitialized = useRef(false); // Ref to track initialization status
@@ -695,7 +695,12 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
             {options.length > 0 && (
                 <div className="px-4 pb-4 space-y-2">
                     {/* 額度不足提示 */}
-                    {turnsRemaining <= 0 ? (
+                    {isLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-3 border border-wuxia-gold/10 rounded-sm bg-black/40">
+                            <span className="text-wuxia-gold/40 text-sm font-serif animate-pulse">⏳</span>
+                            <span className="text-white/40 text-xs font-serif tracking-wide animate-pulse">點算盤纏中...</span>
+                        </div>
+                    ) : turnsRemaining <= 0 ? (
                         <div className="flex items-center justify-center gap-2 py-3 border border-wuxia-gold/20 rounded-sm bg-black/40">
                             <span className="text-wuxia-gold/40 text-sm font-serif">⏳</span>
                             <span className="text-white/40 text-xs font-serif tracking-wide">回合額度已用盡，無法繼續行動</span>
