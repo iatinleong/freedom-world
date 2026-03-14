@@ -42,10 +42,8 @@ export async function POST(req: Request) {
         formData.append('MerchantOrderNo', merchantOrderNo);
         formData.append('Amt', amount.toString());
 
-        // 判斷要打測試區還是正式區
-        const apiUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL?.includes('ccore') 
-            ? 'https://ccore.newebpay.com/API/QueryTradeInfo'
-            : 'https://core.newebpay.com/API/QueryTradeInfo';
+        // 依據環境變數或預設值決定發送網址
+        const apiUrl = process.env.NEXT_PUBLIC_NEWEBPAY_URL || 'https://core.newebpay.com/API/QueryTradeInfo';
 
         const response = await fetch(apiUrl, {
             method: 'POST',
