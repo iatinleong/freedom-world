@@ -231,31 +231,31 @@ export function StoreSection() {
                     />
                     <PlanCard
                         planId="TEST_5"
-                        name="測試方案"
+                        name="5元測試包"
                         usdPrice={0.16}
                         period="/ 次"
                         note="測試正式金流專用"
                         rate={rate}
                         features={[
-                            '一次性 50 次生成額度',
+                            '一次性 10 次生成額度',
                             '測試正式環境金流',
                         ]}
                         onCheckout={handleCheckout}
                         isLoading={loadingPlan === 'TEST_5'}
                     />
                     <PlanCard
-                        planId="TEST_10"
-                        name="10元測試包"
-                        usdPrice={0.32}
+                        planId="TEST_1"
+                        name="1元測試包"
+                        usdPrice={0.03}
                         period="/ 次"
                         note="測試正式金流專用"
                         rate={rate}
                         features={[
-                            '一次性 100 次生成額度',
+                            '一次性 1 次生成額度',
                             '測試正式環境金流',
                         ]}
                         onCheckout={handleCheckout}
-                        isLoading={loadingPlan === 'TEST_10'}
+                        isLoading={loadingPlan === 'TEST_1'}
                     />
                 </div>
 

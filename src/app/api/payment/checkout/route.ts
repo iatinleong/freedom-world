@@ -7,8 +7,8 @@ const PLANS = {
     WANDERER: { amount: 240, desc: '旅者方案 (1個月)' },     // $8 USD 約等於 240 TWD
     STORYTELLER: { amount: 540, desc: '說書人方案 (1個月)' }, // $18 USD 約等於 540 TWD
     ADDON: { amount: 150, desc: '篇章補充包 (300回合)' },     // $4.99 USD 約等於 150 TWD
-    TEST_5: { amount: 5, desc: '測試補充包 (50回合)' },       // $5 TWD
-    TEST_10: { amount: 10, desc: '10元測試包 (100回合)' },    // $10 TWD
+    TEST_5: { amount: 5, desc: '5元測試包 (10回合)' },       // $5 TWD
+    TEST_1: { amount: 1, desc: '1元測試包 (1回合)' },        // $1 TWD
 };
 
 export async function POST(req: Request) {

@@ -97,8 +97,8 @@ export async function POST(req: Request) {
         let turnsToAdd = 0;
         if (order.item_desc.includes('旅者')) turnsToAdd = 60;
         else if (order.item_desc.includes('說書人')) turnsToAdd = 180;
-        else if (order.item_desc.includes('測試補充包')) turnsToAdd = 50;
-        else if (order.item_desc.includes('10元測試包')) turnsToAdd = 100;
+        else if (order.item_desc.includes('5元測試包')) turnsToAdd = 10;
+        else if (order.item_desc.includes('1元測試包')) turnsToAdd = 1;
         else if (order.item_desc.includes('補充包')) turnsToAdd = 300;
 
         if (turnsToAdd > 0) {
