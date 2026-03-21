@@ -9,8 +9,6 @@ const PLANS = {
     ADDON: { amount: 150, desc: '篇章補充包 (300回合)' },     // $4.99 USD 約等於 150 TWD
     TEST_5: { amount: 5, desc: '測試補充包 (50回合)' },       // $5 TWD
     TEST_10: { amount: 10, desc: '10元測試包 (100回合)' },    // $10 TWD
-    TEST_5: { amount: 5, desc: '測試補充包 (50回合)' },       // $5 TWD
-    TEST_10: { amount: 10, desc: '10元測試包 (100回合)' },    // $10 TWD
 };
 
 export async function POST(req: Request) {
