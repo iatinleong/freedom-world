@@ -6,5 +6,5 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
     // 一律導向帳務頁，讓用戶看到最新訂單狀態（由 notify webhook 非同步更新）
-    return NextResponse.redirect(`${baseUrl}/account/billing?payment=pending`, 302);
+    return NextResponse.redirect(`${baseUrl}/game?payment=pending`, 302);
 }
