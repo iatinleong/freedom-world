@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         // 2. 解密 TradeInfo
         const decryptedData = decryptTradeInfo(tradeInfo);
         console.log('Decrypted Notify Data:', decryptedData);
-        
+
         // 藍新回傳的 Status 為 'SUCCESS' 才代表付款成功
         const { Status, Result } = decryptedData;
         const resultObj = typeof Result === 'string' ? JSON.parse(Result) : Result;
@@ -48,17 +48,17 @@ export async function POST(req: Request) {
                 await supabaseAdmin
                     .from('orders')
                     .update({ status: 'FAILED' })
-                    .eq('merchant_order_no', MerchantOrderNo);
+                    .eq('merchant_order_no', MerchantOrderNo)
+                    .eq('status', 'PENDING'); // 只從 PENDING 轉失敗，避免覆蓋已成功訂單
             }
-                
+
             return NextResponse.json({ status: 'Payment Failed Received' });
         }
 
-        // 3. 處理付款成功邏輯
-        // 先查出這筆訂單
+        // 3. 先查出訂單（取得 user_id 和 item_desc）
         const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
-            .select('*')
+            .select('id, user_id, item_desc, status')
             .eq('merchant_order_no', MerchantOrderNo)
             .single();
 
@@ -67,30 +67,33 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
-        // 防呆：如果訂單已經是 SUCCESS，就不重複處理
-        if (order.status === 'SUCCESS') {
-            console.log(`Order ${MerchantOrderNo} already processed.`);
-            return NextResponse.json({ status: 'Already processed' });
-        }
-
-        // 4. 更新訂單狀態與藍新交易序號
-        const { error: updateError } = await supabaseAdmin
+        // 4. 條件更新：只有 status='PENDING' 的訂單才能轉為 SUCCESS
+        //    這是防止 webhook 重送或並發時重複入帳的關鍵原子操作：
+        //    兩個同時到達的 webhook 都能通過 step 3，但只有第一個能成功更新（另一個看到的不是 PENDING）
+        const { data: updatedRows, error: updateError } = await supabaseAdmin
             .from('orders')
-            .update({ 
+            .update({
                 status: 'SUCCESS',
                 trade_no: resultObj?.TradeNo,
                 payment_type: resultObj?.PaymentType,
                 pay_time: resultObj?.PayTime
             })
-            .eq('id', order.id);
+            .eq('id', order.id)
+            .eq('status', 'PENDING') // 只有 PENDING 才能轉成功，已處理過的訂單 update 會影響 0 列
+            .select('id');
 
         if (updateError) {
-             console.error('Failed to update order status:', updateError);
-             return NextResponse.json({ error: 'Database error' }, { status: 500 });
+            console.error('Failed to update order status:', updateError);
+            return NextResponse.json({ error: 'Database error' }, { status: 500 });
+        }
+
+        // 如果沒有任何列被更新，代表另一個 webhook 已搶先處理完
+        if (!updatedRows || updatedRows.length === 0) {
+            console.log(`Order ${MerchantOrderNo} already processed by another request.`);
+            return NextResponse.json({ status: 'Already processed' });
         }
 
         // 5. 增加玩家額度
-        // 這裡需要根據你原本設定的方案邏輯去決定加多少額度
         let turnsToAdd = 0;
         if (order.item_desc.includes('旅者')) turnsToAdd = 60;
         else if (order.item_desc.includes('說書人')) turnsToAdd = 180;
@@ -99,25 +102,25 @@ export async function POST(req: Request) {
         else if (order.item_desc.includes('補充包')) turnsToAdd = 300;
 
         if (turnsToAdd > 0) {
-             // 呼叫 Supabase 的 RPC (Stored Procedure) 或者使用 upsert 更新
-             // 為了簡單起見，我們先查出來再加上去
-             const { data: quota } = await supabaseAdmin
+            // 先查出目前額度，再加上去
+            // （到此只有一個 webhook 在處理，同一訂單的並發已在 step 4 被擋住）
+            const { data: quota } = await supabaseAdmin
                 .from('user_quotas')
                 .select('turns_remaining')
                 .eq('user_id', order.user_id)
                 .single();
 
-             const currentTurns = quota?.turns_remaining || 0;
-             
-             await supabaseAdmin
+            const currentTurns = quota?.turns_remaining || 0;
+
+            await supabaseAdmin
                 .from('user_quotas')
-                .upsert({ 
-                    user_id: order.user_id, 
+                .upsert({
+                    user_id: order.user_id,
                     turns_remaining: currentTurns + turnsToAdd,
                     updated_at: new Date().toISOString()
                 });
-                
-             console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
+
+            console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
         }
 
         // 藍新要求背景通知必須回傳 HTTP 200，它才不會一直 retry

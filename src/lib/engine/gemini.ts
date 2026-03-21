@@ -2,11 +2,19 @@
 // Delegates to Next.js API Route, supports Gemini / Grok / Claude
 
 import { useAIConfigStore } from './aiConfigStore';
+import { supabase } from '../supabase/client';
 import type { GameState } from './types';
 
 function getConfig() {
     const { provider, modelName } = useAIConfigStore.getState();
     return { provider, modelName };
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token
+        ? { 'Authorization': `Bearer ${session.access_token}` }
+        : {};
 }
 
 export async function generateGameResponse(systemPrompt: string, userPrompt: string) {
@@ -18,7 +26,7 @@ export async function generateGameResponse(systemPrompt: string, userPrompt: str
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
             body: JSON.stringify({ systemPrompt, userPrompt, modelName, provider }),
             signal: controller.signal,
         });
@@ -75,7 +83,7 @@ export async function generateNextQuest(state: GameState): Promise<string | null
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
             body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
         });
         if (!response.ok) return null;
@@ -145,7 +153,7 @@ ${usedStr ? `・以下目標已出現，嚴禁重複或相似：【${usedStr}】
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
             body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
         });
         if (!response.ok) return null;
@@ -189,7 +197,7 @@ ${stageLogs || '（暫無記錄）'}
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
             body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
         });
         if (!response.ok) return null;
@@ -228,7 +236,7 @@ ${newContent}
     try {
         const response = await fetch('/api/gemini', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
             body: JSON.stringify({ systemPrompt: prompt, modelName, provider }),
             signal: controller.signal,
         });

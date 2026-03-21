@@ -1,27 +1,28 @@
-import { getSupabase } from '@/lib/supabase/client';
 import { redirect } from 'next/navigation';
-import OrderRow from './OrderRow'; // We will create this client component
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import OrderRow from './OrderRow';
 
 export default async function BillingPage() {
-    const supabase = getSupabase();
-    const { data: { session } } = await supabase.auth.getSession();
+    // 使用 server-side client 正確讀取 cookie-based session（支援 Vercel SSR）
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session?.user) {
+    if (!user) {
         redirect('/'); // 如果沒登入，導回首頁或登入頁
     }
 
     // 取得玩家的購買紀錄 (由新到舊)
-    const { data: orders, error: ordersError } = await supabase
+    const { data: orders } = await supabase
         .from('orders')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
     // 取得玩家目前的可用額度
     const { data: quota } = await supabase
         .from('user_quotas')
         .select('turns_remaining')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .single();
 
     return (
@@ -42,7 +43,7 @@ export default async function BillingPage() {
                     <div className="px-6 py-4 border-b border-neutral-800 bg-neutral-900/50">
                         <h2 className="text-xl font-semibold">歷史交易紀錄</h2>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>

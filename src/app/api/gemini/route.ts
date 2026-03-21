@@ -1,10 +1,30 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 export const maxDuration = 60; // seconds (Vercel Hobby max)
 
+const ALLOWED_PROVIDERS = ['gemini', 'grok', 'claude', 'deepseek', 'openai'] as const;
+const MAX_PROMPT_CHARS = 50_000;
+
 export async function POST(request: Request) {
     try {
+        // 1. 驗證登入身份
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const token = authHeader.slice(7);
+
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const {
             systemPrompt,
@@ -17,28 +37,41 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing systemPrompt' }, { status: 400 });
         }
 
+        // 2. 限制 prompt 長度，防止惡意超大 payload 燒費用
+        if (
+            systemPrompt.length > MAX_PROMPT_CHARS ||
+            (userPrompt && userPrompt.length > MAX_PROMPT_CHARS)
+        ) {
+            return NextResponse.json({ error: 'Prompt too large' }, { status: 400 });
+        }
+
+        // 3. Provider allowlist
+        if (!ALLOWED_PROVIDERS.includes(provider)) {
+            return NextResponse.json({ error: 'Unknown provider' }, { status: 400 });
+        }
+
+        // 4. Server-side quota check（只對真實遊戲回合，即有 userPrompt 的請求）
+        //    自動觸發的輔助呼叫（quest 生成、摘要）沒有 userPrompt，不強制檢查額度
+        if (userPrompt) {
+            const { data: quota } = await supabase
+                .from('user_quotas')
+                .select('turns_remaining')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (!quota || quota.turns_remaining <= 0) {
+                return NextResponse.json({ error: 'No turns remaining' }, { status: 402 });
+            }
+        }
+
         const key = process.env.AI_API_KEY || '';
         if (!key) return NextResponse.json({ error: 'AI_API_KEY not configured' }, { status: 500 });
 
-        if (provider === 'gemini') {
-            return await handleGemini(key, modelName, systemPrompt, userPrompt);
-        }
-
-        if (provider === 'grok') {
-            return await handleGrok(key, modelName, systemPrompt, userPrompt);
-        }
-
-        if (provider === 'claude') {
-            return await handleClaude(key, modelName, systemPrompt, userPrompt);
-        }
-
-        if (provider === 'deepseek') {
-            return await handleDeepSeek(key, modelName, systemPrompt, userPrompt);
-        }
-
-        if (provider === 'openai') {
-            return await handleOpenAI(key, modelName, systemPrompt, userPrompt);
-        }
+        if (provider === 'gemini') return await handleGemini(key, modelName, systemPrompt, userPrompt);
+        if (provider === 'grok') return await handleGrok(key, modelName, systemPrompt, userPrompt);
+        if (provider === 'claude') return await handleClaude(key, modelName, systemPrompt, userPrompt);
+        if (provider === 'deepseek') return await handleDeepSeek(key, modelName, systemPrompt, userPrompt);
+        if (provider === 'openai') return await handleOpenAI(key, modelName, systemPrompt, userPrompt);
 
         return NextResponse.json({ error: 'Unknown provider' }, { status: 400 });
 

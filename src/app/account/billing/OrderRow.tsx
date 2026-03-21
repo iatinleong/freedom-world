@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 
 export default function OrderRow({ order }: { order: any }) {
     const [isChecking, setIsChecking] = useState(false);
@@ -10,30 +11,40 @@ export default function OrderRow({ order }: { order: any }) {
     const handleCheckStatus = async () => {
         setIsChecking(true);
         try {
+            // 取得目前的 auth token 帶給後端驗證身份
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                alert('請先登入');
+                return;
+            }
+
             const res = await fetch('/api/payment/query', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    merchantOrderNo: order.merchant_order_no,
-                    amount: order.amount
-                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                // 只送訂單編號，amount 由後端從 DB 取得（防止前端偽造金額）
+                body: JSON.stringify({ merchantOrderNo: order.merchant_order_no }),
             });
             const data = await res.json();
-            
+
+            if (!res.ok) {
+                alert(`查詢失敗: ${data.error || res.statusText}`);
+                return;
+            }
+
             if (data.Status === 'SUCCESS') {
-                const tradeStatus = data.Result.TradeStatus;
+                const tradeStatus = data.Result?.TradeStatus;
                 if (tradeStatus === '1') {
                     alert('交易已成功！正在為您重新整理狀態與額度...');
-                    // 因為狀態更新可能需要一點時間(如果是剛剛才補單成功)，
-                    // 或是我們只是查詢，如果狀態是1但資料庫還沒更新，我們這裡可以簡單呼叫一個sync API
-                    // 但最簡單的是先重新整理畫面
                     router.refresh();
                 } else if (tradeStatus === '0') {
                     alert('此筆訂單尚未付款。');
                 } else if (tradeStatus === '2') {
                     alert('此筆訂單交易失敗。');
                 } else {
-                     alert(`訂單狀態代碼: ${tradeStatus}`);
+                    alert(`訂單狀態代碼: ${tradeStatus}`);
                 }
             } else {
                 alert(`查詢失敗: ${data.Message}`);
@@ -57,7 +68,7 @@ export default function OrderRow({ order }: { order: any }) {
                     order.status === 'FAILED' ? 'bg-red-900/30 text-red-400 border border-red-800' :
                     'bg-amber-900/30 text-amber-400 border border-amber-800'
                 }`}>
-                    {order.status === 'SUCCESS' ? '交易成功' : 
+                    {order.status === 'SUCCESS' ? '交易成功' :
                      order.status === 'FAILED' ? '交易失敗' : '等待付款'}
                 </span>
             </td>
@@ -66,7 +77,7 @@ export default function OrderRow({ order }: { order: any }) {
             </td>
             <td className="p-4">
                 {order.status === 'PENDING' && (
-                    <button 
+                    <button
                         onClick={handleCheckStatus}
                         disabled={isChecking}
                         className="text-xs bg-neutral-800 hover:bg-neutral-700 text-amber-500 px-3 py-1 rounded border border-neutral-700 disabled:opacity-50 transition-colors"
