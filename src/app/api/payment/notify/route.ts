@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         // 5. 增加玩家額度
         // 這裡需要根據你原本設定的方案邏輯去決定加多少額度
         let turnsToAdd = 0;
-        if (order.item_desc.includes('旅者')) turnsToAdd = 60; // TODO: 根據方案代碼
+        if (order.item_desc.includes('旅者')) turnsToAdd = 60;
         else if (order.item_desc.includes('說書人')) turnsToAdd = 180;
         else if (order.item_desc.includes('測試補充包')) turnsToAdd = 50;
         else if (order.item_desc.includes('10元測試包')) turnsToAdd = 100;
