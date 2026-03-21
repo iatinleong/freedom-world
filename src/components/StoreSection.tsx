@@ -229,6 +229,34 @@ export function StoreSection() {
                         onCheckout={handleCheckout}
                         isLoading={loadingPlan === 'ADDON'}
                     />
+                    <PlanCard
+                        planId="TEST_5"
+                        name="測試方案"
+                        usdPrice={0.16}
+                        period="/ 次"
+                        note="測試正式金流專用"
+                        rate={rate}
+                        features={[
+                            '一次性 50 次生成額度',
+                            '測試正式環境金流',
+                        ]}
+                        onCheckout={handleCheckout}
+                        isLoading={loadingPlan === 'TEST_5'}
+                    />
+                    <PlanCard
+                        planId="TEST_10"
+                        name="10元測試包"
+                        usdPrice={0.32}
+                        period="/ 次"
+                        note="測試正式金流專用"
+                        rate={rate}
+                        features={[
+                            '一次性 100 次生成額度',
+                            '測試正式環境金流',
+                        ]}
+                        onCheckout={handleCheckout}
+                        isLoading={loadingPlan === 'TEST_10'}
+                    />
                 </div>
 
                 <div className="mt-8 p-5 rounded-lg border border-white/10 bg-white/3 text-center max-w-2xl mx-auto">
