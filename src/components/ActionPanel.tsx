@@ -398,14 +398,15 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                 // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
                     const rawHp = state.player.stats.hp + response.stateUpdate.hpChange;
-                    // 主角光環：HP 不得歸零（除非玩家主動求死）
-                    updatePlayerStats({ hp: Math.max(1, rawHp) });
+                    updatePlayerStats({ hp: Math.max(1, Math.min(state.player.stats.maxHp, rawHp)) });
                 }
                 if (response.stateUpdate.qiChange) {
-                    updatePlayerStats({ qi: Math.max(0, state.player.stats.qi + response.stateUpdate.qiChange) });
+                    const rawQi = state.player.stats.qi + response.stateUpdate.qiChange;
+                    updatePlayerStats({ qi: Math.max(0, Math.min(state.player.stats.maxQi, rawQi)) });
                 }
                 if (response.stateUpdate.hungerChange) {
-                    updatePlayerStats({ hunger: Math.max(0, state.player.stats.hunger + response.stateUpdate.hungerChange) });
+                    const rawHunger = state.player.stats.hunger + response.stateUpdate.hungerChange;
+                    updatePlayerStats({ hunger: Math.max(0, Math.min(state.player.stats.maxHunger, rawHunger)) });
                 }
                 if (response.stateUpdate.moneyChange) {
                     updatePlayerStats({ money: state.player.stats.money + response.stateUpdate.moneyChange });

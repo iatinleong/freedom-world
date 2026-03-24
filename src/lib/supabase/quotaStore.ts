@@ -60,14 +60,14 @@ export const useQuotaStore = create<QuotaStore>((set, get) => ({
     },
 
     consumeTurn: async (userId) => {
-        const current = get().turnsRemaining;
-        if (current <= 0) return;
-        const next = current - 1;
-        // 先更新本地狀態，再同步資料庫
-        set({ turnsRemaining: next });
-        await supabase
-            .from('user_quotas')
-            .update({ turns_remaining: next, updated_at: new Date().toISOString() })
-            .eq('user_id', userId);
+        if (get().turnsRemaining <= 0) return;
+        // 樂觀 UI 更新（先 -1，讓按鈕即時反應）
+        set(s => ({ turnsRemaining: s.turnsRemaining - 1 }));
+        // DB 端 atomic decrement，不會覆蓋 webhook 寫入的值
+        const { data } = await supabase.rpc('decrement_quota', { p_user_id: userId });
+        // 若 RPC 回傳實際值，以 DB 為準（修正本地可能的偏差）
+        if (typeof data === 'number' && data >= 0) {
+            set({ turnsRemaining: data });
+        }
     },
 }));
