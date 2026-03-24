@@ -8,7 +8,7 @@ function getDirectorDirectives(state: GameState): string {
   if (!worldState) return '';
   const directives: string[] = [];
 
-  const QUEST_TURNS = 3;
+  const QUEST_TURNS = 6;
   const assistantCount = state.narrative.filter(l => l.role === 'assistant').length;
   const turnsIntoQuest = Math.max(0, assistantCount - (worldState.questStartTurn ?? 0));
 

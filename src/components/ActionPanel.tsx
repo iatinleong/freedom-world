@@ -499,7 +499,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
             }
 
             if (response.options) {
-                setOptions(response.options);
+                setOptions(normalizeOptions(response.options));
             }
 
             // --- Time Advancement (every 3 assistant turns = ~1 shi-chen / 2 hours) ---
