@@ -47,6 +47,13 @@ function GameContent() {
         description: '少俠，您的回合數已成功入帳，快去闖蕩江湖吧！'
       });
       router.replace('/game');
+    } else if (paymentStatus === 'pending') {
+      addNotification({
+        type: 'system',
+        title: '交易確認中',
+        description: '少俠，付款正在確認，回合數將於數分鐘內入帳，請稍候。'
+      });
+      router.replace('/game');
     } else if (paymentStatus === 'failed') {
       addNotification({
         type: 'system',

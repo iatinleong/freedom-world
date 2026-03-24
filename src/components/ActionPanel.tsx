@@ -136,7 +136,7 @@ export function ActionPanel() {
 tensions 說明：parties 可為 1 個（內部矛盾）、2 個（雙邊恩怨）或多個（多方糾葛）。只列真正有戲劇張力的衝突，不必每個勢力都有。
                     `.trim();
 
-                    const { text: worldJson, usage: worldUsage } = await generateGameResponse(worldPrompt, "生成江湖世界");
+                    const { text: worldJson, usage: worldUsage } = await generateGameResponse(worldPrompt, '');
                     if (worldUsage) addUsage(worldUsage.promptTokenCount || 0, worldUsage.candidatesTokenCount || 0);
 
                     const worldResponse = parseJSON(worldJson);
@@ -218,7 +218,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 注意：newItems/newSkills/initialEquipment 僅限背景故事中明確提到的事物，若無則省略該欄位或回傳空陣列。
                     `.trim();
 
-                    const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, "生成主角背景");
+                    const { text: backstoryJson, usage: backstoryUsage } = await generateGameResponse(backstoryPrompt, '');
                     if (backstoryUsage) addUsage(backstoryUsage.promptTokenCount || 0, backstoryUsage.candidatesTokenCount || 0);
 
                     const backstoryResponse = parseJSON(backstoryJson);
@@ -301,7 +301,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 }
                     `.trim();
 
-                    const { text: openingJson, usage: openingUsage } = await generateGameResponse(openingPrompt, "生成開篇場景");
+                    const { text: openingJson, usage: openingUsage } = await generateGameResponse(openingPrompt, '');
                     if (openingUsage) addUsage(openingUsage.promptTokenCount || 0, openingUsage.candidatesTokenCount || 0);
 
                     const openingResponse = parseJSON(openingJson);
