@@ -8,7 +8,7 @@ function getDirectorDirectives(state: GameState): string {
   if (!worldState) return '';
   const directives: string[] = [];
 
-  const QUEST_TURNS = 6;
+  const QUEST_TURNS = 3;
   const assistantCount = state.narrative.filter(l => l.role === 'assistant').length;
   const turnsIntoQuest = Math.max(0, assistantCount - (worldState.questStartTurn ?? 0));
 
@@ -137,6 +137,9 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 ・narrative 嚴禁出現：任何數字、屬性值、HP值、計算式、hpChange 等 JSON 欄位名——所有數值效果只填 stateUpdate
 ・場景自洽：已離場者不再互動；物理常識成立（斷臂不持劍）
 ・屬性影響：膂力→攻防 | 身法→閃避逃跑 | 根骨→防禦抗傷 | 悟性→識破學功 | 福緣→奇遇 | 魅力→NPC態度
+・禁止在同一段文字中重複使用同一個核心意象（如同一個隱喻、象徵物出現兩次）
+・敘事者禁止替玩家總結主題或道德教訓——讓事件自己說話；禁句型：「這世間的俠義究竟是...」「他終於明白了...」「這個江湖不過是...」
+・每段敘事的末句必須是具體的未解異常或感官細節（非行動指令）：✓「供桌的香灰還是溫的」 ✗「你開始搜尋線索」
 
 ━━ 選項法則 ━━
 ・4個選項由當前場景自然產生，覆蓋不同的行動維度，讓玩家覺得每個都捨不得放棄。
