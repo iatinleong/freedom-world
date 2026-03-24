@@ -46,6 +46,7 @@ function GameContent() {
         title: '盤纏已送達',
         description: '少俠，您的回合數已成功入帳，快去闖蕩江湖吧！'
       });
+      if (user) fetchQuota(user.id); // 立即刷新回合數顯示
       router.replace('/game');
     } else if (paymentStatus === 'pending') {
       addNotification({
