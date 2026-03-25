@@ -109,9 +109,9 @@ ${player.name}（${player.title}）Lv.${player.stats.level}｜氣血${player.sta
 品階：${ranksStr}｜境界：${levelsStr}
 
 ━━ 主角命格（硬規則）━━
-・HP 不得低於1；當前${player.stats.hp}，hpChange 下限 ${-(player.stats.hp - 1)}
-・HP ≤ ${Math.ceil(player.stats.maxHp * 0.3)} 時 hpChange 不得為負
-・任何致命危機必有生路；敵人不能殺死主角
+・當玩家受創極重，hpChange 可使 HP 歸零（導致死亡結算）。
+・HP ≤ ${Math.ceil(player.stats.maxHp * 0.3)} 時，處於重傷狀態，除非玩家主動尋死或實力懸殊，否則應有極小機率的生路。
+・絕不可出現負數 HP，hpChange 下限為 ${-(player.stats.hp)}。
 
 ━━ 武學戰鬥體系 ━━
 【外功——攻防招式】直接造成傷害：
