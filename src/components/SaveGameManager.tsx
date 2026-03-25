@@ -70,8 +70,14 @@ export function SaveGameManager({ isOpen, onClose }: SaveGameManagerProps) {
         });
     };
 
+    const MANUAL_SAVE_LIMIT = 5;
+    const manualSaveCount = saves.filter(s => !s.isAutoSave).length;
+
     const handleSave = async () => {
         if (!saveName.trim()) { alert('請輸入存檔名稱'); return; }
+        if (manualSaveCount >= MANUAL_SAVE_LIMIT) {
+            if (!confirm(`已達 ${MANUAL_SAVE_LIMIT} 個手動存檔上限，將自動刪除最舊的存檔，確定繼續嗎？`)) return;
+        }
         setIsSaving(true);
         await saveGame(saveName, gameState, playTime, sessionId);
         setSaveName('');

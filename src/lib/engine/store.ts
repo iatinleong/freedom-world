@@ -13,7 +13,6 @@ interface GameStore extends GameState {
     resetGame: () => void;
     setOptions: (options: import('./types').Option[]) => void;
     startGame: () => Promise<void>;
-    updateUsage: (inputTokens: number, outputTokens: number) => void;
     updateSummary: (summary: string) => void;
     addItem: (item: import('./types').Item) => void;
     removeItem: (name: string, count: number) => void;
@@ -272,25 +271,6 @@ export const useGameStore = create<GameStore>()(
             startGame: async () => {
                 // Placeholder for component-driven init
             },
-
-            updateUsage: (inputTokens, outputTokens) =>
-                set((state) => {
-                    // Pricing for Gemini 1.5 Flash (approximate)
-                    // Input: $0.075 / 1M tokens
-                    // Output: $0.30 / 1M tokens
-                    // Note: Pricing tiers exist for >128k context, simplified here for <128k
-                    const inputCost = (inputTokens / 1000000) * 0.075;
-                    const outputCost = (outputTokens / 1000000) * 0.30;
-                    const totalCost = state.usage.totalCost + inputCost + outputCost;
-
-                    return {
-                        usage: {
-                            totalCost,
-                            totalInputTokens: state.usage.totalInputTokens + inputTokens,
-                            totalOutputTokens: state.usage.totalOutputTokens + outputTokens,
-                        },
-                    };
-                }),
 
             updateSummary: (summary) => set({ summary }),
 

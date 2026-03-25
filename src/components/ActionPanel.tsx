@@ -53,12 +53,22 @@ export function ActionPanel() {
         return () => clearInterval(timer);
     }, []);
 
-    // 關閉/重整頁面前強制存檔（繞過 60 秒節流）
+    // 關閉/重整頁面前：同步備份到 localStorage（async Supabase 在 beforeunload 不可靠）
+    // 下次啟動時 restoreLatestAutoSave 優先讀 DB，若 DB 無資料才從 localStorage 恢復
     useEffect(() => {
         const handleBeforeUnload = () => {
             const storeState = useGameStore.getState();
             if (!storeState.isGameStarted || !user) return;
-            // 強制重置節流時間，讓 autoSave 一定執行
+            try {
+                const snapshot = {
+                    gameState: storeState.getGameState(),
+                    sessionId: storeState.sessionId,
+                    playTime: playTimeRef.current,
+                    savedAt: Date.now(),
+                };
+                localStorage.setItem('fj-crash-recovery', JSON.stringify(snapshot));
+            } catch (_) { /* localStorage 滿了也不要讓頁面爆 */ }
+            // 同時非同步嘗試 Supabase（不保證完成，但快速網路環境下可能成功）
             useSaveGameStore.getState().setLastAutoSave(0);
             void useSaveGameStore.getState().autoSave(
                 storeState.getGameState(),

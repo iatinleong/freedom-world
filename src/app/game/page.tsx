@@ -65,14 +65,27 @@ function GameContent() {
     }
   }, [mounted, user, searchParams, router, addNotification]);
 
-  // On login: load quota and restore latest auto-save
+  // On login: load quota and restore latest auto-save (prefer DB; fall back to crash-recovery snapshot)
   useEffect(() => {
     if (user) {
       fetchQuota(user.id);
       if (!isGameStarted && !restored) {
         setRestored(true);
         restoreLatestAutoSave().then(save => {
-          if (save) loadGameState(save.gameState, save.sessionId);
+          if (save) {
+            loadGameState(save.gameState, save.sessionId);
+          } else {
+            // DB 無存檔，嘗試 localStorage crash-recovery
+            try {
+              const raw = localStorage.getItem('fj-crash-recovery');
+              if (raw) {
+                const snapshot = JSON.parse(raw);
+                loadGameState(snapshot.gameState, snapshot.sessionId);
+              }
+            } catch (_) { /* 資料損壞就忽略 */ }
+          }
+          // 無論如何，清除 crash-recovery 快照（已被 DB 取代或已恢復）
+          localStorage.removeItem('fj-crash-recovery');
         });
       }
     }
