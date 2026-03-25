@@ -102,25 +102,17 @@ export async function POST(req: Request) {
         else if (order.item_desc.includes('補充包')) turnsToAdd = 300;
 
         if (turnsToAdd > 0) {
-            // 先查出目前額度，再加上去
-            // （到此只有一個 webhook 在處理，同一訂單的並發已在 step 4 被擋住）
-            const { data: quota } = await supabaseAdmin
-                .from('user_quotas')
-                .select('turns_remaining')
-                .eq('user_id', order.user_id)
-                .single();
+            // 使用 RPC 進行原子加總，避免覆蓋額度
+            const { error: incrementError } = await supabaseAdmin.rpc('increment_quota', {
+                p_user_id: order.user_id,
+                p_turns: turnsToAdd
+            });
 
-            const currentTurns = quota?.turns_remaining || 0;
-
-            await supabaseAdmin
-                .from('user_quotas')
-                .upsert({
-                    user_id: order.user_id,
-                    turns_remaining: currentTurns + turnsToAdd,
-                    updated_at: new Date().toISOString()
-                });
-
-            console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
+            if (incrementError) {
+                console.error(`Failed to increment quota for user ${order.user_id}:`, incrementError);
+            } else {
+                console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
+            }
         }
 
         // 藍新要求背景通知必須回傳 HTTP 200，它才不會一直 retry
