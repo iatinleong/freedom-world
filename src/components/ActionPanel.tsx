@@ -426,7 +426,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                 // --- DATA PROCESSING (PRESERVING ALL FIXES) ---
                 if (response.stateUpdate.hpChange) {
                     const rawHp = state.player.stats.hp + response.stateUpdate.hpChange;
-                    updatePlayerStats({ hp: Math.max(1, Math.min(state.player.stats.maxHp, rawHp)) });
+                    updatePlayerStats({ hp: Math.min(state.player.stats.maxHp, Math.max(0, rawHp)) });
                 }
                 if (response.stateUpdate.qiChange) {
                     const rawQi = state.player.stats.qi + response.stateUpdate.qiChange;
