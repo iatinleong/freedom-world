@@ -25,6 +25,7 @@ interface SaveGameStore {
     loadGame: (id: string) => Promise<SaveSlot | null>;
     deleteSave: (id: string) => Promise<void>;
     setAutoSaveEnabled: (enabled: boolean) => void;
+    setLastAutoSave: (ts: number) => void;
     autoSave: (gameState: GameState, playTime: number, sessionId: string) => Promise<void>;
     restoreLatestAutoSave: () => Promise<SaveSlot | null>;
     clearNarrative: (sessionId: string) => Promise<void>;
@@ -162,6 +163,7 @@ export const useSaveGameStore = create<SaveGameStore>((set, get) => ({
     },
 
     setAutoSaveEnabled: (enabled) => set({ autoSaveEnabled: enabled }),
+    setLastAutoSave: (ts) => set({ lastAutoSave: ts }),
 
     autoSave: async (gameState, playTime, sessionId) => {
         const state = get();

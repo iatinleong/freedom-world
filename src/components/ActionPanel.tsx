@@ -53,6 +53,23 @@ export function ActionPanel() {
         return () => clearInterval(timer);
     }, []);
 
+    // 關閉/重整頁面前強制存檔（繞過 60 秒節流）
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            const storeState = useGameStore.getState();
+            if (!storeState.isGameStarted || !user) return;
+            // 強制重置節流時間，讓 autoSave 一定執行
+            useSaveGameStore.getState().setLastAutoSave(0);
+            void useSaveGameStore.getState().autoSave(
+                storeState.getGameState(),
+                playTimeRef.current,
+                storeState.sessionId
+            );
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [user]);
+
     // Initial Random Generation
     useEffect(() => {
         const initGame = async () => {
@@ -366,6 +383,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 
             const response = parseJSON(responseJson);
 
+            if (!response.narrative) throw new Error('AI 回傳缺少 narrative 欄位，請稍後再試');
             addLog({ role: 'assistant', content: response.narrative });
 
             // 扣除一回合額度

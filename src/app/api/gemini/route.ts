@@ -54,9 +54,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Prompt too large' }, { status: 400 });
         }
 
-        // 3. Provider allowlist
+        // 3. Provider + model allowlist
         if (!ALLOWED_PROVIDERS.includes(provider)) {
             return NextResponse.json({ error: 'Unknown provider' }, { status: 400 });
+        }
+        if (modelName && !ALLOWED_MODELS[provider]?.includes(modelName)) {
+            return NextResponse.json({ error: 'Unknown model' }, { status: 400 });
         }
 
         // 4. Server-side quota check（只對真實遊戲回合，即有 userPrompt 的請求）
