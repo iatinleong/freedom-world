@@ -5,6 +5,14 @@ import { createClient } from '@supabase/supabase-js';
 export const maxDuration = 60; // seconds (Vercel Hobby max)
 
 const ALLOWED_PROVIDERS = ['gemini', 'grok', 'claude', 'deepseek', 'openai'] as const;
+
+const ALLOWED_MODELS: Record<string, string[]> = {
+    gemini:   ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'],
+    grok:     ['grok-3-fast', 'grok-3-mini-fast', 'grok-2-1212'],
+    claude:   ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'],
+    deepseek: ['deepseek-chat', 'deepseek-reasoner'],
+    openai:   ['gpt-4o-mini', 'gpt-4o'],
+};
 const MAX_PROMPT_CHARS = 50_000;
 
 export async function POST(request: Request) {

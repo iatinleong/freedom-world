@@ -39,7 +39,7 @@ export function ActionPanel() {
     const { autoSave } = useSaveGameStore();
     const { user } = useAuthStore();
     const { turnsRemaining, consumeTurn, isLoading } = useQuotaStore();
-    const [playTime, setPlayTime] = useState(0);
+    const playTimeRef = useRef(0);
     const [customAction, setCustomAction] = useState('');
     const hasInitialized = useRef(false); // Ref to track initialization status
     const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function ActionPanel() {
     // Play time tracker
     useEffect(() => {
         const timer = setInterval(() => {
-            setPlayTime((prev) => prev + 1);
+            playTimeRef.current += 1;
         }, 1000);
 
         return () => clearInterval(timer);
@@ -416,7 +416,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                     Object.entries(response.stateUpdate.attributeChanges).forEach(([attr, change]) => {
                         if (attr in newAttributes) {
                             // @ts-expect-error - Dynamic key access
-                            newAttributes[attr] += change;
+                            newAttributes[attr] += Number(change) || 0;
                         }
                     });
                     updatePlayerStats({ attributes: newAttributes });
@@ -426,7 +426,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                     Object.entries(response.stateUpdate.reputationChanges).forEach(([rep, change]) => {
                         if (rep in newReputation) {
                             // @ts-expect-error - Dynamic key access
-                            newReputation[rep] += change;
+                            newReputation[rep] += Number(change) || 0;
                         }
                     });
                     updatePlayerStats({ reputation: newReputation });
@@ -470,6 +470,18 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                         });
                 }
 
+                // Handle Equipment Updates
+                if (response.stateUpdate.newEquipment) {
+                    const eqUpdate: any = {};
+                    if (response.stateUpdate.newEquipment.weapon !== undefined) eqUpdate.weapon = response.stateUpdate.newEquipment.weapon;
+                    if (response.stateUpdate.newEquipment.armor !== undefined) eqUpdate.armor = response.stateUpdate.newEquipment.armor;
+                    if (response.stateUpdate.newEquipment.accessory !== undefined) eqUpdate.accessory = response.stateUpdate.newEquipment.accessory;
+                    if (Object.keys(eqUpdate).length > 0) {
+                        updateEquipment(eqUpdate);
+                        addLog({ role: 'system', content: `更換裝備：${Object.values(eqUpdate).join('、')}` });
+                    }
+                }
+
                 // Handle Skills
                 if (response.stateUpdate.newSkills) {
                     response.stateUpdate.newSkills.forEach((skill: any) => {
@@ -500,7 +512,20 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
             }
 
             if (response.options) {
-                setOptions(normalizeOptions(response.options));
+                const parsedOptions = normalizeOptions(response.options);
+                if (parsedOptions.length > 0) {
+                    setOptions(parsedOptions);
+                } else {
+                    setOptions([
+                        { id: 'fb1', label: '環顧四周', action: '環顧四周，觀察當前局勢' },
+                        { id: 'fb2', label: '深呼吸', action: '深呼吸，讓自己冷靜下來' }
+                    ]);
+                }
+            } else {
+                setOptions([
+                    { id: 'fb1', label: '環顧四周', action: '環顧四周，觀察當前局勢' },
+                    { id: 'fb2', label: '深呼吸', action: '深呼吸，讓自己冷靜下來' }
+                ]);
             }
 
             // --- Time Advancement (every 3 assistant turns = ~1 shi-chen / 2 hours) ---
@@ -537,8 +562,10 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
                 const nextQuest = arc[nextIndex] ?? null;
                 const oldQuest = ws.mainQuest;
 
+                const fallbackQuest = "暫無頭緒，在江湖中隨意探索、打探消息";
+                
                 updateWorldState({
-                    mainQuest: nextQuest ?? ws.mainQuest,
+                    mainQuest: nextQuest ?? fallbackQuest,
                     questHistory: oldQuest
                         ? [...(ws.questHistory ?? []), oldQuest]
                         : (ws.questHistory ?? []),
@@ -585,7 +612,7 @@ ${factionSecrets ? `\n【門派不為人知的秘密】\n${factionSecrets}` : ''
 
             // Trigger auto-save after each action (fire-and-forget)
             const storeState = useGameStore.getState();
-            void autoSave(storeState.getGameState(), playTime, storeState.sessionId);
+            void autoSave(storeState.getGameState(), playTimeRef.current, storeState.sessionId);
         }
     };
 
