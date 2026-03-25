@@ -67,9 +67,34 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
-        // 4. 條件更新：只有 status='PENDING' 的訂單才能轉為 SUCCESS
-        //    這是防止 webhook 重送或並發時重複入帳的關鍵原子操作：
-        //    兩個同時到達的 webhook 都能通過 step 3，但只有第一個能成功更新（另一個看到的不是 PENDING）
+        // 4. 先執行額度增加 (increment_quota)
+        // 如果失敗，回傳 500 讓藍新金流稍後 retry。
+        // 如果成功，才往下走把訂單改為 SUCCESS。
+        let turnsToAdd = 0;
+        if (order.item_desc.includes('旅者')) turnsToAdd = 60;
+        else if (order.item_desc.includes('說書人')) turnsToAdd = 180;
+        else if (order.item_desc.includes('5元測試包')) turnsToAdd = 10;
+        else if (order.item_desc.includes('1元測試包')) turnsToAdd = 1;
+        else if (order.item_desc.includes('補充包')) turnsToAdd = 300;
+
+        if (turnsToAdd > 0) {
+            // 使用 RPC 進行原子加總
+            const { error: incrementError } = await supabaseAdmin.rpc('increment_quota', {
+                p_user_id: order.user_id,
+                p_turns: turnsToAdd
+            });
+
+            if (incrementError) {
+                console.error(`Failed to increment quota for user ${order.user_id}:`, incrementError);
+                // 額度增加失敗，中斷處理並回傳 500，這會讓藍新進入 Retry 隊列。
+                // 由於還沒跑到下一步的 update，訂單狀態依然會是 PENDING。
+                return NextResponse.json({ error: 'Failed to update quota' }, { status: 500 });
+            }
+            console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
+        }
+
+        // 5. 條件更新：只有 status='PENDING' 的訂單才能轉為 SUCCESS
+        //    這是防止 webhook 重送或並發時重複入帳的關鍵原子操作 (CAS)
         const { data: updatedRows, error: updateError } = await supabaseAdmin
             .from('orders')
             .update({
@@ -79,7 +104,7 @@ export async function POST(req: Request) {
                 pay_time: resultObj?.PayTime
             })
             .eq('id', order.id)
-            .eq('status', 'PENDING') // 只有 PENDING 才能轉成功，已處理過的訂單 update 會影響 0 列
+            .eq('status', 'PENDING') // 只有 PENDING 才能轉成功
             .select('id');
 
         if (updateError) {
@@ -87,32 +112,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Database error' }, { status: 500 });
         }
 
-        // 如果沒有任何列被更新，代表另一個 webhook 已搶先處理完
+        // 如果沒有任何列被更新，代表另一個 webhook 已搶先處理完。
         if (!updatedRows || updatedRows.length === 0) {
             console.log(`Order ${MerchantOrderNo} already processed by another request.`);
             return NextResponse.json({ status: 'Already processed' });
-        }
-
-        // 5. 增加玩家額度
-        let turnsToAdd = 0;
-        if (order.item_desc.includes('旅者')) turnsToAdd = 60;
-        else if (order.item_desc.includes('說書人')) turnsToAdd = 180;
-        else if (order.item_desc.includes('5元測試包')) turnsToAdd = 10;
-        else if (order.item_desc.includes('1元測試包')) turnsToAdd = 1;
-        else if (order.item_desc.includes('補充包')) turnsToAdd = 300;
-
-        if (turnsToAdd > 0) {
-            // 使用 RPC 進行原子加總，避免覆蓋額度
-            const { error: incrementError } = await supabaseAdmin.rpc('increment_quota', {
-                p_user_id: order.user_id,
-                p_turns: turnsToAdd
-            });
-
-            if (incrementError) {
-                console.error(`Failed to increment quota for user ${order.user_id}:`, incrementError);
-            } else {
-                console.log(`Added ${turnsToAdd} turns to user ${order.user_id}`);
-            }
         }
 
         // 藍新要求背景通知必須回傳 HTTP 200，它才不會一直 retry
